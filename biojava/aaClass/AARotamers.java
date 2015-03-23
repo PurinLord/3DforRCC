@@ -1,3 +1,5 @@
+package rccto3d.rotamers;
+
 import java.util.HashMap;
 import java.util.ArrayList;
 
