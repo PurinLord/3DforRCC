@@ -22,13 +22,12 @@ public static void main(String[] args) throws Exception {
 								"import java.util.ArrayList;\n\n" +
 								"public class ";
 	String headEnd =  " extends AARotamers {\n" +
-										"\tprivate static final int size = XXX;\n" +
-										"\tprivate static final HashMap<Integer,ArrayList> rotamers  = new HashMap<Integer,ArrayList>();\n" +
+										"\tprivate static HashMap<Integer,ArrayList> rotamers  = new HashMap<Integer,ArrayList>();\n" +
 										"\tprivate static ArrayList<ArrayList> aminoAcid;\n" +
 										"\tprivate static ArrayList<String> atom;\n\n" +
 										"\tstatic {\n" +
-										"\t\tsetSize(size);\n" +
-										"\t\tsetRotamers(rotamers);\n";
+										"\t\tsizeMap.put(\"YYY\", XX);\n" +
+										"\t\taminoMap.put(\"YYY\", rotamers);\n";
 
 	String startAminoAcid = "\t\taminoAcid = new ArrayList<ArrayList>();\n";
 	String startAtom = 		"\t\tatom = new ArrayList<String>();\n";
@@ -51,7 +50,8 @@ public static void main(String[] args) throws Exception {
 			if(!amino.equals("")){
 				prog += "\t}\n";
 				prog += "}\n";
-				prog = prog.replaceFirst("XXX", String.valueOf(size));
+				prog = prog.replaceFirst("XX", String.valueOf(size));
+				prog = prog.replaceAll("YYY", amino);
 				writer = new PrintWriter(dirName + amino + "Rotamers.java", "UTF-8");
 				writer.println(prog);
 				writer.close();
@@ -92,7 +92,8 @@ public static void main(String[] args) throws Exception {
 	}
 	prog += "\t}\n";
 	prog += "}\n";
-	prog = prog.replaceFirst("XXX", String.valueOf(size));
+	prog = prog.replaceFirst("XX", String.valueOf(size));
+	prog = prog.replaceAll("YYY", amino);
 	writer = new PrintWriter(dirName + amino + "Rotamers.java", "UTF-8");
 	writer.println(prog);
 	writer.close();
