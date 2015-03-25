@@ -2,10 +2,8 @@ import java.io.*;
 import java.util.Arrays;
 
 public class MakeRClass{
+
 public static void main(String[] args) throws Exception {
-
-	String dirName = "aaClass/";
-
   if(args.length==1){
 
 	PrintWriter writer;
@@ -17,8 +15,7 @@ public static void main(String[] args) throws Exception {
 	String prog = "";
 	size = 0;
 
-	String head = "package rccto3d.rotamers;\n\n" +
-								"import java.util.HashMap;\n" +
+	String head = "import java.util.HashMap;\n" +
 								"import java.util.ArrayList;\n\n" +
 								"public class ";
 	String headEnd =  " extends AARotamers {\n" +
@@ -50,9 +47,14 @@ public static void main(String[] args) throws Exception {
 			if(!amino.equals("")){
 				prog += "\t}\n";
 				prog += "}\n";
+<<<<<<< HEAD
 				prog = prog.replaceFirst("XX", String.valueOf(size));
 				prog = prog.replaceAll("YYY", amino);
 				writer = new PrintWriter(dirName + amino + "Rotamers.java", "UTF-8");
+=======
+				prog = prog.replaceFirst("XXX", String.valueOf(size));
+				writer = new PrintWriter("aaClass/" + amino + "Rotamers.java", "UTF-8");
+>>>>>>> parent of a4698c0... added package and minor changes
 				writer.println(prog);
 				writer.close();
 				prog = "";
@@ -92,9 +94,14 @@ public static void main(String[] args) throws Exception {
 	}
 	prog += "\t}\n";
 	prog += "}\n";
+<<<<<<< HEAD
 	prog = prog.replaceFirst("XX", String.valueOf(size));
 	prog = prog.replaceAll("YYY", amino);
 	writer = new PrintWriter(dirName + amino + "Rotamers.java", "UTF-8");
+=======
+	prog = prog.replaceFirst("XXX", String.valueOf(size));
+	writer = new PrintWriter("aaClass/" + amino + "Rotamers.java", "UTF-8");
+>>>>>>> parent of a4698c0... added package and minor changes
 	writer.println(prog);
 	writer.close();
 	//System.out.println(ID + "|" + atom + "|");
