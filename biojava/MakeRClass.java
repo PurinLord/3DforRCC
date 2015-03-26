@@ -21,14 +21,15 @@ public static void main(String[] args) throws Exception {
 								"import java.util.HashMap;\n" +
 								"import java.util.ArrayList;\n\n" +
 								"public class ";
-	String headEnd =  " extends AARotamers {\n" +
-										"\tprivate static final int size = XXX;\n" +
-										"\tprivate static final HashMap<Integer,ArrayList> rotamers  = new HashMap<Integer,ArrayList>();\n" +
-										"\tprivate static ArrayList<ArrayList> aminoAcid;\n" +
-										"\tprivate static ArrayList<String> atom;\n\n" +
-										"\tstatic {\n" +
-										"\t\tsetSize(size);\n" +
-										"\t\tsetRotamers(rotamers);\n";
+	String headEnd =  "Rotamers extends AARotamers {\n" +
+										"\tprivate int size = XXX;\n" +
+										"\tprivate HashMap<Integer,ArrayList> rotamers  = new HashMap<Integer,ArrayList>();\n" +
+										"\tprivate ArrayList<ArrayList> aminoAcid;\n" +
+										"\tprivate ArrayList<String> atom;\n\n";
+	String cnstr = 		"\tpublic ";
+	String cnstrEnd =	"Rotamers(){\n\n" +
+										"\tsuper.setSize(this.size);\n" +
+										"\tsuper.setRotamers(this.rotamers);\n";
 
 	String startAminoAcid = "\t\taminoAcid = new ArrayList<ArrayList>();\n";
 	String startAtom = 		"\t\tatom = new ArrayList<String>();\n";
@@ -58,7 +59,7 @@ public static void main(String[] args) throws Exception {
 				prog = "";
 			}
 			amino = fileName.substring(0,3);
-			prog += head + amino + "Rotamers" + headEnd;
+			prog += head + amino + headEnd + cnstr + amino + cnstrEnd;
 		}
 		if(fileName.substring(10,11).equals(".")){
 			rotNum = fileName.substring(9,10);

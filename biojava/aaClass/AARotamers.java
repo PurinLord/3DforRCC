@@ -5,10 +5,10 @@ import java.util.ArrayList;
 
 abstract class AARotamers {
 
-	protected static int size = 0;
-	protected static HashMap<Integer,ArrayList> rotamers  = new HashMap<Integer,ArrayList>();
+	private int size = 0;
+	private HashMap<Integer,ArrayList> rotamers  = new HashMap<Integer,ArrayList>();
 
-	public static String getPDB(int rotNum, String chain, int aminoStart, int atomStart){
+	public String getPDB(int rotNum, String chain, int aminoStart, int atomStart){
 		String pdb = "";
 		String atNum,  amNum = "";
 		String id, amino, x, y, z, type = "";
@@ -35,22 +35,22 @@ abstract class AARotamers {
 		return pdb;
 	}
 
-	public static int getSize(){
-		return size;
+	public int getSize(){
+		return this.size;
 	}
 
-	protected static void setSize(int newSize){
+	protected void setSize(int newSize){
 		size = newSize;
 	}
 
-	protected static void setRotamers(HashMap<Integer,ArrayList> newRotamer){
+	protected void setRotamers(HashMap<Integer,ArrayList> newRotamer){
 		rotamers  = newRotamer;
 	}
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("main");
-		System.out.println(rotamers);
-		System.out.println(getSize());
-		System.out.println(getPDB(1, "A", 2, 6));
+		ALARotamers ala = new ALARotamers();
+		System.out.println(ala.getSize());
+		System.out.println(ala.getPDB(1, "A", 12, 63));
 	}
 }
