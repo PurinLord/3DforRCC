@@ -12,7 +12,6 @@ import rccto3d.rotamers.*;
 
 public class PDBfromFASTA {
 
-	private String pdb = "";
 
 	private final ASPRotamers ASP = new ASPRotamers();
 	private final GLURotamers GLU = new GLURotamers();
@@ -37,20 +36,79 @@ public class PDBfromFASTA {
 	private final METRotamers MET = new METRotamers();
 	private final THRRotamers THR = new THRRotamers();
 
-	public String makeSequence(String fileName, String identifier) throws Exception{
-		getPDB(readFasta(fileName, identifier));
+	//TODO
+	/*
+	private int defaultASP = 1;
+	private int defaultGLU = 1;
+	private int defaultILE = 1;
+	private int defaultPHE = 1;
+	private int defaultTRP = 1;
+	private int defaultALA = 1;
+	private int defaultCYH = 1;
+	private int defaultGLY = 1;
+	private int defaultLEU = 1;
+	private int defaultPRO = 1;
+	private int defaultTYR = 1;
+	private int defaultARG = 1;
+	private int defaultCYS = 1;
+	private int defaultHID = 1;
+	private int defaultLYS = 1;
+	private int defaultSER = 1;
+	private int defaultVAL = 1;
+	private int defaultASN = 1;
+	private int defaultGLN = 1;
+	private int defaultHIE = 1;
+	private int defaultMET = 1;
+	private int defaultTHR = 1;
+	*/
+
+	public String pdbFromFile(String fileName, String identifier, int from, int to, String chain, int startAmino, int startAtom)
+		throws Exception{
+		return pdbFromSequende(readFasta(fileName, identifier), from, to, chain, startAmino, startAtom);
+	}
+
+	public String pdbFromFile(String fileName, String identifier, String chain, int startAmino, int startAtom) throws Exception{
+		return pdbFromSequende(readFasta(fileName, identifier), chain, startAmino, startAtom);
+	}
+
+	public String pdbFromFile(String fileName, String identifier) throws Exception{
+		return pdbFromSequende(readFasta(fileName, identifier));
+	}
+
+	//starts at 1
+	//ends at 0 or > length
+	//start amino 1
+	//start atom 1
+	public String pdbFromSequende(ProteinSequence seq, int from, int to, String chain, int startAmino, int startAtom){
+		String pdb = "";
+		String amino;
+		AARotamers curRotamer;
+		int atomNum = startAtom;
+		int aminoNum = startAmino - 1;
+		int i;
+		if (to > seq.getLength() || to == 0){
+			to = seq.getLength();
+		}
+		for(i = 1; i <= to; i++){
+				amino = seq.getCompoundAt(i + from - 1).toString();
+				curRotamer = getRotamer(amino);
+				pdb += curRotamer.getPDB(1, chain, i + aminoNum, atomNum) + "\n";
+				atomNum += curRotamer.getSize();
+		}
 		return pdb;
 	}
 
-	private void getPDB(ProteinSequence seq){
-		String amino;
-		int atomNum = 0;
-		int i;
-		for(i = 1; i <= seq.getLength(); i++){
-				amino = seq.getCompoundAt(i).toString();
-				pdb += getRotamer(amino, 1, "A", i, atomNum) + "\n";
-				//atomNum += 
-		}
+	public String pdbFromSequende(ProteinSequence seq, String chain, int startAmino, int startAtom){
+		return pdbFromSequende(seq, 1, 0, chain, startAmino, startAtom);
+	}
+
+	public String pdbFromSequende(ProteinSequence seq){
+		return pdbFromSequende(seq, "A", 1, 1);
+	}
+
+	//TODO
+	public void setDefaultRotamer(String amino, int defRot){
+		//String this.amino.getRotamers(amino);
 	}
 	
 	private ProteinSequence readFasta(String filename, String identifier) throws Exception{
@@ -58,58 +116,58 @@ public class PDBfromFASTA {
 		return fasta.get(identifier);
 	}
 
-	private String getRotamer(String amino, int rotNum, String chain, int aminoStart, int atomStart){
+	private AARotamers getRotamer(String amino){
 
 		switch(amino){
 			case "A":
-				return ALA.getPDB(rotNum, chain, aminoStart, atomStart);
+				return ALA;
 			case "C":
-				return CYS.getPDB(rotNum, chain, aminoStart, atomStart);
+				return CYS;
 			case "D":
-				return ASP.getPDB(rotNum, chain, aminoStart, atomStart);
+				return ASP;
 			case "E":
-				return GLU.getPDB(rotNum, chain, aminoStart, atomStart);
+				return GLU;
 			case "F":
-				return PHE.getPDB(rotNum, chain, aminoStart, atomStart);
+				return PHE;
 			case "G":
-				return GLY.getPDB(rotNum, chain, aminoStart, atomStart);
+				return GLY;
 			case "H":
-				return HIE.getPDB(rotNum, chain, aminoStart, atomStart);
+				return HIE;
 			case "I":
-				return ILE.getPDB(rotNum, chain, aminoStart, atomStart);
+				return ILE;
 			case "K":
-				return LYS.getPDB(rotNum, chain, aminoStart, atomStart);
+				return LYS;
 			case "L":
-				return LEU.getPDB(rotNum, chain, aminoStart, atomStart);
+				return LEU;
 			case "M":
-				return MET.getPDB(rotNum, chain, aminoStart, atomStart);
+				return MET;
 			case "N":
-				return ASN.getPDB(rotNum, chain, aminoStart, atomStart);
+				return ASN;
 			case "P":
-				return PRO.getPDB(rotNum, chain, aminoStart, atomStart);
+				return PRO;
 			case "Q":
-				return GLN.getPDB(rotNum, chain, aminoStart, atomStart);
+				return GLN;
 			case "R":
-				return ARG.getPDB(rotNum, chain, aminoStart, atomStart);
+				return ARG;
 			case "S":
-				return SER.getPDB(rotNum, chain, aminoStart, atomStart);
+				return SER;
 			case "T":
-				return THR.getPDB(rotNum, chain, aminoStart, atomStart);
+				return THR;
 			case "V":
-				return VAL.getPDB(rotNum, chain, aminoStart, atomStart);
+				return VAL;
 			case "W":
-				return TRP.getPDB(rotNum, chain, aminoStart, atomStart);
+				return TRP;
 			case "Y":
-				return TYR.getPDB(rotNum, chain, aminoStart, atomStart);
+				return TYR;
 		}
-		System.out.println("[]" + amino);
+		System.out.println(">" + amino);
 		return null;
 	}
 
 	public static void main(String[] args){
 	try{
 		PDBfromFASTA pff = new PDBfromFASTA();
-		System.out.println(pff.makeSequence(args[0], args[1]));
+		System.out.println(pff.pdbFromFile(args[0], args[1]));
 	}catch(Exception e){
   	e.printStackTrace();
 	}
