@@ -3,10 +3,11 @@ package rccto3d.rotamers;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-abstract class AARotamers {
+public class AARotamers {
 
 	private int size = 0;
 	private HashMap<Integer,ArrayList> rotamers  = new HashMap<Integer,ArrayList>();
+	private String aminoName = "";
 
 	public String getPDB(int rotNum, String chain, int aminoStart, int atomStart){
 		String pdb = "";
@@ -39,12 +40,16 @@ abstract class AARotamers {
 		return this.size;
 	}
 
-	protected void setSize(int newSize){
-		size = newSize;
+	protected void setSize(int size){
+		this.size = size;
 	}
 
-	protected void setRotamers(HashMap<Integer,ArrayList> newRotamer){
-		rotamers  = newRotamer;
+	protected void setRotamers(HashMap<Integer,ArrayList> rotamer){
+		this.rotamers  = rotamer;
+	}
+
+	protected void setAminoName(String aminoName){
+		this.aminoName = aminoName;
 	}
 
 	public static void main(String[] args) throws Exception {

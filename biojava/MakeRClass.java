@@ -30,6 +30,8 @@ public static void main(String[] args) throws Exception {
 	String cnstrEnd =	"Rotamers(){\n\n" +
 										"\tsuper.setSize(this.size);\n" +
 										"\tsuper.setRotamers(this.rotamers);\n";
+	String setName =	"\tsuper.setAminoName(\"";
+	String setNameEnd="\");\n";
 
 	String startAminoAcid = "\t\taminoAcid = new ArrayList<ArrayList>();\n";
 	String startAtom = 		"\t\tatom = new ArrayList<String>();\n";
@@ -59,7 +61,7 @@ public static void main(String[] args) throws Exception {
 				prog = "";
 			}
 			amino = fileName.substring(0,3);
-			prog += head + amino + headEnd + cnstr + amino + cnstrEnd;
+			prog += head + amino + headEnd + cnstr + amino + cnstrEnd + setName + amino + setNameEnd;
 		}
 		if(fileName.substring(10,11).equals(".")){
 			rotNum = fileName.substring(9,10);
