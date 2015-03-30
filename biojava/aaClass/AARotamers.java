@@ -16,11 +16,11 @@ public class AARotamers {
 		int space = 0;
 		for(int j = 0; j < size; j++){
 			id = (String)((ArrayList)((ArrayList)rotamers.get(rotNum)).get(j)).get(0);
-			amino = (String)((ArrayList)((ArrayList)rotamers.get(rotNum)).get(j)).get(1);
-			x = (String)((ArrayList)((ArrayList)rotamers.get(rotNum)).get(j)).get(2);
-			y = (String)((ArrayList)((ArrayList)rotamers.get(rotNum)).get(j)).get(3);
-			z = (String)((ArrayList)((ArrayList)rotamers.get(rotNum)).get(j)).get(4);
-			type = (String)((ArrayList)((ArrayList)rotamers.get(rotNum)).get(j)).get(5);
+			amino = aminoName;
+			x = (String)((ArrayList)((ArrayList)rotamers.get(rotNum)).get(j)).get(1);
+			y = (String)((ArrayList)((ArrayList)rotamers.get(rotNum)).get(j)).get(2);
+			z = (String)((ArrayList)((ArrayList)rotamers.get(rotNum)).get(j)).get(3);
+			type = (String)((ArrayList)((ArrayList)rotamers.get(rotNum)).get(j)).get(4);
 			atNum = String.valueOf(atomStart + j);
       space = 5 - atNum.length();
       for(int i=0; i < space; i++) atNum = " " + atNum;
@@ -50,6 +50,10 @@ public class AARotamers {
 
 	protected void setAminoName(String aminoName){
 		this.aminoName = aminoName;
+	}
+
+	public String getAminoName(String aminoName){
+		return this.aminoName;
 	}
 
 	public static void main(String[] args) throws Exception {

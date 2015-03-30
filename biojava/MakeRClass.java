@@ -85,7 +85,7 @@ public static void main(String[] args) throws Exception {
 			prog += nline;
 			prog += startAtom;
 			prog += "\t\t" + addPar + "\"" + ID + "\"" + addParEnd +
-							addPar + "\"" + atom + "\"" + addParEnd +
+							//addPar + "\"" + atom + "\"" + addParEnd +
 							addPar + "\"" + x + "\"" + addParEnd +
 							addPar + "\"" + y + "\"" + addParEnd +
 							addPar + "\"" + z + "\"" + addParEnd +
