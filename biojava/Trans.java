@@ -53,6 +53,7 @@ public class Trans extends Calc {
 
 	private static final double BOND_DISTANCE = 1.32;
 	private static final double OMEGA_TRANS = Math.PI;
+	private static final double ANG_TO_RAD = Math.PI/180.0;
 
 	/** Rotates residue resNumber of chain to change its dihedral angle Phi
 	 */
@@ -129,6 +130,27 @@ public class Trans extends Calc {
 		}
 	}
 
+	public static void setPsi(Chain chain, int resNumber, double angle) throws Exception{
+		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
+		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
+		double angle2 = getPsi(a1, a2);
+		rotatePsi(chain, resNumber, angle2*ANG_TO_RAD -angle*ANG_TO_RAD);
+	}
+
+	public static void setPhi(Chain chain, int resNumber, double angle) throws Exception{
+		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
+		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
+		double angle2 = getPhi(a1, a2);
+		rotatePhi(chain, resNumber + 1, -angle2*ANG_TO_RAD +angle*ANG_TO_RAD);
+	}
+
+	public static void setOmega(Chain chain, int resNumber, double angle) throws Exception{
+		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
+		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
+		double angle2 = getPhi(a1, a2);
+		rotateOmega(chain, resNumber, -angle2*ANG_TO_RAD +angle*ANG_TO_RAD);
+	}
+
 	public static void joinAmino(Chain chain, int resNumber){
 		try{
 			AminoAcid amino1 = (AminoAcid) chain.getAtomGroup(resNumber);
@@ -156,7 +178,7 @@ public class Trans extends Calc {
 		joinAmino(chain, resNumber);
 		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
 		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
-		rotateOmega(chain, resNumber, -getOmega(a1, a2)*Math.PI/180.0 + OMEGA_TRANS);
+		rotateOmega(chain, resNumber, -getOmega(a1, a2)*ANG_TO_RAD + OMEGA_TRANS);
 		}catch (Exception e){
     	e.printStackTrace();
 		}

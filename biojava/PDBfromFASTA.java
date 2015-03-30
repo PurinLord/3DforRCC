@@ -2,8 +2,11 @@ package rccto3d;
 
 import java.util.LinkedHashMap;
 import java.io.File;
+import java.io.PrintWriter;
 import java.io.IOException;
 
+import org.biojava.bio.structure.Structure;
+import org.biojava.bio.structure.Chain;
 import org.biojava3.core.sequence.io.FastaReaderHelper;
 import org.biojava3.core.sequence.ProteinSequence;
 
@@ -11,7 +14,6 @@ import rccto3d.rotamers.*;
 
 
 public class PDBfromFASTA {
-
 
 	private final ASPRotamers ASP = new ASPRotamers();
 	private final GLURotamers GLU = new GLURotamers();
@@ -62,8 +64,62 @@ public class PDBfromFASTA {
 	private int defaultTHR = 1;
 	*/
 
-	public String pdbFromFile(String fileName, String identifier, int from, int to, String chain, int startAmino, int startAtom)
-		throws Exception{
+	public static final double ALFA_RIGHT_PHI = -0.9948; //57°;
+	public static final double ALFA_RIGHT_PSI = -0.8203; //47°;
+	public static final double BETHA_ANTIPARALLEL_PHI = -2.426; //139°;
+	public static final double BETHA_ANTIPARALLEL_PSI = 2.356; //135°;
+	public static final double NONE_PHI = 3.1426; //180°;
+	public static final double NONE_PSI = 3.1426; //180°;
+
+	public static void main(String[] args){
+	try{
+		PDBfromFASTA pff = new PDBfromFASTA();
+		String pdb = pff.pdbFromFile(args[0], args[1]);
+		//System.out.println(pdb);
+		
+		Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, "none"));
+		
+		//Trans.writePDB("datos/tst9.pdb", pff.shapeProtein("tst.pdb", "alpha", true));
+	}catch(Exception e){
+  	e.printStackTrace();
+	}
+	}
+
+	public Structure shapeProtein(String fileName, String shape, boolean keepFile) throws Exception{
+		Structure struc = Trans.readPDB(fileName);
+		Chain chain = struc.getChain(0);
+		double phi = 0.0;
+		double psi = 0.0;
+		switch(shape){
+			case "alpha":
+				phi = ALFA_RIGHT_PHI;
+				psi = ALFA_RIGHT_PSI;
+				break;
+			case "betha":
+				phi = BETHA_ANTIPARALLEL_PHI;
+				psi = BETHA_ANTIPARALLEL_PSI;
+				break;
+			case "none":
+				phi = NONE_PHI;
+				psi = NONE_PSI;
+				break;
+		}
+		for(int i = 0; i < chain.getAtomLength() - 1; i++){
+			Trans.makeBondTrans(chain, i);
+			//Trans.setPhi(chain, i, phi);
+			//Trans.setPsi(chain, i, psi);
+		}
+		return struc;
+	}
+
+	public Structure shapeProtein(String pdb, String shape) throws Exception{
+		PrintWriter writer = new PrintWriter("temp.pdb");
+		writer.println(pdb);
+		writer.close();
+		return shapeProtein("temp.pdb", shape, true);
+	}
+
+	public String pdbFromFile(String fileName, String identifier, int from, int to, String chain, int startAmino, int startAtom) throws Exception{
 		return pdbFromSequende(readFasta(fileName, identifier), from, to, chain, startAmino, startAtom);
 	}
 
@@ -116,8 +172,8 @@ public class PDBfromFASTA {
 		return fasta.get(identifier);
 	}
 
+	//TODO
 	private AARotamers getRotamer(String amino){
-
 		switch(amino){
 			case "A":
 				return ALA;
@@ -162,14 +218,5 @@ public class PDBfromFASTA {
 		}
 		System.out.println(">" + amino);
 		return null;
-	}
-
-	public static void main(String[] args){
-	try{
-		PDBfromFASTA pff = new PDBfromFASTA();
-		System.out.println(pff.pdbFromFile(args[0], args[1]));
-	}catch(Exception e){
-  	e.printStackTrace();
-	}
 	}
 }
