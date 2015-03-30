@@ -17,7 +17,7 @@ import org.biojava.bio.structure.StructureException;
 
 /** Makes a solid body rotatios of a spesific residue to change its dihedral angle
  */
-public class TransfStructure {
+public class Trans extends Calc {
   public static void main(String[] args) {
       Structure structure;
 			Chain chain;
@@ -30,9 +30,18 @@ public class TransfStructure {
 				structure = readPDB(args[0]);
 				chain = structure.getChain(0);
 
+				System.out.println(dist(chain, 2));
+				System.out.println(dist(chain, 3));
+				System.out.println(dist(chain, 4));
+				System.out.println(dist(chain, 5));
+				System.out.println(dist(chain, 15));
+				System.out.println(dist(chain, 16));
+				System.out.println(dist(chain, 17));
+				System.out.println(dist(chain, 18));
+
 				//writePDB("modify0.pdb", structure);
 				//printDihedral(chain, res);
-				rotatePhi(chain, res, teta);
+				//rotatePhi(chain, res, teta);
 				//printDihedral(chain, res);
 				//writePDB("modify1.pdb", chain.getParent());
 
@@ -43,6 +52,7 @@ public class TransfStructure {
   }
 
 	private static final double BOND_DISTANCE = 1.32;
+	private static final double OMEGA_TRANS = Math.PI;
 
 	/** Rotates residue resNumber of chain to change its dihedral angle Phi
 	 */
@@ -119,26 +129,20 @@ public class TransfStructure {
 		}
 	}
 
-	public static void makeBond(Chain chain, int resNumber){
+	public static void joinAmino(Chain chain, int resNumber){
 		try{
 			AminoAcid amino1 = (AminoAcid) chain.getAtomGroup(resNumber);
 			AminoAcid amino2 = (AminoAcid) chain.getAtomGroup(resNumber + 1);
 			Atom atom1 = amino1.getC();
 			Atom atom2 = amino2.getN();
 			double[] dist = getDif(atom1, atom2);
-			//System.out.println("dis " + norm(dist));
 			double length = norm(dist) - BOND_DISTANCE;
-			//System.out.println("len " + length);
 			dist = normalize(dist);
 			dist[0] = dist[0]*length;
 			dist[1] = dist[1]*length;
 			dist[2] = dist[2]*length;
 			Atom tAtom = getTransAtom(dist);
 			Calc.shift(amino2, tAtom);
-
-			dist = getDif(atom1, atom2);
-			//System.out.println("dis2 " + norm(dist));
-
 		}catch (ClassCastException e){
     	e.printStackTrace();
 			System.out.println("Chain has non-aminoacid elements");
@@ -147,7 +151,17 @@ public class TransfStructure {
 		}
 	}
 
-	//final method
+	public static void makeBondTrans(Chain chain, int resNumber){
+		try{
+		joinAmino(chain, resNumber);
+		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
+		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
+		rotateOmega(chain, resNumber, -getOmega(a1, a2)*Math.PI/180.0 + OMEGA_TRANS);
+		}catch (Exception e){
+    	e.printStackTrace();
+		}
+	}
+
 	public static double getOmega(AminoAcid a, AminoAcid b) throws StructureException {
 		if ( ! Calc.isConnected(a,b)){
 			throw new StructureException("can not calc Omega - AminoAcids are not connected!") ;
@@ -328,6 +342,20 @@ public class TransfStructure {
 		writer.close();
 		}catch(Exception e){
 			e.printStackTrace();
+		}
+	}
+
+	public static double dist(Chain chain, int resNumber){
+		try{
+		AminoAcid amino1 = (AminoAcid) chain.getAtomGroup(resNumber);
+		AminoAcid amino2 = (AminoAcid) chain.getAtomGroup(resNumber + 1);
+		Atom atom1 = amino1.getC();
+		Atom atom2 = amino2.getN();
+		double[] dist = getDif(atom1, atom2);
+		return norm(dist);
+		}catch(Exception e){
+			e.printStackTrace();
+			return 0.0;
 		}
 	}
 }
