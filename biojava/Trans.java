@@ -21,6 +21,8 @@ public class Trans extends Calc {
   public static void main(String[] args) {
       Structure structure;
 			Chain chain;
+			AminoAcid a1;
+			AminoAcid a2;
 			double teta = 3.1416*(1.0/8);
 			int res = 2;
 
@@ -30,14 +32,15 @@ public class Trans extends Calc {
 				structure = readPDB(args[0]);
 				chain = structure.getChain(0);
 
-				System.out.println(dist(chain, 2));
-				System.out.println(dist(chain, 3));
-				System.out.println(dist(chain, 4));
-				System.out.println(dist(chain, 5));
-				System.out.println(dist(chain, 15));
-				System.out.println(dist(chain, 16));
-				System.out.println(dist(chain, 17));
-				System.out.println(dist(chain, 18));
+				a1 = (AminoAcid)chain.getAtomGroup(res);
+				a2 = (AminoAcid)chain.getAtomGroup(res + 1);
+				System.out.println(getDihedral(a1, a2));
+
+				setPhi(chain, res, 0);
+				setPsi(chain, res, 0);
+				setOmega(chain, res, 0);
+
+				System.out.println(getDihedral(a1, a2));
 
 				//writePDB("modify0.pdb", structure);
 				//printDihedral(chain, res);
@@ -52,7 +55,7 @@ public class Trans extends Calc {
   }
 
 	private static final double BOND_DISTANCE = 1.32;
-	private static final double OMEGA_TRANS = Math.PI;
+	private static final double OMEGA_TRANS = 180.0;//Math.PI;
 	private static final double ANG_TO_RAD = Math.PI/180.0;
 
 	/** Rotates residue resNumber of chain to change its dihedral angle Phi
@@ -147,7 +150,7 @@ public class Trans extends Calc {
 	public static void setOmega(Chain chain, int resNumber, double angle) throws Exception{
 		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
 		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
-		double angle2 = getPhi(a1, a2);
+		double angle2 = getOmega(a1, a2);
 		rotateOmega(chain, resNumber, -angle2*ANG_TO_RAD +angle*ANG_TO_RAD);
 	}
 
@@ -176,11 +179,12 @@ public class Trans extends Calc {
 	public static void makeBondTrans(Chain chain, int resNumber){
 		try{
 		joinAmino(chain, resNumber);
-		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
-		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
-		rotateOmega(chain, resNumber, -getOmega(a1, a2)*ANG_TO_RAD + OMEGA_TRANS);
+		//AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
+		//AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
+		//rotateOmega(chain, resNumber, -getOmega(a1, a2)*ANG_TO_RAD + OMEGA_TRANS*ANG_TO_RAD);
+		setOmega(chain, resNumber, OMEGA_TRANS);
 		}catch (Exception e){
-    	e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 
@@ -194,7 +198,8 @@ public class Trans extends Calc {
 		Atom b_CA = b.getCA();
 		// C and N were checked in isConnected already
 		if (b_CA==null) throw new StructureException("Can not calculate Omega, CA atom is missing");
-		return Calc.torsionAngle(a_CA,a_C,b_N,b_CA);
+			System.out.println(">> " + torsionAngle(a_CA,a_C,b_N,b_CA));
+		return torsionAngle(a_CA,a_C,b_N,b_CA);
 	}
 
 	/** Creates de axis of rotation to change dihedral angle Phi of residue ResNumber
@@ -236,11 +241,7 @@ public class Trans extends Calc {
 	 */
 	private static Atom getTransAtom(Atom original, Atom rotation){
 		double[] dif = getDif(original, rotation);
-		Atom atom = new AtomImpl();
-		atom.setX(dif[0]);
-		atom.setY(dif[1]);
-		atom.setZ(dif[2]);
-		return atom;
+		return getTransAtom(dif);
 	}
 
 	private static Atom getTransAtom(double[] vec){
@@ -341,6 +342,15 @@ public class Trans extends Calc {
     }
 	}
 
+	public static String getDihedral(AminoAcid a1, AminoAcid a2){
+		try{
+		return getPhi(a1, a2) + " " + getPsi(a1, a2) + " " + getOmega(a1, a2);
+    } catch (Exception e) {
+      e.printStackTrace();
+			return "cant get angle";
+    }
+	}
+
 	/** Creates a Structure objet from a PDB file
 	 */
 	public static Structure readPDB(String filename){
@@ -367,14 +377,13 @@ public class Trans extends Calc {
 		}
 	}
 
-	public static double dist(Chain chain, int resNumber){
+	public static double bondDist(Chain chain, int resNumber){
 		try{
 		AminoAcid amino1 = (AminoAcid) chain.getAtomGroup(resNumber);
 		AminoAcid amino2 = (AminoAcid) chain.getAtomGroup(resNumber + 1);
 		Atom atom1 = amino1.getC();
 		Atom atom2 = amino2.getN();
-		double[] dist = getDif(atom1, atom2);
-		return norm(dist);
+		return getDistance(atom1, atom2);
 		}catch(Exception e){
 			e.printStackTrace();
 			return 0.0;

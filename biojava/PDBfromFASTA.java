@@ -10,6 +10,8 @@ import org.biojava.bio.structure.Chain;
 import org.biojava3.core.sequence.io.FastaReaderHelper;
 import org.biojava3.core.sequence.ProteinSequence;
 
+import org.biojava.bio.structure.AminoAcid;
+
 import rccto3d.rotamers.*;
 
 
@@ -64,9 +66,11 @@ public class PDBfromFASTA {
 	private int defaultTHR = 1;
 	*/
 
-	public static final double ALFA_RIGHT_PHI = -0.9948; //57°;
-	public static final double ALFA_RIGHT_PSI = -0.8203; //47°;
-	public static final double BETHA_ANTIPARALLEL_PHI = -2.426; //139°;
+	//public static final double ALFA_RIGHT_PHI = -0.9948; //-57°;
+	//public static final double ALFA_RIGHT_PSI = -0.8203; //-47°;
+	public static final double ALFA_RIGHT_PHI = -Math.PI*5.0/18.0; //-50°;
+	public static final double ALFA_RIGHT_PSI = -Math.PI*5.0/18.0; //-50°;
+	public static final double BETHA_ANTIPARALLEL_PHI = -2.426; //-139°;
 	public static final double BETHA_ANTIPARALLEL_PSI = 2.356; //135°;
 	public static final double NONE_PHI = 3.1426; //180°;
 	public static final double NONE_PSI = 3.1426; //180°;
@@ -77,7 +81,7 @@ public class PDBfromFASTA {
 		String pdb = pff.pdbFromFile(args[0], args[1]);
 		//System.out.println(pdb);
 		
-		Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, "none"));
+		Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, "alpha"));
 		
 		//Trans.writePDB("datos/tst9.pdb", pff.shapeProtein("tst.pdb", "alpha", true));
 	}catch(Exception e){
@@ -90,6 +94,8 @@ public class PDBfromFASTA {
 		Chain chain = struc.getChain(0);
 		double phi = 0.0;
 		double psi = 0.0;
+			AminoAcid a1;
+			AminoAcid a2;
 		switch(shape){
 			case "alpha":
 				phi = ALFA_RIGHT_PHI;
@@ -106,8 +112,11 @@ public class PDBfromFASTA {
 		}
 		for(int i = 0; i < chain.getAtomLength() - 1; i++){
 			Trans.makeBondTrans(chain, i);
-			//Trans.setPhi(chain, i, phi);
-			//Trans.setPsi(chain, i, psi);
+			Trans.setPhi(chain, i, phi);
+			Trans.setPsi(chain, i, psi);
+				a1 = (AminoAcid)chain.getAtomGroup(i);
+				a2 = (AminoAcid)chain.getAtomGroup(i + 1);
+				System.out.println(Trans.getDihedral(a1, a2));
 		}
 		return struc;
 	}
