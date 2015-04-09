@@ -3,6 +3,7 @@ package rccto3d;
 import java.io.File;
 import java.io.PrintWriter;
 import java.lang.Math;
+import java.lang.Double;
 
 import org.biojava.bio.structure.Structure;
 import org.biojava.bio.structure.Chain;
@@ -70,7 +71,7 @@ public class Trans extends Calc {
 			Calc.rotate(amino, rot);
 			//Gets new atom axis position
 			Atom rAtom = amino.getC();
-			Atom tAtom = getTransAtom(cAtom, rAtom);
+			Atom tAtom = subtract(cAtom, rAtom);
 			//Corrects
 			Calc.shift(amino, tAtom);
 
@@ -97,7 +98,7 @@ public class Trans extends Calc {
 			Matrix rot = getRotMatrix(axis, angle);
 			Calc.rotate(amino, rot);
 			Atom rAtom = amino.getN();
-			Atom tAtom = getTransAtom(cAtom, rAtom);
+			Atom tAtom = subtract(cAtom, rAtom);
 			Calc.shift(amino, tAtom);
 
 			for(int i = resNumber + 1; i < chain.getAtomLength(); i++){
@@ -122,7 +123,7 @@ public class Trans extends Calc {
 			Matrix rot = getRotMatrix(axis, angle);
 			Calc.rotate(amino2, rot);
 			Atom rAtom = amino2.getN();
-			Atom tAtom = getTransAtom(cAtom, rAtom);
+			Atom tAtom = subtract(cAtom, rAtom);
 			Calc.shift(amino2, tAtom);
 
 		}catch (ClassCastException e){
@@ -169,10 +170,10 @@ public class Trans extends Calc {
 			Atom tAtom = getTransAtom(dist);
 			Calc.shift(amino2, tAtom);
 		}catch (ClassCastException e){
-    	e.printStackTrace();
+			e.printStackTrace();
 			System.out.println("Chain has non-aminoacid elements");
 		}catch (Exception e){
-    	e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 
@@ -198,7 +199,6 @@ public class Trans extends Calc {
 		Atom b_CA = b.getCA();
 		// C and N were checked in isConnected already
 		if (b_CA==null) throw new StructureException("Can not calculate Omega, CA atom is missing");
-			System.out.println(">> " + torsionAngle(a_CA,a_C,b_N,b_CA));
 		return torsionAngle(a_CA,a_C,b_N,b_CA);
 	}
 
@@ -237,13 +237,6 @@ public class Trans extends Calc {
 		return axis;
 	}
 
-	/** Creates atom to tranlate the residues
-	 */
-	private static Atom getTransAtom(Atom original, Atom rotation){
-		double[] dif = getDif(original, rotation);
-		return getTransAtom(dif);
-	}
-
 	private static Atom getTransAtom(double[] vec){
 		Atom atom = new AtomImpl();
 		atom.setX(vec[0]);
@@ -256,12 +249,10 @@ public class Trans extends Calc {
 	 */
 	private static double[] getDif(Atom a1, Atom a2){
 		double[] dif = new double[3];
-		double x = a1.getX() - a2.getX();
-		double y = a1.getY() - a2.getY();
-		double z = a1.getZ() - a2.getZ();
-		dif[0] = x;
-		dif[1] = y;
-		dif[2] = z;
+		dif[0] = a1.getX() - a2.getX();
+		dif[1] = a1.getY() - a2.getY();
+		dif[2] = a1.getZ() - a2.getZ();
+
 		return dif;
 	}
 
@@ -299,6 +290,41 @@ public class Trans extends Calc {
 		vec[1] = vec[1]/norm;
 		vec[2] = vec[2]/norm;
 		return vec;
+	}
+
+	public static String getDihedral(AminoAcid a1, AminoAcid a2){
+		try{
+		return getPhi(a1, a2) + " " + getPsi(a1, a2) + " " + getOmega(a1, a2);
+		} catch (Exception e) {
+		  e.printStackTrace();
+			return "cant get angle";
+		}
+	}
+
+	/** Creates a Structure objet from a PDB file
+	 */
+	public static Structure readPDB(String filename){
+ 		PDBFileReader pdbreader = new PDBFileReader();
+		Structure structure = null;
+    try{
+    	structure = pdbreader.getStructure(filename);
+    	//System.out.println(structure);
+    } catch (Exception e) {
+    	e.printStackTrace();
+    }
+    return structure;
+	}
+
+	/** Saves structure in to a pdb format in to file
+	 */
+	public static void writePDB(String filename, Structure structure){
+		try{
+		PrintWriter writer = new PrintWriter(filename, "UTF-8");
+		writer.println(structure.toPDB());
+		writer.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	/** Prints dhihedral angles Phi Psi between the two atoms
@@ -340,41 +366,6 @@ public class Trans extends Calc {
     } catch (Exception e) {
       e.printStackTrace();
     }
-	}
-
-	public static String getDihedral(AminoAcid a1, AminoAcid a2){
-		try{
-		return getPhi(a1, a2) + " " + getPsi(a1, a2) + " " + getOmega(a1, a2);
-    } catch (Exception e) {
-      e.printStackTrace();
-			return "cant get angle";
-    }
-	}
-
-	/** Creates a Structure objet from a PDB file
-	 */
-	public static Structure readPDB(String filename){
- 		PDBFileReader pdbreader = new PDBFileReader();
-		Structure structure = null;
-    try{
-    	structure = pdbreader.getStructure(filename);
-    	//System.out.println(structure);
-    } catch (Exception e) {
-    	e.printStackTrace();
-    }
-    return structure;
-	}
-
-	/** Saves structure in to a pdb format in to file
-	 */
-	public static void writePDB(String filename, Structure structure){
-		try{
-		PrintWriter writer = new PrintWriter(filename, "UTF-8");
-		writer.println(structure.toPDB());
-		writer.close();
-		}catch(Exception e){
-			e.printStackTrace();
-		}
 	}
 
 	public static double bondDist(Chain chain, int resNumber){
