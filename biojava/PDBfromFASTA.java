@@ -81,7 +81,7 @@ public class PDBfromFASTA {
 		String pdb = pff.pdbFromFile(args[0], args[1]);
 		//System.out.println(pdb);
 		
-		Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, "alpha"));
+		Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, "zero"));
 		
 		//Trans.writePDB("datos/tst9.pdb", pff.shapeProtein("tst.pdb", "alpha", true));
 	}catch(Exception e){
@@ -110,13 +110,15 @@ public class PDBfromFASTA {
 				psi = NONE_PSI;
 				break;
 		}
+		//Trans.writePDB("datos/tst.pdb", struc);
 		for(int i = 0; i < chain.getAtomLength() - 1; i++){
 			Trans.makeBondTrans(chain, i);
-			Trans.setPhi(chain, i, phi);
-			Trans.setPsi(chain, i, psi);
+			//Trans.setPhi(chain, i, phi);
+			//Trans.setPsi(chain, i, psi);
+				//Trans.writePDB("datos/tst" + i + ".pdb", struc);
 				a1 = (AminoAcid)chain.getAtomGroup(i);
 				a2 = (AminoAcid)chain.getAtomGroup(i + 1);
-				System.out.println(Trans.getDihedral(a1, a2));
+				//System.out.println(Trans.getDihedral(a1, a2));
 		}
 		return struc;
 	}

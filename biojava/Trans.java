@@ -166,7 +166,6 @@ public class Trans extends Calc {
 			Atom C = amino1.getC();
 			Atom N2 = amino2.getN();
 			Atom CA2 = amino2.getCA();
-			int sign = -1;
 
 				Trans.writePDB("datos/tst0.pdb", chain.getParent());
 
@@ -184,23 +183,18 @@ public class Trans extends Calc {
 				//System.out.println("cAtom x " + cAtom.getX() + " y " + cAtom.getY() + " z " + cAtom.getZ());
 			double angle = angle(subtract(C, N2), subtract(CA2, N2));
 				System.out.println("angle " + angle + " gama " + (ANG_BOND - angle));
-			if (resNumber/2 == resNumber/2.0) sign = 1;//System.out.println("res " + resNumber + " sign " + sign);
-			Matrix rot = getRotMatrix(new double[] {0,0,1}, sign * (ANG_BOND - angle)*ANG_TO_RAD);
+			Atom axis = vectorProduct(subtract(C, N2), subtract(CA2, N2));
+				System.out.println("axis " + axis.getZ());
+			axis = unitVector(axis);
+				System.out.println("axis " + axis.getZ());
+			Matrix rot = getRotMatrix(new double[] {0,0,1}, -axis.getZ() * (ANG_BOND - angle)*ANG_TO_RAD);
 			rotate(amino2, rot);
 				Trans.writePDB("datos/tst2.pdb", chain.getParent());
 				//Atom subtr = subtract(cAtom, N2);
 				//System.out.println("subtr x " + subtr.getX() + " y " + subtr.getY() + " z " + subtr.getZ());
 			shift(amino2, subtract(cAtom, N2));
 				angle = angle(subtract(C, N2), subtract(CA2, N2));
-				if (Math.round(angle) != 123.0){ 
-					System.out.println("2angl " + angle);
-					sign = sign * -1;	
-					rot = getRotMatrix(new double[] {0,0,1}, sign * (ANG_BOND - angle)*ANG_TO_RAD);
-					rotate(amino2, rot);
-					shift(amino2, subtract(cAtom, N2));
-					angle = angle(subtract(C, N2), subtract(CA2, N2));
-					System.out.println("-2angl " + angle);
-				}
+				System.out.println("2angl " + angle);
 				Trans.writePDB("datos/tst3.pdb", chain.getParent());
 
 		}catch (ClassCastException e){
