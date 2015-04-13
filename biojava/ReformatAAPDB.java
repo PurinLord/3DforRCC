@@ -1,3 +1,5 @@
+package rccto3d.managerot;
+
 import java.io.*;
 import java.util.*;
 
@@ -21,7 +23,8 @@ public class ReformatAAPDB
       {
        if(line.startsWith("ATOM"))
         {
-         atomName=line.substring(11,15);
+         atomName=line.substring(12,15);
+				 System.out.println(atomName);
          if(atomName.indexOf("H")==-1)
           {
            token=line.substring(27);
@@ -32,12 +35,20 @@ public class ReformatAAPDB
            for(i=0; i<emptySpaces; i++) serial=" "+serial;
            newLine=newLine+serial+" ";
           
-           emptySpaces=4-atomName.length();
+           emptySpaces=3-atomName.length();
            for(i=0; i<emptySpaces; i++) atomName=" "+atomName;
-					 //System.out.println(atomName + "|");
-           newLine=newLine+atomName;
+           newLine=newLine+atomName + " ";
 
-           resName=line.substring(17,20);
+					 if(file.getName().substring(0,3).equals("HIE") || file.getName().substring(0,3).equals("HID")){
+           	resName="HIS";
+					 }else{
+					 	if(file.getName().substring(0,3).equals("CYH")){
+           		resName="CYS";
+						}else{
+           		resName=line.substring(17,20);
+						}
+					 }
+
            emptySpaces=4-resName.length();
            for(i=0; i<emptySpaces; i++) resName=" "+resName;
            newLine=newLine+resName+" ";
@@ -48,15 +59,15 @@ public class ReformatAAPDB
 
            newLine=newLine+token;
 
-           System.out.println(newLine);
+           //System.out.println(newLine);
 					 fullLine += newLine + "\n";
           }
         }
       }
 		 fullLine = fullLine.trim();
-     System.out.println("ATOM     15  OE1 GLN A   2       5.366   6.856  36.946  1.00 31.80           O");
+     //System.out.println("ATOM     15  OE1 GLN A   2       5.366   6.856  36.946  1.00 31.80           O");
      //System.out.println(file.getPath());
-		 PrintWriter writer = new PrintWriter(file.getPath(), "UTF-8");
+		 PrintWriter writer = new PrintWriter("aaNew/" + file.getName(), "UTF-8");
 		 writer.println(fullLine);
 		 writer.close();
      infile.close();
