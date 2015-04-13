@@ -20,44 +20,47 @@ import org.biojava.bio.structure.StructureException;
  */
 public class Trans extends Calc {
   public static void main(String[] args) {
-      Structure structure;
-			Chain chain;
-			AminoAcid a1;
-			AminoAcid a2;
-			double teta = 3.1416*(1.0/8);
-			int res = 2;
+    Structure structure;
+		Chain chain;
+		AminoAcid a1;
+		AminoAcid a2;
+		double teta = 3.1416*(1.0/8);
+		int res = 2;
 
-      try {
-				// SET PATH HERE!
-				//structure = readPDB("1hiv.pdb");
-				structure = readPDB(args[0]);
-				chain = structure.getChain(0);
+    try {
+			// SET PATH HERE!
+			//structure = readPDB("1hiv.pdb");
+			structure = readPDB(args[0]);
+			chain = structure.getChain(0);
 
-				a1 = (AminoAcid)chain.getAtomGroup(res);
-				a2 = (AminoAcid)chain.getAtomGroup(res + 1);
-				System.out.println(getDihedral(a1, a2));
+			a1 = (AminoAcid)chain.getAtomGroup(res);
+			a2 = (AminoAcid)chain.getAtomGroup(res + 1);
+			System.out.println(getDihedral(a1, a2));
 
-				setPhi(chain, res, 0);
-				setPsi(chain, res, 0);
-				setOmega(chain, res, 0);
+			setPhi(chain, res, 0);
+			setPsi(chain, res, 0);
+			setOmega(chain, res, 0);
 
-				System.out.println(getDihedral(a1, a2));
+			System.out.println(getDihedral(a1, a2));
 
-				//writePDB("modify0.pdb", structure);
-				//printDihedral(chain, res);
-				//rotatePhi(chain, res, teta);
-				//printDihedral(chain, res);
-				//writePDB("modify1.pdb", chain.getParent());
+			//writePDB("modify0.pdb", structure);
+			//printDihedral(chain, res);
+			//rotatePhi(chain, res, teta);
+			//printDihedral(chain, res);
+			//writePDB("modify1.pdb", chain.getParent());
 
-      } catch (Exception e) {
-      	System.out.println("error");
-        e.printStackTrace();
-      }
+    } catch (Exception e) {
+    	System.out.println("error");
+      e.printStackTrace();
+    }
   }
 
 	private static final double BOND_DISTANCE = 1.32;
 	private static final double OMEGA_TRANS = 180.0;//Math.PI;
 	private static final double ANG_TO_RAD = Math.PI/180.0;
+	private static final double X_BOND = 0.53689236886; //1.32 * Math.cos(180-114)
+	private static final double Y_BOND = 1.20588000408; //1.32 * Math.sin(180-114)
+	private static final double ANG_BOND = 123;
 
 	/** Rotates residue resNumber of chain to change its dihedral angle Phi
 	 */
@@ -155,20 +158,51 @@ public class Trans extends Calc {
 		rotateOmega(chain, resNumber, -angle2*ANG_TO_RAD +angle*ANG_TO_RAD);
 	}
 
-	public static void joinAmino(Chain chain, int resNumber){
+	public static void joinAmino(Chain chain, int resNumber) throws Exception{
 		try{
 			AminoAcid amino1 = (AminoAcid) chain.getAtomGroup(resNumber);
 			AminoAcid amino2 = (AminoAcid) chain.getAtomGroup(resNumber + 1);
-			Atom atom1 = amino1.getC();
-			Atom atom2 = amino2.getN();
-			double[] dist = getDif(atom1, atom2);
-			double length = norm(dist) - BOND_DISTANCE;
-			dist = normalize(dist);
-			dist[0] = dist[0]*length;
-			dist[1] = dist[1]*length;
-			dist[2] = dist[2]*length;
-			Atom tAtom = getTransAtom(dist);
-			Calc.shift(amino2, tAtom);
+			Atom CA = amino1.getCA();
+			Atom C = amino1.getC();
+			Atom N2 = amino2.getN();
+			Atom CA2 = amino2.getCA();
+			int sign = -1;
+
+				Trans.writePDB("datos/tst0.pdb", chain.getParent());
+
+			Atom e1 = subtract(C, CA);
+			e1 = unitVector(e1);
+				//System.out.println("e1 x " + e1.getX() + " y " + e1.getY() + " z " + e1.getZ());
+			Atom e2 = makeAtom(-e1.getY(), e1.getX(), 0.0);
+				//System.out.println("e2 x " + e2.getX() + " y " + e2.getY() + " z " + e2.getZ());
+			Atom tAtom = add(add(C, scaleEquals(e1, X_BOND)), scaleEquals(e2, Y_BOND));
+				//System.out.println("tAtom x " + tAtom.getX() + " y " + tAtom.getY() + " z " + tAtom.getZ());
+			shift(amino2, tAtom);
+				Trans.writePDB("datos/tst1.pdb", chain.getParent());
+
+			Atom cAtom = (Atom) amino2.getN().clone();
+				//System.out.println("cAtom x " + cAtom.getX() + " y " + cAtom.getY() + " z " + cAtom.getZ());
+			double angle = angle(subtract(C, N2), subtract(CA2, N2));
+				System.out.println("angle " + angle + " gama " + (ANG_BOND - angle));
+			if (resNumber/2 == resNumber/2.0) sign = 1;//System.out.println("res " + resNumber + " sign " + sign);
+			Matrix rot = getRotMatrix(new double[] {0,0,1}, sign * (ANG_BOND - angle)*ANG_TO_RAD);
+			rotate(amino2, rot);
+				Trans.writePDB("datos/tst2.pdb", chain.getParent());
+				//Atom subtr = subtract(cAtom, N2);
+				//System.out.println("subtr x " + subtr.getX() + " y " + subtr.getY() + " z " + subtr.getZ());
+			shift(amino2, subtract(cAtom, N2));
+				angle = angle(subtract(C, N2), subtract(CA2, N2));
+				if (Math.round(angle) != 123.0){ 
+					System.out.println("2angl " + angle);
+					sign = sign * -1;	
+					rot = getRotMatrix(new double[] {0,0,1}, sign * (ANG_BOND - angle)*ANG_TO_RAD);
+					rotate(amino2, rot);
+					shift(amino2, subtract(cAtom, N2));
+					angle = angle(subtract(C, N2), subtract(CA2, N2));
+					System.out.println("-2angl " + angle);
+				}
+				Trans.writePDB("datos/tst3.pdb", chain.getParent());
+
 		}catch (ClassCastException e){
 			e.printStackTrace();
 			System.out.println("Chain has non-aminoacid elements");
@@ -183,7 +217,7 @@ public class Trans extends Calc {
 		//AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
 		//AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
 		//rotateOmega(chain, resNumber, -getOmega(a1, a2)*ANG_TO_RAD + OMEGA_TRANS*ANG_TO_RAD);
-		setOmega(chain, resNumber, OMEGA_TRANS);
+		//setOmega(chain, resNumber, OMEGA_TRANS);
 		}catch (Exception e){
 			e.printStackTrace();
 		}
@@ -258,7 +292,7 @@ public class Trans extends Calc {
 
 	/** Constructs a rotation matrix of an angle teta along the axis vec
 	 */
-	private static Matrix getRotMatrix(double[] vec, double teta){
+	public static Matrix getRotMatrix(double[] vec, double teta){
 		double[][] rot = new double[3][3];
 		double l = vec[0];
 		double m = vec[1];
@@ -284,12 +318,20 @@ public class Trans extends Calc {
 
 	/** Normalize vector
 	 */
-	private static double[] normalize(double[] vec){
+	public static double[] normalize(double[] vec){
 		double norm = norm(vec);
 		vec[0] = vec[0]/norm;
 		vec[1] = vec[1]/norm;
 		vec[2] = vec[2]/norm;
 		return vec;
+	}
+
+	public static Atom makeAtom(double x, double y, double z){
+		Atom a = new AtomImpl();
+		a.setX(x);
+		a.setY(y);
+		a.setZ(z);
+		return a;
 	}
 
 	public static String getDihedral(AminoAcid a1, AminoAcid a2){
@@ -320,11 +362,28 @@ public class Trans extends Calc {
 	public static void writePDB(String filename, Structure structure){
 		try{
 		PrintWriter writer = new PrintWriter(filename, "UTF-8");
-		writer.println(structure.toPDB());
+		writer.println(structure.toPDB().trim());
 		writer.close();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+
+	public static Atom scaleEquals(Atom a, double s) {
+		double x = a.getX();
+		double y = a.getY();
+		double z = a.getZ();
+
+		x *= s;
+		y *= s;
+		z *= s;
+
+		//Atom b = new AtomImpl();
+		a.setX(x);
+		a.setY(y);
+		a.setZ(z);
+
+		return a;
 	}
 
 	/** Prints dhihedral angles Phi Psi between the two atoms
