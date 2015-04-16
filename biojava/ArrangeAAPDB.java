@@ -37,13 +37,13 @@ public class ArrangeAAPDB{
 
 			struc = Trans.readPDB(file.getPath());
 			System.out.println(file.getName());
-			struc = possition(struc);
+			//struc = possition(struc);
+			struc = possOx(struc);
 			Trans.writePDB("aaPos/" + file.getName(), struc);
 		}
 	}
 
 	public static Structure possition(Structure struc) throws Exception{
-
 		Chain chain;
 		AminoAcid amino;
 		Atom tAtom;
@@ -88,6 +88,38 @@ public class ArrangeAAPDB{
 		axis = Trans.normalize(axis);
 		Matrix rot = Trans.getRotMatrix(axis, -alpha * ANG_TO_RAD);
 		Trans.rotate(struc, rot);
+
+		return struc;
+	}
+
+	public static Structure possOx(Structure struc) throws Exception{
+		Chain chain;
+		AminoAcid amino;
+		Atom a1;
+		Atom a2;
+		Atom a3;
+		Atom aO;
+		double alpha;
+		double dist = 1.24;
+
+		chain = struc.getChain(0);
+		amino = (AminoAcid)chain.getAtomGroup(0);
+		a1 = amino.getN();
+		a2 = amino.getCA();
+		a3 = amino.getC();
+		aO = amino.getO();
+
+		alpha = Trans.angle(Trans.subtract(a2, a3), Trans.makeAtom(-1, 0, 0));
+		System.out.println("al " + alpha);
+		//O-C angle 121°
+		alpha = 121 - alpha;
+		System.out.println("a2 " + alpha);
+
+		aO.setX(a3.getX() + (dist * -Math.cos(alpha * ANG_TO_RAD)));
+		aO.setY(dist * -Math.sin(alpha * ANG_TO_RAD));
+		aO.setZ(0.0);
+		System.out.println("cos " + Math.cos(alpha * ANG_TO_RAD) + " x " + (dist * Math.cos(alpha * ANG_TO_RAD)));
+		System.out.println("sin " + Math.sin(alpha * ANG_TO_RAD) + " y " + (dist * Math.sin(alpha * ANG_TO_RAD)));
 
 		return struc;
 	}
