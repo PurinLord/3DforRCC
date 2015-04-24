@@ -95,20 +95,31 @@ public class Trans extends Calc {
 	 */
 	public static void rotatePhi(Chain chain, int resNumber, double angle){
 		try{
+				rccto3d.Trans.writePDB("datos/in1.pdb", chain.getParent());
+				System.out.println("angle " + angle);
 			AminoAcid amino = (AminoAcid) chain.getAtomGroup(resNumber);
+				System.out.println(amino);
 			Atom cAtom = (Atom) amino.getN().clone();
+				System.out.println(cAtom);
 			double[] axis = getAxisPhi(chain, resNumber);
+				System.out.println(axis);
 			Matrix rot = getRotMatrix(axis, angle);
+				System.out.println(rot);
 			Calc.rotate(amino, rot);
 			Atom rAtom = amino.getN();
+				System.out.println(rAtom);
 			Atom tAtom = subtract(cAtom, rAtom);
+				System.out.println(tAtom);
 			Calc.shift(amino, tAtom);
+				rccto3d.Trans.writePDB("datos/in2.pdb", chain.getParent());
 
 			for(int i = resNumber + 1; i < chain.getAtomLength(); i++){
+					rccto3d.Trans.writePDB("datos/inin"+ i +".pdb", chain.getParent());
 				amino = (AminoAcid) chain.getAtomGroup(i);
 				Calc.rotate(amino, rot);
 				Calc.shift(amino, tAtom);
 			}
+				rccto3d.Trans.writePDB("datos/in3.pdb", chain.getParent());
 		}catch (ClassCastException e){
     	e.printStackTrace();
 			System.out.println("Chain has non-aminoacid elements");
@@ -137,18 +148,50 @@ public class Trans extends Calc {
 		}
 	}
 
+	public static void rotatePhiNonSolid(Chain chain, int resNumber, double angle){
+		try{
+			AminoAcid amino = (AminoAcid) chain.getAtomGroup(resNumber);
+			Atom cAtom = (Atom) amino.getN().clone();
+			double[] axis = getAxisPhi(chain, resNumber);
+			Matrix rot = getRotMatrix(axis, angle);
+				//AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber -1);
+				//AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber);
+				//double angle2 = getPhi(a1, a2);
+				//System.out.println(" ang " + angle2 + " toRot " + angle + " - " + angle/ANG_TO_RAD);
+			Calc.rotate(amino, rot);
+			Atom rAtom = amino.getN();
+			Atom tAtom = subtract(cAtom, rAtom);
+			Calc.shift(amino, tAtom);
+		}catch (ClassCastException e){
+    	e.printStackTrace();
+			System.out.println("Chain has non-aminoacid elements");
+		}catch (Exception e){
+    	e.printStackTrace();
+		}
+	}
+
 	public static void setPsi(Chain chain, int resNumber, double angle) throws Exception{
 		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
 		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
+			System.out.println("psi " + rccto3d.Trans.getDistance(a1.getC(), a2.getN()));
 		double angle2 = getPsi(a1, a2);
-		rotatePsi(chain, resNumber, angle2*ANG_TO_RAD -angle*ANG_TO_RAD);
+			//System.out.println("Psi ang " + angle2 + " > " + (angle2 -angle));
+		rotatePsi(chain, resNumber, (angle2 -angle)*ANG_TO_RAD);
+			System.out.println(rccto3d.Trans.getDistance(a1.getC(), a2.getN()));
+			angle2 = getPsi(a1, a2);
+			System.out.println(" F " + angle2);
 	}
 
 	public static void setPhi(Chain chain, int resNumber, double angle) throws Exception{
 		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
 		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
+			System.out.println("phi " + rccto3d.Trans.getDistance(a1.getC(), a2.getN()));
 		double angle2 = getPhi(a1, a2);
-		rotatePhi(chain, resNumber + 1, -angle2*ANG_TO_RAD +angle*ANG_TO_RAD);
+			System.out.println(" Phi ang " + angle2);
+		rotatePhi(chain, resNumber + 1, (-angle2 +angle)*ANG_TO_RAD);
+			System.out.println(rccto3d.Trans.getDistance(a1.getC(), a2.getN()));
+			angle2 = getPhi(a1, a2);
+			System.out.println(" F " + angle2);
 	}
 
 	public static void setOmega(Chain chain, int resNumber, double angle) throws Exception{
@@ -156,6 +199,16 @@ public class Trans extends Calc {
 		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
 		double angle2 = getOmega(a1, a2);
 		rotateOmega(chain, resNumber, -angle2*ANG_TO_RAD +angle*ANG_TO_RAD);
+	}
+
+	public static void setPhiNonSolid(Chain chain, int resNumber, double angle) throws Exception{
+		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
+		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
+		double angle2 = getPhi(a1, a2);
+		System.out.println("PhiN  ang " + angle2+ " > " + (angle2 -angle));
+		rotatePhiNonSolid(chain, resNumber + 1, (angle2 -angle)*ANG_TO_RAD);
+		angle2 = getPsi(a1, a2);
+		System.out.println(" F " + angle2);
 	}
 
 	public static void joinAmino(Chain chain, int resNumber) throws Exception{
@@ -167,35 +220,23 @@ public class Trans extends Calc {
 			Atom N2 = amino2.getN();
 			Atom CA2 = amino2.getCA();
 
-				Trans.writePDB("datos/tst0.pdb", chain.getParent());
-
+				//Trans.writePDB("datos/tst0.pdb", chain.getParent());
 			Atom e1 = subtract(C, CA);
 			e1 = unitVector(e1);
-				//System.out.println("e1 x " + e1.getX() + " y " + e1.getY() + " z " + e1.getZ());
 			Atom e2 = makeAtom(-e1.getY(), e1.getX(), 0.0);
-				//System.out.println("e2 x " + e2.getX() + " y " + e2.getY() + " z " + e2.getZ());
 			Atom tAtom = add(add(C, scaleEquals(e1, X_BOND)), scaleEquals(e2, Y_BOND));
-				//System.out.println("tAtom x " + tAtom.getX() + " y " + tAtom.getY() + " z " + tAtom.getZ());
 			shift(amino2, tAtom);
-				Trans.writePDB("datos/tst1.pdb", chain.getParent());
+				//Trans.writePDB("datos/tst1.pdb", chain.getParent());
 
 			Atom cAtom = (Atom) amino2.getN().clone();
-				//System.out.println("cAtom x " + cAtom.getX() + " y " + cAtom.getY() + " z " + cAtom.getZ());
 			double angle = angle(subtract(C, N2), subtract(CA2, N2));
-				System.out.println("angle " + angle + " gama " + (ANG_BOND - angle));
 			Atom axis = vectorProduct(subtract(C, N2), subtract(CA2, N2));
-				System.out.println("axis " + axis.getZ());
 			axis = unitVector(axis);
-				System.out.println("axis " + axis.getZ());
 			Matrix rot = getRotMatrix(new double[] {0,0,1}, -axis.getZ() * (ANG_BOND - angle)*ANG_TO_RAD);
 			rotate(amino2, rot);
-				Trans.writePDB("datos/tst2.pdb", chain.getParent());
-				//Atom subtr = subtract(cAtom, N2);
-				//System.out.println("subtr x " + subtr.getX() + " y " + subtr.getY() + " z " + subtr.getZ());
+				//Trans.writePDB("datos/tst2.pdb", chain.getParent());
 			shift(amino2, subtract(cAtom, N2));
-				angle = angle(subtract(C, N2), subtract(CA2, N2));
-				System.out.println("2angl " + angle);
-				Trans.writePDB("datos/tst3.pdb", chain.getParent());
+				//Trans.writePDB("datos/tst3.pdb", chain.getParent());
 
 		}catch (ClassCastException e){
 			e.printStackTrace();
@@ -211,7 +252,7 @@ public class Trans extends Calc {
 		//AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
 		//AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
 		//rotateOmega(chain, resNumber, -getOmega(a1, a2)*ANG_TO_RAD + OMEGA_TRANS*ANG_TO_RAD);
-		//setOmega(chain, resNumber, OMEGA_TRANS);
+		setOmega(chain, resNumber, OMEGA_TRANS);
 		}catch (Exception e){
 			e.printStackTrace();
 		}
@@ -291,6 +332,8 @@ public class Trans extends Calc {
 		double l = vec[0];
 		double m = vec[1];
 		double n = vec[2];
+				System.out.println(teta);
+				System.out.println(l +" "+ m +" "+ n);
 		rot[0][0] = l*l*(1.0 - Math.cos(teta)) + Math.cos(teta);
 		rot[0][1] = m*l*(1.0 - Math.cos(teta)) - n*Math.sin(teta);
 		rot[0][2] = n*l*(1.0 - Math.cos(teta)) + m*Math.sin(teta);
@@ -300,6 +343,7 @@ public class Trans extends Calc {
 		rot[2][0] = l*n*(1.0 - Math.cos(teta)) - m*Math.sin(teta);
 		rot[2][1] = m*n*(1.0 - Math.cos(teta)) + l*Math.sin(teta);
 		rot[2][2] = n*n*(1.0 - Math.cos(teta)) + Math.cos(teta);
+				System.out.println(rot[0][0]);
 		return new Matrix(rot);
 	}
 

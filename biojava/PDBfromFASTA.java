@@ -68,12 +68,12 @@ public class PDBfromFASTA {
 
 	//public static final double ALFA_RIGHT_PHI = -0.9948; //-57°;
 	//public static final double ALFA_RIGHT_PSI = -0.8203; //-47°;
-	public static final double ALFA_RIGHT_PHI = -Math.PI*5.0/18.0; //-50°;
-	public static final double ALFA_RIGHT_PSI = -Math.PI*5.0/18.0; //-50°;
-	public static final double BETHA_ANTIPARALLEL_PHI = -2.426; //-139°;
-	public static final double BETHA_ANTIPARALLEL_PSI = 2.356; //135°;
-	public static final double NONE_PHI = 3.1426; //180°;
-	public static final double NONE_PSI = 3.1426; //180°;
+	public static final double ALFA_RIGHT_PHI = -50; //-Math.PI*5.0/18.0;
+	public static final double ALFA_RIGHT_PSI = -50; //-Math.PI*5.0/18.0;
+	public static final double BETHA_ANTIPARALLEL_PHI = -139; //-2.426;
+	public static final double BETHA_ANTIPARALLEL_PSI =  135; // 2.356;
+	public static final double NONE_PHI = 180; //3.1426;
+	public static final double NONE_PSI = 180; //3.1426;
 
 	public static void main(String[] args){
 	try{
@@ -81,7 +81,7 @@ public class PDBfromFASTA {
 		String pdb = pff.pdbFromFile(args[0], args[1]);
 		//System.out.println(pdb);
 		
-		Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, "zero"));
+		Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, args[2]));
 		
 		//Trans.writePDB("datos/tst9.pdb", pff.shapeProtein("tst.pdb", "alpha", true));
 	}catch(Exception e){
@@ -110,15 +110,21 @@ public class PDBfromFASTA {
 				psi = NONE_PSI;
 				break;
 		}
-		//Trans.writePDB("datos/tst.pdb", struc);
+			System.out.println("phi " + phi + " psi " + psi);
 		for(int i = 0; i < chain.getAtomLength() - 1; i++){
 			Trans.makeBondTrans(chain, i);
-			//Trans.setPhi(chain, i, phi);
+			//Trans.setPhiNonSolid(chain, i, phi);
 			//Trans.setPsi(chain, i, psi);
+		}
+			Trans.writePDB("datos/tst.pdb", struc);
+		for(int i = 0; i < chain.getAtomLength() - 1; i++){
+				System.out.println("> " + i);
 				//Trans.writePDB("datos/tst" + i + ".pdb", struc);
 				a1 = (AminoAcid)chain.getAtomGroup(i);
 				a2 = (AminoAcid)chain.getAtomGroup(i + 1);
 				//System.out.println(Trans.getDihedral(a1, a2));
+			Trans.setPhi(chain, i, phi);
+			Trans.setPsi(chain, i, psi);
 		}
 		return struc;
 	}
