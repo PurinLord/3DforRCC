@@ -1,5 +1,3 @@
-package rccto3d;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.lang.Math;

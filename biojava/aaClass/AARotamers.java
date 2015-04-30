@@ -1,5 +1,3 @@
-package rccto3d.rotamers;
-
 import java.util.HashMap;
 import java.util.ArrayList;
 
@@ -57,6 +55,7 @@ public class AARotamers {
 	}
 
 	public static void main(String[] args) throws Exception {
+		String am = args[0];
 		System.out.println("main");
 		ALARotamers ala = new ALARotamers();
 		System.out.println(ala.getSize());
