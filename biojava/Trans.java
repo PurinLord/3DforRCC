@@ -61,6 +61,10 @@ public class Trans extends Calc {
 	private static final double X_BOND = 0.53689236886; //1.32 * Math.cos(180-114)
 	private static final double Y_BOND = 1.20588000408; //1.32 * Math.sin(180-114)
 	private static final double ANG_BOND = 123;
+	//private static final double O_DIST = 2.4;
+	//private static final double O_ANG = 47.2;
+	private static final double O_X = 1.6306591302;
+	private static final double O_Y = 1.7609516748;
 
 	/** Rotates residue resNumber of chain to change its dihedral angle Phi
 	 */
@@ -77,6 +81,7 @@ public class Trans extends Calc {
 			Atom tAtom = subtract(cAtom, rAtom);
 			//Corrects
 			Calc.shift(amino, tAtom);
+			positionOxigen(chain, resNumber);
 
 			for(int i = resNumber - 1; i >= 0; i--){
 				amino = (AminoAcid) chain.getAtomGroup(i);
@@ -103,6 +108,7 @@ public class Trans extends Calc {
 			Atom rAtom = amino.getN();
 			Atom tAtom = subtract(cAtom, rAtom);
 			Calc.shift(amino, tAtom);
+			positionOxigen(chain, resNumber);
 
 			for(int i = resNumber + 1; i < chain.getAtomLength(); i++){
 				amino = (AminoAcid) chain.getAtomGroup(i);
@@ -143,10 +149,6 @@ public class Trans extends Calc {
 			Atom cAtom = (Atom) amino.getN().clone();
 			double[] axis = getAxisPhi(chain, resNumber);
 			Matrix rot = getRotMatrix(axis, angle);
-				//AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber -1);
-				//AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber);
-				//double angle2 = getPhi(a1, a2);
-				//System.out.println(" ang " + angle2 + " toRot " + angle + " - " + angle/ANG_TO_RAD);
 			Calc.rotate(amino, rot);
 			Atom rAtom = amino.getN();
 			Atom tAtom = subtract(cAtom, rAtom);
@@ -232,12 +234,29 @@ public class Trans extends Calc {
 	public static void makeBondTrans(Chain chain, int resNumber){
 		try{
 		joinAmino(chain, resNumber);
-		//AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
-		//AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
-		//rotateOmega(chain, resNumber, -getOmega(a1, a2)*ANG_TO_RAD + OMEGA_TRANS*ANG_TO_RAD);
 		setOmega(chain, resNumber, OMEGA_TRANS);
 		}catch (Exception e){
 			e.printStackTrace();
+		}
+	}
+
+	public static void positionOxigen(Chain chain, int resNumber){
+		try{
+			AminoAcid amino = (AminoAcid) chain.getAtomGroup(resNumber);
+			AminoAcid amino2 = (AminoAcid) chain.getAtomGroup(resNumber + 1);
+			Atom a1 = subtract(amino2.getCA(), amino.getCA());
+			Atom a2 = subtract(amino2.getN(), amino.getCA());
+			Atom a3 = vectorProduct(a1, a2);
+			a2 = vectorProduct(a1, a3);
+			a1 = scaleEquals(normalize(a1), O_X);
+			a2 = scaleEquals(normalize(a2), O_Y);
+			a3 = add(a1, a2);
+			Atom oxigen = amino.getO();
+			oxigen.setX(a3.getX());
+			oxigen.setY(a3.getY());
+			oxigen.setZ(a3.getZ());
+		}catch (Exception e){
+    	e.printStackTrace();
 		}
 	}
 
@@ -345,6 +364,14 @@ public class Trans extends Calc {
 		vec[1] = vec[1]/norm;
 		vec[2] = vec[2]/norm;
 		return vec;
+	}
+
+	public static Atom normalize(Atom a){
+		double norm = norm(new double[] {a.getX(),a.getY(),a.getZ()});
+		a.setX(a.getX()/norm);
+		a.setY(a.getY()/norm);
+		a.setZ(a.getZ()/norm);
+		return a;
 	}
 
 	public static Atom makeAtom(double x, double y, double z){
