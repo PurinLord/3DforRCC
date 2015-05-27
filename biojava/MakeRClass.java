@@ -49,7 +49,7 @@ public static void main(String[] args) throws Exception {
 	Arrays.sort(fList);
 
 	for (File file : fList){
-	System.out.println(file.getName());
+	//System.out.println(file.getName());
   	ID = atom = x = y = z = type = "";
 		BufferedReader infile = new BufferedReader(new FileReader(file));
 		fileName = file.getName();

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import org.biojava.bio.structure.io.PDBFileReader;
 import org.biojava.bio.structure.Structure;
 import org.biojava.bio.structure.Chain;
 import org.biojava3.core.sequence.io.FastaReaderHelper;
@@ -76,24 +77,24 @@ public class PDBfromFASTA {
 	public static final double NONE_PSI = 180; //3.1426;
 
 	public static void main(String[] args){
-	try{
-		PDBfromFASTA pff = new PDBfromFASTA();
-		String pdb = pff.pdbFromFile(args[0], args[1]);
-		//System.out.println(pdb);
-		
-		Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, args[2]));
-		
-		//Trans.writePDB("datos/tst9.pdb", pff.shapeProtein("tst.pdb", "alpha", true));
-	}catch(Exception e){
-  	e.printStackTrace();
-	}
+		try{
+			PDBfromFASTA pff = new PDBfromFASTA();
+			String pdb = pff.pdbFromFile(args[0], args[1]);
+			//System.out.println(pdb);
+			
+			Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, args[2]));
+			
+			//Trans.writePDB("datos/tst9.pdb", pff.shapeProtein("tst.pdb", "alpha", true));
+		}catch(Exception e){
+  		e.printStackTrace();
+		}
 	}
 
 	public Structure shapeProtein(String fileName, String shape, boolean keepFile) throws Exception{
 		Structure struc = Trans.readPDB(fileName);
 		Chain chain = struc.getChain(0);
-		double phi = 0.0;
-		double psi = 0.0;
+		double phi = -20.0;
+		double psi = -20.0;
 			AminoAcid a1;
 			AminoAcid a2;
 		switch(shape){
@@ -110,15 +111,15 @@ public class PDBfromFASTA {
 				psi = NONE_PSI;
 				break;
 		}
-			System.out.println("phi " + phi + " psi " + psi);
+			//System.out.println("phi " + phi + " psi " + psi);
 		for(int i = 0; i < chain.getAtomLength() - 1; i++){
 			Trans.makeBondTrans(chain, i);
 			//Trans.setPhiNonSolid(chain, i, phi);
 			//Trans.setPsi(chain, i, psi);
 		}
-			Trans.writePDB("datos/tst.pdb", struc);
+			//Trans.writePDB("datos/tst.pdb", struc);
 		for(int i = 0; i < chain.getAtomLength() - 1; i++){
-				System.out.println("> " + i);
+				//System.out.println("> " + i);
 				//Trans.writePDB("datos/tst" + i + ".pdb", struc);
 				a1 = (AminoAcid)chain.getAtomGroup(i);
 				a2 = (AminoAcid)chain.getAtomGroup(i + 1);
@@ -134,6 +135,13 @@ public class PDBfromFASTA {
 		writer.println(pdb);
 		writer.close();
 		return shapeProtein("temp.pdb", shape, true);
+	}
+
+	public Structure shapeProtein(String pdb) throws Exception{
+		PrintWriter writer = new PrintWriter("temp.pdb");
+		writer.println(pdb);
+		writer.close();
+		return shapeProtein("temp.pdb", "none", true);
 	}
 
 	public String pdbFromFile(String fileName, String identifier, int from, int to, String chain, int startAmino, int startAtom) throws Exception{
@@ -177,11 +185,6 @@ public class PDBfromFASTA {
 
 	public String pdbFromSequende(ProteinSequence seq){
 		return pdbFromSequende(seq, "A", 1, 1);
-	}
-
-	//TODO
-	public void setDefaultRotamer(String amino, int defRot){
-		//String this.amino.getRotamers(amino);
 	}
 	
 	private ProteinSequence readFasta(String filename, String identifier) throws Exception{
@@ -233,7 +236,34 @@ public class PDBfromFASTA {
 			case "Y":
 				return TYR;
 		}
-		System.out.println(">" + amino);
+		//System.out.println(">" + amino);
 		return null;
+	}
+
+	public static void writePDB(String filename, Structure structure){
+		try{
+		PrintWriter writer = new PrintWriter(filename, "UTF-8");
+		writer.println(structure.toPDB().trim());
+		writer.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	public static Structure readPDB(String filename){
+ 		PDBFileReader pdbreader = new PDBFileReader();
+		Structure structure = null;
+    try{
+    	structure = pdbreader.getStructure(filename);
+    	//System.out.println(structure);
+    } catch (Exception e) {
+    	e.printStackTrace();
+    }
+    return structure;
+	}
+
+	//TODO
+	public void setDefaultRotamer(String amino, int defRot){
+		//String this.amino.getRotamers(amino);
 	}
 }

@@ -25,6 +25,7 @@ public class Trans extends Calc {
 		AminoAcid a1;
 		AminoAcid a2;
 		double teta = 3.1416*(1.0/8);
+		double angle = 20;
 		int res = 2;
 
     try {
@@ -37,13 +38,13 @@ public class Trans extends Calc {
 			a2 = (AminoAcid)chain.getAtomGroup(res + 1);
 			System.out.println(getDihedral(a1, a2));
 
-			setPhi(chain, res, 0);
-			setPsi(chain, res, 0);
-			setOmega(chain, res, 0);
+			setPhi(chain, res, angle);
+			setPsi(chain, res, angle);
+			//setOmega(chain, res, 0);
 
 			System.out.println(getDihedral(a1, a2));
 
-			//writePDB("modify0.pdb", structure);
+			writePDB("datos/tst.pdb", structure);
 			//printDihedral(chain, res);
 			//rotatePhi(chain, res, teta);
 			//printDihedral(chain, res);
@@ -76,12 +77,14 @@ public class Trans extends Calc {
 			double[] axis = getAxisPsi(chain, resNumber);
 			Matrix rot = getRotMatrix(axis, angle);
 			Calc.rotate(amino, rot);
+			writePDB("datos/t1.pdb", chain.getParent());
 			//Gets new atom axis position
 			Atom rAtom = amino.getC();
 			Atom tAtom = subtract(cAtom, rAtom);
 			//Corrects
 			Calc.shift(amino, tAtom);
 			positionOxigen(chain, resNumber);
+			writePDB("datos/t2.pdb", chain.getParent());
 
 			for(int i = resNumber - 1; i >= 0; i--){
 				amino = (AminoAcid) chain.getAtomGroup(i);
@@ -123,6 +126,9 @@ public class Trans extends Calc {
 		}
 	}
 
+	/** Rotates residue resNumber of chain to change its dihedral angle Omega
+	 * this is a NON SOLID BODY rotation
+	 */
 	public static void rotateOmega(Chain chain, int resNumber, double angle){
 		try{
 			AminoAcid amino = (AminoAcid) chain.getAtomGroup(resNumber);
@@ -161,6 +167,8 @@ public class Trans extends Calc {
 		}
 	}
 
+	/** Set the dihedral angle Psi of residue resNumber in chain to the given angle
+	 */
 	public static void setPsi(Chain chain, int resNumber, double angle) throws Exception{
 		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
 		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
@@ -170,6 +178,8 @@ public class Trans extends Calc {
 		rotatePsi(chain, resNumber, (angle2 -angle)*ANG_TO_RAD);
 	}
 
+	/** Set the dihedral angle Phi of residue resNumber in chain to the given angle
+	 */
 	public static void setPhi(Chain chain, int resNumber, double angle) throws Exception{
 		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
 		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
@@ -179,6 +189,9 @@ public class Trans extends Calc {
 		rotatePhi(chain, resNumber + 1, (-angle2 +angle)*ANG_TO_RAD);
 	}
 
+	/** Set the dihedral angle Omega of residue resNumber in chain to the given angle
+	 * this is a NON SOLID BODY rotation
+	 */
 	public static void setOmega(Chain chain, int resNumber, double angle) throws Exception{
 		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
 		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
@@ -196,6 +209,9 @@ public class Trans extends Calc {
 		System.out.println(" F " + angle2);
 	}
 
+	/** Makes brings the aminoacid in chain at resNumber + 1 at the proper peptidic bond distans with the previus residue
+	 * only works for properly formated aminoacids
+	 */
 	public static void joinAmino(Chain chain, int resNumber) throws Exception{
 		try{
 			AminoAcid amino1 = (AminoAcid) chain.getAtomGroup(resNumber);
@@ -225,12 +241,16 @@ public class Trans extends Calc {
 
 		}catch (ClassCastException e){
 			e.printStackTrace();
+			System.out.println("amino " + resNumber);
 			System.out.println("Chain has non-aminoacid elements");
 		}catch (Exception e){
 			e.printStackTrace();
 		}
 	}
 
+	/** Makes a trans peptidic bond betwean the aminoacid in chain at resNumber with the next residue
+	 * only works for properly formated aminoacids
+	 */
 	public static void makeBondTrans(Chain chain, int resNumber){
 		try{
 		joinAmino(chain, resNumber);
@@ -240,6 +260,8 @@ public class Trans extends Calc {
 		}
 	}
 
+	/** Places the oxigen of the carboxil in ists proper position (this is used after any dihedral angle rotation)
+	 */
 	public static void positionOxigen(Chain chain, int resNumber){
 		try{
 			AminoAcid amino = (AminoAcid) chain.getAtomGroup(resNumber);
@@ -252,14 +274,16 @@ public class Trans extends Calc {
 			a2 = scaleEquals(normalize(a2), O_Y);
 			a3 = add(a1, a2);
 			Atom oxigen = amino.getO();
-			oxigen.setX(a3.getX());
-			oxigen.setY(a3.getY());
-			oxigen.setZ(a3.getZ());
+			oxigen.setX(amino.getCA().getX() + a3.getX());
+			oxigen.setY(amino.getCA().getY() + a3.getY());
+			oxigen.setZ(amino.getCA().getZ() + a3.getZ());
 		}catch (Exception e){
     	e.printStackTrace();
 		}
 	}
 
+	/** Return the dihedral angle Omega betwen aminoacid a and b
+	 */
 	public static double getOmega(AminoAcid a, AminoAcid b) throws StructureException {
 		if ( ! Calc.isConnected(a,b)){
 			throw new StructureException("can not calc Omega - AminoAcids are not connected!") ;
