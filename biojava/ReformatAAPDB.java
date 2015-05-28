@@ -17,14 +17,13 @@ public class ReformatAAPDB
      //BufferedReader infile = new BufferedReader(new FileReader(args[0]));
      int i=0, emptySpaces=0, serialNo=1, resNum=1;
      String atom="ATOM  ";
-     String line="", newLine="", fullLine="", serial="", atomName="", resName="", chainID="A", resSeq="   1", token="";
+     String line="", newLine="", fullLine="", serial="", atomName="", resName="",resName2="", chainID="A", resSeq="   1", token="";
 
      while((line=infile.readLine())!=null)
       {
        if(line.startsWith("ATOM"))
         {
          atomName=line.substring(12,15);
-				 System.out.println(atomName);
          if(atomName.indexOf("H")==-1)
           {
            token=line.substring(27);
@@ -40,6 +39,7 @@ public class ReformatAAPDB
            newLine=newLine+atomName + " ";
 
 					 if(file.getName().substring(0,3).equals("HIE") || file.getName().substring(0,3).equals("HID")){
+				 		System.out.println(file);
            	resName="HIS";
 					 }else{
 					 	if(file.getName().substring(0,3).equals("CYH")){
@@ -50,8 +50,8 @@ public class ReformatAAPDB
 					 }
 
            emptySpaces=4-resName.length();
-           for(i=0; i<emptySpaces; i++) resName=" "+resName;
-           newLine=newLine+resName+" ";
+           for(i=0; i<emptySpaces; i++) resName2=" "+resName;
+           newLine=newLine+resName2+" ";
 
            newLine=newLine+chainID;
 
@@ -67,7 +67,8 @@ public class ReformatAAPDB
 		 fullLine = fullLine.trim();
      //System.out.println("ATOM     15  OE1 GLN A   2       5.366   6.856  36.946  1.00 31.80           O");
      //System.out.println(file.getPath());
-		 PrintWriter writer = new PrintWriter("aaNew/" + file.getName(), "UTF-8");
+
+		 PrintWriter writer = new PrintWriter("aaNew/" + resName + file.getName().substring(3,file.getName().length()), "UTF-8");
 		 writer.println(fullLine);
 		 writer.close();
      infile.close();
