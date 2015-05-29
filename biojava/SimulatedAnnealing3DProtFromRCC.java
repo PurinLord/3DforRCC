@@ -1,3 +1,5 @@
+package rccto3d.optimisation;
+
 import java.lang.Math;
 import java.io.*;
 
@@ -30,31 +32,31 @@ public class SimulatedAnnealing3DProtFromRCC
    return Math.exp((energy - newEnergy) / temperature);
   }
 
- public static int[] calcRCC(String s1){
-	int rcc[] = new int[26];
-	try{
-	String s2 = "A";
-	Process p = Runtime.getRuntime().exec("python create_26dvRCC.py "+s1+" "+s2);
-	BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-	String ret = in.readLine();
-	String val = "";
-	int j = 0;
-	for(int i = 0; i < ret.length(); i++){
-		char c = ret.charAt(i);
-		if(c==','){
-			rcc[j] = Integer.valueOf(val);
-			val = "";
-			j++;
-		}else{
-			val+=c;
+	public static int[] calcRCC(String s1){
+		int rcc[] = new int[26];
+		try{
+		String s2 = "A";
+		Process p = Runtime.getRuntime().exec("python create_26dvRCC.py "+s1+" "+s2);
+		BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		String ret = in.readLine();
+		String val = "";
+		int j = 0;
+		for(int i = 0; i < ret.length(); i++){
+			char c = ret.charAt(i);
+			if(c==','){
+				rcc[j] = Integer.valueOf(val);
+				val = "";
+				j++;
+			}else{
+				val+=c;
+			}
 		}
+		rcc[j] = Integer.valueOf(val);
+		}catch(Exception e){
+  		e.printStackTrace();
+		}
+		return rcc;
 	}
-	rcc[j] = Integer.valueOf(val);
-	}catch(Exception e){
-		System.out.println("error" + e.toString());
-	}
-	return rcc;
-}
 
  public static int[] calcRCC(Structure struc)
   {
@@ -96,25 +98,29 @@ public class SimulatedAnnealing3DProtFromRCC
 		String pdb = null;
 		Structure struc_ini = null;
 
+		Structure struc_model = null;
+   	double currentEnergy = 0, neighbourEnergy = 0;
+   	double distance_ini = 0;
+
 		try{
 		pdb = pff.pdbFromFile(args[0], args[1]);
    //ProteinSequence seq = new ProteinsSequence(args[0]);
 
    // Build initial Protein 3D structure
-		struc_ini = pff.shapeProtein(pdb);
+		struc_ini = pff.makeProtein(pdb);
+		PDBfromFASTA.writePDB("out/s.pdb", struc_ini);
 		}catch(Exception e){
-			System.out.println(e.toString());
+    	e.printStackTrace();
 		}
-		Structure struc_model = null;
    //Protein3D prot3d_ini = new Protein3D(seq,args[1]);
    //Protein3D prot3d_model = null;
 		PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
 
    // Declaration of variables to store energy values
-   double currentEnergy = 0, neighbourEnergy = 0;
 
    // Initialize intial solution
-   double distance_ini = calcSimilarity(calcRCC(args[2]), calcRCC("out/struc_ini.pdb"));
+   	distance_ini = calcSimilarity(calcRCC(args[2]), calcRCC("out/struc_ini.pdb"));
+
    System.out.println("Initial solution distance: " + distance_ini);
    double distance_neighbor=0.0;
 

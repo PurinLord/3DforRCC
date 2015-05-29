@@ -37,7 +37,7 @@ public class PDBfromFASTA {
 	private final VALRotamers VAL = new VALRotamers();
 	private final ASNRotamers ASN = new ASNRotamers();
 	private final GLNRotamers GLN = new GLNRotamers();
-	private final HIERotamers HIE = new HIERotamers();
+	private final HISRotamers HIS = new HISRotamers();
 	private final METRotamers MET = new METRotamers();
 	private final THRRotamers THR = new THRRotamers();
 
@@ -62,7 +62,7 @@ public class PDBfromFASTA {
 	private int defaultVAL = 1;
 	private int defaultASN = 1;
 	private int defaultGLN = 1;
-	private int defaultHIE = 1;
+	private int defaultHIS = 1;
 	private int defaultMET = 1;
 	private int defaultTHR = 1;
 	*/
@@ -90,8 +90,26 @@ public class PDBfromFASTA {
 		}
 	}
 
-	public Structure shapeProtein(String fileName, String shape, boolean keepFile) throws Exception{
+	//TODO keepFile
+	public Structure makeProtein(String fileName, boolean keepFile) throws Exception{
 		Structure struc = Trans.readPDB(fileName);
+		Chain chain = struc.getChain(0);
+		for(int i = 0; i < chain.getAtomLength() - 1; i++){
+			Trans.makeBondTrans(chain, i);
+		}
+		writePDB("out/ttt" + ".pdb", struc);
+		return struc;
+	}
+
+	public Structure makeProtein(String pdb) throws Exception{
+		PrintWriter writer = new PrintWriter("temp.pdb");
+		writer.println(pdb);
+		writer.close();
+		return makeProtein("temp.pdb", true);
+	}
+
+	public Structure shapeProtein(String fileName, String shape, boolean keepFile) throws Exception{
+		Structure struc = makeProtein(fileName, keepFile);
 		Chain chain = struc.getChain(0);
 		double phi = -20.0;
 		double psi = -20.0;
@@ -113,14 +131,7 @@ public class PDBfromFASTA {
 		}
 			//System.out.println("phi " + phi + " psi " + psi);
 		for(int i = 0; i < chain.getAtomLength() - 1; i++){
-			Trans.makeBondTrans(chain, i);
-			//Trans.setPhiNonSolid(chain, i, phi);
-			//Trans.setPsi(chain, i, psi);
-		}
-			//Trans.writePDB("datos/tst.pdb", struc);
-		for(int i = 0; i < chain.getAtomLength() - 1; i++){
 				//System.out.println("> " + i);
-				//Trans.writePDB("datos/tst" + i + ".pdb", struc);
 				a1 = (AminoAcid)chain.getAtomGroup(i);
 				a2 = (AminoAcid)chain.getAtomGroup(i + 1);
 				//System.out.println(Trans.getDihedral(a1, a2));
@@ -208,7 +219,7 @@ public class PDBfromFASTA {
 			case "G":
 				return GLY;
 			case "H":
-				return HIE;
+				return HIS;
 			case "I":
 				return ILE;
 			case "K":

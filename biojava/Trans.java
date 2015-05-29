@@ -111,6 +111,7 @@ public class Trans extends Calc {
 			Atom rAtom = amino.getN();
 			Atom tAtom = subtract(cAtom, rAtom);
 			Calc.shift(amino, tAtom);
+			//System.out.println("-- " + resNumber);
 			positionOxigen(chain, resNumber);
 
 			for(int i = resNumber + 1; i < chain.getAtomLength(); i++){
@@ -123,6 +124,7 @@ public class Trans extends Calc {
 			System.out.println("Chain has non-aminoacid elements");
 		}catch (Exception e){
     	e.printStackTrace();
+			System.out.println("-- " + resNumber);
 		}
 	}
 
@@ -241,7 +243,6 @@ public class Trans extends Calc {
 
 		}catch (ClassCastException e){
 			e.printStackTrace();
-			System.out.println("amino " + resNumber);
 			System.out.println("Chain has non-aminoacid elements");
 		}catch (Exception e){
 			e.printStackTrace();
@@ -358,8 +359,6 @@ public class Trans extends Calc {
 		double l = vec[0];
 		double m = vec[1];
 		double n = vec[2];
-				System.out.println(teta);
-				System.out.println(l +" "+ m +" "+ n);
 		rot[0][0] = l*l*(1.0 - Math.cos(teta)) + Math.cos(teta);
 		rot[0][1] = m*l*(1.0 - Math.cos(teta)) - n*Math.sin(teta);
 		rot[0][2] = n*l*(1.0 - Math.cos(teta)) + m*Math.sin(teta);
@@ -369,7 +368,6 @@ public class Trans extends Calc {
 		rot[2][0] = l*n*(1.0 - Math.cos(teta)) - m*Math.sin(teta);
 		rot[2][1] = m*n*(1.0 - Math.cos(teta)) + l*Math.sin(teta);
 		rot[2][2] = n*n*(1.0 - Math.cos(teta)) + Math.cos(teta);
-				System.out.println(rot[0][0]);
 		return new Matrix(rot);
 	}
 
