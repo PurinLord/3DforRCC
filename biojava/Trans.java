@@ -264,6 +264,7 @@ public class Trans extends Calc {
 	/** Places the oxigen of the carboxil in ists proper position (this is used after any dihedral angle rotation)
 	 */
 	public static void positionOxigen(Chain chain, int resNumber){
+		if(resNumber < chain.getAtomLength()-1){
 		try{
 			AminoAcid amino = (AminoAcid) chain.getAtomGroup(resNumber);
 			AminoAcid amino2 = (AminoAcid) chain.getAtomGroup(resNumber + 1);
@@ -280,6 +281,7 @@ public class Trans extends Calc {
 			oxigen.setZ(amino.getCA().getZ() + a3.getZ());
 		}catch (Exception e){
     	e.printStackTrace();
+		}
 		}
 	}
 

@@ -5,6 +5,7 @@ import java.io.*;
 
 import org.biojava.bio.structure.Structure;
 import org.biojava.bio.structure.Chain;
+import org.biojava.bio.structure.AminoAcid;
 
 import rccto3d.*;
 import rccto3d.Trans;
@@ -20,8 +21,12 @@ public class SimulatedAnnealing3DProtFromRCC
   static double coolingRate = 0.003;
 
 	//factor de cambio para Phi y Psi
-	static double cambioPhi = 10.0;
-	static double cambioPsi = 10.0;
+	static double cambioPhi = 360.0;
+	static double cambioPsi = 360.0;
+
+	//Candidad de ángulos phi psi que cambian
+	static int minCambio = 1;
+	static int maxCambio = 70;
 
  // Calculate the acceptance probability
  public static double acceptanceProbability(double energy, double newEnergy, double temperature) 
@@ -79,16 +84,53 @@ public class SimulatedAnnealing3DProtFromRCC
    	return Math.sqrt(sum);
   }// end calcSimilarity
 
-	public static void alterconformation(Structure struc){
-		int largo = struc.size();
-		//for(i=0; i<largo; i++){
-		//}
-		int dAmino = (int) (largo * Math.random());
-		double dPsi = cambioPsi * Math.random();
-		double dPhi = cambioPhi * Math.random();
+	public static Structure alterConformation(Structure struc){
 		Chain chain = struc.getChain(0);
-		Trans.rotatePsi(chain, dAmino, dPsi);
-		Trans.rotatePhi(chain, dAmino, dPhi);
+		int largo = chain.getAtomLength();
+		int to = minCambio + (int)(Math.random()*(maxCambio - minCambio));
+		for(int i=0; i<to; i++){
+			int dAmino = (int) (largo * Math.random());
+			double dPsi = cambioPsi * Math.random();
+			double dPhi = cambioPhi * Math.random();
+			Trans.rotatePsi(chain, dAmino, dPsi);
+			Trans.rotatePhi(chain, dAmino, dPhi);
+		}
+		return struc;
+	}
+
+	public static Structure alterConformationAll(Structure struc){
+		Chain chain = struc.getChain(0);
+		int largo = chain.getAtomLength();
+		for(int i=0; i<largo; i++){
+			double dPsi = cambioPsi * Math.random();
+			double dPhi = cambioPhi * Math.random();
+			Trans.rotatePsi(chain, i, dPsi);
+			Trans.rotatePhi(chain, i, dPhi);
+		}
+		return struc;
+	}
+
+	public static Structure alterConformationAll(Structure struc, Structure target){
+		Chain chainT = target.getChain(0);
+		Chain chain = struc.getChain(0);
+		int largo = chain.getAtomLength();
+		AminoAcid a1;
+		AminoAcid a2;
+		for(int i=0; i <largo; i++){
+			int dAmino = (int) ((largo -1) * Math.random());
+			try{
+			a1 = (AminoAcid)chain.getAtomGroup(dAmino);
+			a2 = (AminoAcid)chain.getAtomGroup(dAmino + 1);
+			double dPsi = Trans.getPhi(a1, a2);
+			double dPhi = Trans.getPsi(a1, a2);
+			Trans.rotatePsi(chain, i, dPsi);
+			Trans.rotatePhi(chain, i, dPhi);
+    	}catch (Exception e) {
+				System.out.println(">" + largo +" "+ i);
+    		e.printStackTrace();
+    	}
+		}
+		return struc;
 	}
 
  public static void main(String[] args) 
@@ -102,24 +144,33 @@ public class SimulatedAnnealing3DProtFromRCC
    	double currentEnergy = 0, neighbourEnergy = 0;
    	double distance_ini = 0;
 
+		int targetRCC[]; 
+		int currentRCC[]; 
+
 		try{
 		pdb = pff.pdbFromFile(args[0], args[1]);
    //ProteinSequence seq = new ProteinsSequence(args[0]);
 
    // Build initial Protein 3D structure
 		struc_ini = pff.makeProtein(pdb);
-		PDBfromFASTA.writePDB("out/s.pdb", struc_ini);
 		}catch(Exception e){
     	e.printStackTrace();
 		}
-   //Protein3D prot3d_ini = new Protein3D(seq,args[1]);
-   //Protein3D prot3d_model = null;
+
 		PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
 
+			////TEST read
+			//struc_ini = PDBfromFASTA.readPDB(args[2]);
+			//Structure target = PDBfromFASTA.readPDB(args[2]);
+			//PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
+
    // Declaration of variables to store energy values
+	 	targetRCC = calcRCC(args[2]);
+		for(int i : targetRCC){System.out.print(i + " ");}
+		System.out.print("\n");
 
    // Initialize intial solution
-   	distance_ini = calcSimilarity(calcRCC(args[2]), calcRCC("out/struc_ini.pdb"));
+   	distance_ini = calcSimilarity(targetRCC, calcRCC("out/struc_ini.pdb"));
 
    System.out.println("Initial solution distance: " + distance_ini);
    double distance_neighbor=0.0;
@@ -127,32 +178,40 @@ public class SimulatedAnnealing3DProtFromRCC
    // Set as current best
    double best = distance_ini;
         
+	 // Create new neighbour 3d model
+		struc_ini = PDBfromFASTA.readPDB("out/struc_ini.pdb");
+		 
    // Loop until system has cooled
    while (temp > 1) 
     {
-     // Create new neighbour 3d model
-			struc_model = PDBfromFASTA.readPDB("out/struc_ini.pdb");
-     //seq_model = seq_ini.clone();
-
+		 
+			currentRCC = calcRCC("out/struc_ini.pdb");
+     	currentEnergy = calcSimilarity(targetRCC, currentRCC);;
      // Get a random conformation for this new neighbor
-     alterconformation(struc_model);
+			struc_model = alterConformation(struc_ini);
+				//struc_model = alterConformationAll(struc_ini, target);
 			PDBfromFASTA.writePDB("out/struc_model.pdb", struc_model);
             
-     // Get energy of solutions
-     currentEnergy = calcSimilarity(calcRCC(args[2]), calcRCC("out/struc_ini.pdb"));;
-     neighbourEnergy = calcSimilarity(calcRCC(args[2]), calcRCC("out/struc_model.pdb"));;
+			currentRCC = calcRCC("out/struc_model.pdb");
+     // Get energy of solution
+     neighbourEnergy = calcSimilarity(targetRCC, currentRCC);;
 
      // Decide if we should accept the neighbour
      if (acceptanceProbability(currentEnergy, neighbourEnergy, temp) > Math.random()) {
        struc_ini = struc_model;
+				PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
       }
 
      // Keep track of the best solution found
      if (neighbourEnergy < best) 
       {
        best = neighbourEnergy;
+				PDBfromFASTA.writePDB("out/best_" + best + ".pdb", struc_ini);
+   			System.out.println(temp + ": " + best);
       }
-            
+
+	 		for(int i : currentRCC){System.out.print(i + " ");}
+	 		System.out.print("\n");
      // Cool system
      temp *= 1-coolingRate;
     }

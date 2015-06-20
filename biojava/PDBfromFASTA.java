@@ -97,7 +97,6 @@ public class PDBfromFASTA {
 		for(int i = 0; i < chain.getAtomLength() - 1; i++){
 			Trans.makeBondTrans(chain, i);
 		}
-		writePDB("out/ttt" + ".pdb", struc);
 		return struc;
 	}
 
