@@ -24,14 +24,14 @@ public class PDBfromFASTA {
 	private final PHERotamers PHE = new PHERotamers();
 	private final TRPRotamers TRP = new TRPRotamers();
 	private final ALARotamers ALA = new ALARotamers();
-	private final CYHRotamers CYH = new CYHRotamers();
+	//private final CYHRotamers CYH = new CYHRotamers();
 	private final GLYRotamers GLY = new GLYRotamers();
 	private final LEURotamers LEU = new LEURotamers();
 	private final PRORotamers PRO = new PRORotamers();
 	private final TYRRotamers TYR = new TYRRotamers();
 	private final ARGRotamers ARG = new ARGRotamers();
 	private final CYSRotamers CYS = new CYSRotamers();
-	private final HIDRotamers HID = new HIDRotamers();
+	//private final HIDRotamers HID = new HIDRotamers();
 	private final LYSRotamers LYS = new LYSRotamers();
 	private final SERRotamers SER = new SERRotamers();
 	private final VALRotamers VAL = new VALRotamers();
