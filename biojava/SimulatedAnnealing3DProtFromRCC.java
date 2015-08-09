@@ -29,13 +29,13 @@ public class SimulatedAnnealing3DProtFromRCC
 	static int maxCambio = 70;
 
  // Calculate the acceptance probability
- public static double acceptanceProbability(double energy, double newEnergy, double temperature) 
-  {
-   // If the new solution is better, accept it
-   if (newEnergy < energy) return 1.0;
-   // If the new solution is worse, calculate an acceptance probability
-   return Math.exp((energy - newEnergy) / temperature);
-  }
+	public static double acceptanceProbability(double energy, double newEnergy, double temperature) 
+	{
+		// If the new solution is better, accept it
+		if (newEnergy < energy) return 1.0;
+		// If the new solution is worse, calculate an acceptance probability
+		return Math.exp((energy - newEnergy) / temperature);
+	}
 
 	public static int[] calcRCC(String s1){
 		int rcc[] = new int[26];
@@ -63,15 +63,15 @@ public class SimulatedAnnealing3DProtFromRCC
 		return rcc;
 	}
 
- public static int[] calcRCC(Structure struc)
-  {
-   int[] result = new int[26];
-   int i=0;
-
-   for(i=0; i<26; i++) result[i]=0;
-
-   return result;
-  } // end calcRCC
+	public static int[] calcRCC(Structure struc)
+	{
+		int[] result = new int[26];
+		int i=0;
+		
+		for(i=0; i<26; i++) result[i]=0;
+		
+		return result;
+	} // end calcRCC
 
 	public static double calcSimilarity(int[] rcc1, int[] rcc2)
   {
@@ -141,12 +141,14 @@ public class SimulatedAnnealing3DProtFromRCC
 		Structure struc_ini = null;
 
 		Structure struc_model = null;
+		Structure target = null;
    	double currentEnergy = 0, neighbourEnergy = 0;
    	double distance_ini = 0;
 
 		int targetRCC[]; 
 		int currentRCC[]; 
 
+		if(args[0].length() > 3 && args[0].substring(args[0].length() - 3, 3) == ".fa"){
 		try{
 		pdb = pff.pdbFromFile(args[0], args[1]);
    //ProteinSequence seq = new ProteinsSequence(args[0]);
@@ -156,13 +158,13 @@ public class SimulatedAnnealing3DProtFromRCC
 		}catch(Exception e){
     	e.printStackTrace();
 		}
-
 		PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
+		}else{
+			struc_ini = PDBfromFASTA.readPDB(args[2]);
+			target = PDBfromFASTA.readPDB(args[2]);
+			PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
+		}
 
-			////TEST read
-			//struc_ini = PDBfromFASTA.readPDB(args[2]);
-			//Structure target = PDBfromFASTA.readPDB(args[2]);
-			//PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
 
    // Declaration of variables to store energy values
 	 	targetRCC = calcRCC(args[2]);
@@ -188,8 +190,11 @@ public class SimulatedAnnealing3DProtFromRCC
 			currentRCC = calcRCC("out/struc_ini.pdb");
      	currentEnergy = calcSimilarity(targetRCC, currentRCC);;
      // Get a random conformation for this new neighbor
-			struc_model = alterConformation(struc_ini);
-				//struc_model = alterConformationAll(struc_ini, target);
+			if(target != null){
+				struc_model = alterConformationAll(struc_ini, target);
+			}else{
+				struc_model = alterConformation(struc_ini);
+			}
 			PDBfromFASTA.writePDB("out/struc_model.pdb", struc_model);
             
 			currentRCC = calcRCC("out/struc_model.pdb");
