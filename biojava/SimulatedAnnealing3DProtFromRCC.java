@@ -14,7 +14,7 @@ import rccto3d.PDBfromFASTA;
 public class SimulatedAnnealing3DProtFromRCC 
 {
 
-  // Set initial temp
+	// Set initial temp
 	static double temp = 10000;
 
   // Cooling rate
@@ -137,28 +137,31 @@ public class SimulatedAnnealing3DProtFromRCC
   {
 		//Mesure time
 		long elapsedTime = System.nanoTime();
-   // Load Protein Sequence
+		System.out.println(args[0] + " " + args[1] + " " + args[2] + 
+				"\ntemp " + temp + " coolRate " + coolingRate + 
+				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi + " min cambio " + minCambio + " max cambio " +  maxCambio);
+		// Load Protein Sequence
 		PDBfromFASTA pff = new PDBfromFASTA();
 		String pdb = null;
 		Structure struc_ini = null;
-
+		
 		Structure struc_model = null;
 		Structure target = null;
-   	double currentEnergy = 0, neighbourEnergy = 0;
-   	double distance_ini = 0;
-
+		double currentEnergy = 0, neighbourEnergy = 0;
+		double distance_ini = 0;
+		
 		int targetRCC[]; 
 		int currentRCC[]; 
-
+		
 		if(args[0].length() > 3 && args[0].substring(args[0].length() - 3) == ".fa"){
 		try{
 		pdb = pff.pdbFromFile(args[0], args[1]);
-   //ProteinSequence seq = new ProteinsSequence(args[0]);
-
-   // Build initial Protein 3D structure
+		//ProteinSequence seq = new ProteinsSequence(args[0]);
+		
+		// Build initial Protein 3D structure
 		struc_ini = pff.makeProtein(pdb);
 		}catch(Exception e){
-    	e.printStackTrace();
+			e.printStackTrace();
 		}
 		PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
 		}else{
@@ -166,67 +169,70 @@ public class SimulatedAnnealing3DProtFromRCC
 			target = PDBfromFASTA.readPDB(args[2]);
 			PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
 		}
-
-
-   // Declaration of variables to store energy values
-	 	targetRCC = calcRCC(args[2]);
+		
+		
+		// Declaration of variables to store energy values
+		targetRCC = calcRCC(args[2]);
 		for(int i : targetRCC){System.out.print(i + " ");}
 		System.out.print("\n");
-
-   // Initialize intial solution
-   	distance_ini = calcSimilarity(targetRCC, calcRCC("out/struc_ini.pdb"));
-
-   System.out.println("Initial solution distance: " + distance_ini);
-   double distance_neighbor=0.0;
-
-   // Set as current best
-   double best = distance_ini;
-        
-	 // Create new neighbour 3d model
+		
+		// Initialize intial solution
+		distance_ini = calcSimilarity(targetRCC, calcRCC("out/struc_ini.pdb"));
+		
+		System.out.println("Initial solution distance: " + distance_ini);
+		double distance_neighbor=0.0;
+		
+		// Set as current best
+		double best = distance_ini;
+		    
+		// Create new neighbour 3d model
 		struc_ini = PDBfromFASTA.readPDB("out/struc_ini.pdb");
 		 
-   // Loop until system has cooled
-   while (temp > 1) 
-    {
+		// Loop until system has cooled
+		while (temp > 1) 
+		{
 		 
 			currentRCC = calcRCC("out/struc_ini.pdb");
-     	currentEnergy = calcSimilarity(targetRCC, currentRCC);;
-     // Get a random conformation for this new neighbor
+		 	currentEnergy = calcSimilarity(targetRCC, currentRCC);;
+			// Get a random conformation for this new neighbor
 			if(target != null){
 				struc_model = alterConformationAll(struc_ini, target);
 			}else{
 				struc_model = alterConformation(struc_ini);
 			}
 			PDBfromFASTA.writePDB("out/struc_model.pdb", struc_model);
-            
+		        
 			currentRCC = calcRCC("out/struc_model.pdb");
-     // Get energy of solution
-     neighbourEnergy = calcSimilarity(targetRCC, currentRCC);;
-
-     // Decide if we should accept the neighbour
-     if (acceptanceProbability(currentEnergy, neighbourEnergy, temp) > Math.random()) {
-       struc_ini = struc_model;
+			// Get energy of solution
+			neighbourEnergy = calcSimilarity(targetRCC, currentRCC);;
+		
+			// Decide if we should accept the neighbour
+			if (acceptanceProbability(currentEnergy, neighbourEnergy, temp) > Math.random()) {
+		  	struc_ini = struc_model;
 				PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
-      }
-
-     // Keep track of the best solution found
-     if (neighbourEnergy < best) 
-      {
-       best = neighbourEnergy;
+		  }
+		
+			// Keep track of the best solution found
+			if (neighbourEnergy < best) 
+		  {
+				best = neighbourEnergy;
 				PDBfromFASTA.writePDB("out/best_" + best + ".pdb", struc_ini);
-   			System.out.println(temp + ": " + best);
-      }
-
-	 		for(int i : currentRCC){System.out.print(i + " ");}
-	 		System.out.print("\n");
-     // Cool system
-     temp *= 1-coolingRate;
-    }
-
-   System.out.println("Final solution distance: " + best);//.getDistance());
-   System.out.println("Tour: " + best);
+				System.out.println(temp + ": " + best);
+				if(best == 0){
+			 	  temp = 0;
+			 	}
+		  }
+		
+			for(int i : currentRCC){System.out.print(i + " ");}
+			System.out.print("\n");
+		 // Cool system
+		 temp *= 1-coolingRate;
+		}
+		
+		System.out.println("Final solution distance: " + best);//.getDistance());
+		System.out.println("Tour: " + best);
 		elapsedTime = System.nanoTime() - elapsedTime;
-		System.out.println("Total execution time to create 1000K objects in Java in millis: " + elapsedTime);
+		System.out.println("Total execution time: " + elapsedTime/1000000.0);
   }
 }
 
