@@ -90,8 +90,8 @@ public class SimulatedAnnealing3DProtFromRCC
 		int to = minCambio + (int)(Math.random()*(maxCambio - minCambio));
 		for(int i=0; i<to; i++){
 			int dAmino = (int) (largo * Math.random());
-			double dPsi = cambioPsi * Math.random();
-			double dPhi = cambioPhi * Math.random();
+			double dPsi = Math.round(cambioPsi * Math.random());
+			double dPhi = Math.round(cambioPhi * Math.random());
 			Trans.rotatePsi(chain, dAmino, dPsi);
 			Trans.rotatePhi(chain, dAmino, dPhi);
 		}
@@ -135,6 +135,8 @@ public class SimulatedAnnealing3DProtFromRCC
 
  public static void main(String[] args) 
   {
+		//Mesure time
+		long elapsedTime = System.nanoTime();
    // Load Protein Sequence
 		PDBfromFASTA pff = new PDBfromFASTA();
 		String pdb = null;
@@ -148,7 +150,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		int targetRCC[]; 
 		int currentRCC[]; 
 
-		if(args[0].length() > 3 && args[0].substring(args[0].length() - 3, 3) == ".fa"){
+		if(args[0].length() > 3 && args[0].substring(args[0].length() - 3) == ".fa"){
 		try{
 		pdb = pff.pdbFromFile(args[0], args[1]);
    //ProteinSequence seq = new ProteinsSequence(args[0]);
@@ -223,6 +225,8 @@ public class SimulatedAnnealing3DProtFromRCC
 
    System.out.println("Final solution distance: " + best);//.getDistance());
    System.out.println("Tour: " + best);
+		elapsedTime = System.nanoTime() - elapsedTime;
+		System.out.println("Total execution time to create 1000K objects in Java in millis: " + elapsedTime);
   }
 }
 
