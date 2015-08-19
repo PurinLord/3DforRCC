@@ -9,6 +9,9 @@ import numpy as np
 def plotTrajectory(dfile):
     fin = open(dfile)
 
+    fin.readline()
+    fin.readline()
+    fin.readline()
     Vsteps = []
     Vtarget = fin.readline().strip().split()
     Vtarget = map(float,Vtarget)

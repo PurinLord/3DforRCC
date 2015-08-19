@@ -16,6 +16,7 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	// Set initial temp
 	static double temp = 10000;
+	static int searchSteps = 300;
 
   // Cooling rate
   static double coolingRate = 0.003;
@@ -28,7 +29,7 @@ public class SimulatedAnnealing3DProtFromRCC
 	static int minCambio = 1;
 	static int maxCambio = 70;
 
- // Calculate the acceptance probability
+	//Calculate the acceptance probability
 	public static double acceptanceProbability(double energy, double newEnergy, double temperature) 
 	{
 		// If the new solution is better, accept it
@@ -133,8 +134,8 @@ public class SimulatedAnnealing3DProtFromRCC
 		return struc;
 	}
 
- public static void main(String[] args) 
-  {
+	public static void main(String[] args)
+	{
 		//Mesure time
 		long elapsedTime = System.nanoTime();
 		System.out.println(args[0] + " " + args[1] + " " + args[2] + 
@@ -189,50 +190,50 @@ public class SimulatedAnnealing3DProtFromRCC
 		struc_ini = PDBfromFASTA.readPDB("out/struc_ini.pdb");
 		 
 		// Loop until system has cooled
-		while (temp > 1) 
+		for (;temp > 1;temp *= 1-coolingRate) 
 		{
 		 
-			currentRCC = calcRCC("out/struc_ini.pdb");
-		 	currentEnergy = calcSimilarity(targetRCC, currentRCC);;
-			// Get a random conformation for this new neighbor
-			if(target != null){
-				struc_model = alterConformationAll(struc_ini, target);
-			}else{
-				struc_model = alterConformation(struc_ini);
+			for(int step = 0; step < searchSteps; step++){
+				currentRCC = calcRCC("out/struc_ini.pdb");
+				currentEnergy = calcSimilarity(targetRCC, currentRCC);;
+				// Get a random conformation for this new neighbor
+				if(target != null){
+					struc_model = alterConformationAll(struc_ini, target);
+				}else{
+					struc_model = alterConformation(struc_ini);
+				}
+				PDBfromFASTA.writePDB("out/struc_model.pdb", struc_model);
+							
+				currentRCC = calcRCC("out/struc_model.pdb");
+				// Get energy of solution
+				neighbourEnergy = calcSimilarity(targetRCC, currentRCC);;
+			
+				// Decide if we should accept the neighbour
+				if (acceptanceProbability(currentEnergy, neighbourEnergy, temp) > Math.random()) {
+					struc_ini = struc_model;
+					PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
+				}
+			
+				// Keep track of the best solution found
+				if (neighbourEnergy < best) 
+				{
+					best = neighbourEnergy;
+					PDBfromFASTA.writePDB("out/best_" + best + ".pdb", struc_ini);
+					System.out.println(temp + ": " + best);
+					if(best == 0){
+						temp = 0;
+					}
+				}
+			
+				for(int i : currentRCC){System.out.print(i + " ");}
+				System.out.print("\n");
 			}
-			PDBfromFASTA.writePDB("out/struc_model.pdb", struc_model);
-		        
-			currentRCC = calcRCC("out/struc_model.pdb");
-			// Get energy of solution
-			neighbourEnergy = calcSimilarity(targetRCC, currentRCC);;
-		
-			// Decide if we should accept the neighbour
-			if (acceptanceProbability(currentEnergy, neighbourEnergy, temp) > Math.random()) {
-		  	struc_ini = struc_model;
-				PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
-		  }
-		
-			// Keep track of the best solution found
-			if (neighbourEnergy < best) 
-		  {
-				best = neighbourEnergy;
-				PDBfromFASTA.writePDB("out/best_" + best + ".pdb", struc_ini);
-				System.out.println(temp + ": " + best);
-				if(best == 0){
-			 	  temp = 0;
-			 	}
-		  }
-		
-			for(int i : currentRCC){System.out.print(i + " ");}
-			System.out.print("\n");
-		 // Cool system
-		 temp *= 1-coolingRate;
 		}
 		
 		System.out.println("Final solution distance: " + best);//.getDistance());
 		System.out.println("Tour: " + best);
 		elapsedTime = System.nanoTime() - elapsedTime;
-		System.out.println("Total execution time: " + elapsedTime/1000000.0);
+		System.out.println("Total execution time: " + elapsedTime/3600000000000.0);
   }
 }
 
