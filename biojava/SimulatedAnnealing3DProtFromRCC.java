@@ -22,8 +22,8 @@ public class SimulatedAnnealing3DProtFromRCC
   static double coolingRate = 0.003;
 
 	//factor de cambio para Phi y Psi
-	static double cambioPhi = 360.0;
-	static double cambioPsi = 360.0;
+	static double cambioPhi = 36.0;
+	static double cambioPsi = 36.0;
 
 	//Candidad de ángulos phi psi que cambian
 	static int minCambio = 1;
@@ -139,7 +139,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		//Mesure time
 		long elapsedTime = System.nanoTime();
 		System.out.println(args[0] + " " + args[1] + " " + args[2] + 
-				"\ntemp " + temp + " coolRate " + coolingRate + 
+				"\ntemp " + temp + " coolRate " + coolingRate + " searchSteps " + searchSteps +
 				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi + " min cambio " + minCambio + " max cambio " +  maxCambio);
 		// Load Protein Sequence
 		PDBfromFASTA pff = new PDBfromFASTA();
@@ -219,7 +219,7 @@ public class SimulatedAnnealing3DProtFromRCC
 				{
 					best = neighbourEnergy;
 					PDBfromFASTA.writePDB("out/best_" + best + ".pdb", struc_ini);
-					System.out.println(temp + ": " + best);
+					System.out.println(temp + ": " + best + " time: " + elapsedTime/3600000000000.0);
 					if(best == 0){
 						temp = 0;
 					}
@@ -231,7 +231,6 @@ public class SimulatedAnnealing3DProtFromRCC
 		}
 		
 		System.out.println("Final solution distance: " + best);//.getDistance());
-		System.out.println("Tour: " + best);
 		elapsedTime = System.nanoTime() - elapsedTime;
 		System.out.println("Total execution time: " + elapsedTime/3600000000000.0);
   }

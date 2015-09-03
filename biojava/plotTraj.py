@@ -13,16 +13,24 @@ def plotTrajectory(dfile):
     fin.readline()
     fin.readline()
     Vsteps = []
+    Vsolutions = []
     Vtarget = fin.readline().strip().split()
     Vtarget = map(float,Vtarget)
     Vsteps.append(Vtarget)
+    solFlag = False
     for l in fin:
         l = l.strip().split()
+        if len(l) == 2: solFlag = True; continue 
         if len(l) != 26: continue
+        if solFlag:
+				    Vsolutions.append(map(float,l))
+				    solFlag = False
         l = map(float,l)
         Vsteps.append(l)
 
-
+    longitud = len(Vsteps)
+    #print  Vsolutions 
+    Vsteps.extend(Vsolutions)
     distances = [euclidean(a,Vsteps[0]) for a in Vsteps[1:]]
     print len(distances)
     colors = cm.cool(np.linspace(0, 1, len(distances)))
@@ -40,6 +48,8 @@ def plotTrajectory(dfile):
     plt.scatter(Vsteps[0,0],Vsteps[0,1],color='red',s=30,marker=(5,1))
     #Optimization steps
     plt.scatter(Vsteps[1:,0],Vsteps[1:,1],color=colors,alpha=0.5)
+		#
+    plt.scatter(Vsteps[longitud:,0],Vsteps[longitud:,1],color='yellow',s=25)
 
     #plt.show()
     plt.savefig('gabrile_purin/plot.png', dpi=100)
