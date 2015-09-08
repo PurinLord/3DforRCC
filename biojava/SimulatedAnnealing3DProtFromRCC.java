@@ -75,14 +75,13 @@ public class SimulatedAnnealing3DProtFromRCC
 	} // end calcRCC
 
 	public static double calcSimilarity(int[] rcc1, int[] rcc2)
-  {
+	{
 		int sum = 0;
     int i=0;
 		for(i=0; i<26; i++){
-			sum += (rcc1[i] - rcc2[i])^2;
+			sum += Math.pow(rcc1[i] - rcc2[i], 2.0);
 		}
-
-   	return Math.sqrt(sum);
+		return Math.sqrt(sum);
   }// end calcSimilarity
 
 	public static Structure alterConformation(Structure struc){
@@ -154,17 +153,23 @@ public class SimulatedAnnealing3DProtFromRCC
 		int targetRCC[]; 
 		int currentRCC[]; 
 		
-		if(args[0].length() > 3 && args[0].substring(args[0].length() - 3) == ".fa"){
-		try{
-		pdb = pff.pdbFromFile(args[0], args[1]);
-		//ProteinSequence seq = new ProteinsSequence(args[0]);
-		
-		// Build initial Protein 3D structure
-		struc_ini = pff.makeProtein(pdb);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
+		if(args[0].length() > 3){
+			if(args[0].substring(args[0].length() - 3).equals(".fa")){
+				try{
+				pdb = pff.pdbFromFile(args[0], args[1]);
+				//ProteinSequence seq = new ProteinsSequence(args[0]);
+				
+				// Build initial Protein 3D structure
+				struc_ini = pff.makeProtein(pdb);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
+			}
+			if(args[0].substring(args[0].length() - 4).equals(".pdb")){
+				struc_ini = PDBfromFASTA.readPDB(args[0]);
+				PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
+			}
 		}else{
 			struc_ini = PDBfromFASTA.readPDB(args[2]);
 			target = PDBfromFASTA.readPDB(args[2]);
@@ -200,7 +205,7 @@ public class SimulatedAnnealing3DProtFromRCC
 				if(target != null){
 					struc_model = alterConformationAll(struc_ini, target);
 				}else{
-					struc_model = alterConformation(struc_ini);
+					struc_model = alterConformationAll(struc_ini);
 				}
 				PDBfromFASTA.writePDB("out/struc_model.pdb", struc_model);
 							
