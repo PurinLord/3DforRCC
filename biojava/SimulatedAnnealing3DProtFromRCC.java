@@ -142,10 +142,13 @@ public class SimulatedAnnealing3DProtFromRCC
 				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi + " min cambio " + minCambio + " max cambio " +  maxCambio);
 		// Load Protein Sequence
 		PDBfromFASTA pff = null;
+		String fileDir = "";
 		if(args.length > 3){
 			pff = new PDBfromFASTA(args[3]);
+			fileDir = args[3];
 		}else{
 			pff = new PDBfromFASTA();
+			fileDir = "out/";
 		}
 		String pdb = null;
 		Structure struc_ini = null;
@@ -169,16 +172,16 @@ public class SimulatedAnnealing3DProtFromRCC
 				}catch(Exception e){
 					e.printStackTrace();
 				}
-				PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
+				PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
 			}
 			if(args[0].substring(args[0].length() - 4).equals(".pdb")){
 				struc_ini = PDBfromFASTA.readPDB(args[0]);
-				PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
+				PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
 			}
 		}else{
 			struc_ini = PDBfromFASTA.readPDB(args[2]);
 			target = PDBfromFASTA.readPDB(args[2]);
-			PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
+			PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
 		}
 		
 		
@@ -188,7 +191,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		System.out.print("\n");
 		
 		// Initialize intial solution
-		distance_ini = calcSimilarity(targetRCC, calcRCC("out/struc_ini.pdb"));
+		distance_ini = calcSimilarity(targetRCC, calcRCC(fileDir + "struc_ini.pdb"));
 		
 		System.out.println("Initial solution distance: " + distance_ini);
 		double distance_neighbor=0.0;
@@ -197,14 +200,14 @@ public class SimulatedAnnealing3DProtFromRCC
 		double best = distance_ini;
 		    
 		// Create new neighbour 3d model
-		struc_ini = PDBfromFASTA.readPDB("out/struc_ini.pdb");
+		struc_ini = PDBfromFASTA.readPDB(fileDir + "struc_ini.pdb");
 		 
 		// Loop until system has cooled
 		for (;temp > 1;temp *= 1-coolingRate) 
 		{
 		 
 			for(int step = 0; step < searchSteps; step++){
-				currentRCC = calcRCC("out/struc_ini.pdb");
+				currentRCC = calcRCC(fileDir + "struc_ini.pdb");
 				currentEnergy = calcSimilarity(targetRCC, currentRCC);;
 				// Get a random conformation for this new neighbor
 				if(target != null){
@@ -212,23 +215,23 @@ public class SimulatedAnnealing3DProtFromRCC
 				}else{
 					struc_model = alterConformationAll(struc_ini);
 				}
-				PDBfromFASTA.writePDB("out/struc_model.pdb", struc_model);
+				PDBfromFASTA.writePDB(fileDir + "struc_model.pdb", struc_model);
 							
-				currentRCC = calcRCC("out/struc_model.pdb");
+				currentRCC = calcRCC(fileDir + "struc_model.pdb");
 				// Get energy of solution
 				neighbourEnergy = calcSimilarity(targetRCC, currentRCC);;
 			
 				// Decide if we should accept the neighbour
 				if (acceptanceProbability(currentEnergy, neighbourEnergy, temp) > Math.random()) {
 					struc_ini = struc_model;
-					PDBfromFASTA.writePDB("out/struc_ini.pdb", struc_ini);
+					PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
 				}
 			
 				// Keep track of the best solution found
 				if (neighbourEnergy < best) 
 				{
 					best = neighbourEnergy;
-					PDBfromFASTA.writePDB("out/best_" + best + ".pdb", struc_ini);
+					PDBfromFASTA.writePDB(fileDir + "best_" + best + ".pdb", struc_ini);
 					System.out.println(temp + ": " + best + " time: " + elapsedTime/3600000000000.0);
 					if(best == 0){
 						temp = 0;
