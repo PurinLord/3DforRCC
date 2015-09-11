@@ -141,7 +141,12 @@ public class SimulatedAnnealing3DProtFromRCC
 				"\ntemp " + temp + " coolRate " + coolingRate + " searchSteps " + searchSteps +
 				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi + " min cambio " + minCambio + " max cambio " +  maxCambio);
 		// Load Protein Sequence
-		PDBfromFASTA pff = new PDBfromFASTA();
+		PDBfromFASTA pff = null;
+		if(args.length > 3){
+			pff = new PDBfromFASTA(args[3]);
+		}else{
+			pff = new PDBfromFASTA();
+		}
 		String pdb = null;
 		Structure struc_ini = null;
 		
@@ -156,11 +161,11 @@ public class SimulatedAnnealing3DProtFromRCC
 		if(args[0].length() > 3){
 			if(args[0].substring(args[0].length() - 3).equals(".fa")){
 				try{
-				pdb = pff.pdbFromFile(args[0], args[1]);
-				//ProteinSequence seq = new ProteinsSequence(args[0]);
+					pdb = pff.pdbFromFile(args[0], args[1]);
+					//ProteinSequence seq = new ProteinsSequence(args[0]);
 				
-				// Build initial Protein 3D structure
-				struc_ini = pff.makeProtein(pdb);
+					// Build initial Protein 3D structure
+					struc_ini = pff.makeProtein(pdb);
 				}catch(Exception e){
 					e.printStackTrace();
 				}

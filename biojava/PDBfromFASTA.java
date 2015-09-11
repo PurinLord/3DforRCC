@@ -75,6 +75,7 @@ public class PDBfromFASTA {
 	public static final double BETHA_ANTIPARALLEL_PSI =  135; // 2.356;
 	public static final double NONE_PHI = 180; //3.1426;
 	public static final double NONE_PSI = 180; //3.1426;
+	private String tempDirectory;
 
 	public static void main(String[] args){
 		try{
@@ -90,6 +91,14 @@ public class PDBfromFASTA {
 		}
 	}
 
+	public PDBfromFASTA (){
+		tempDirectory = "temp.pdb"; 
+	}
+
+	public PDBfromFASTA (String directory){
+		tempDirectory = directory; 
+	}
+
 	//TODO keepFile
 	public Structure makeProtein(String fileName, boolean keepFile) throws Exception{
 		Structure struc = Trans.readPDB(fileName);
@@ -101,10 +110,10 @@ public class PDBfromFASTA {
 	}
 
 	public Structure makeProtein(String pdb) throws Exception{
-		PrintWriter writer = new PrintWriter("temp.pdb");
+		PrintWriter writer = new PrintWriter(tempDirectory);
 		writer.println(pdb);
 		writer.close();
-		return makeProtein("temp.pdb", true);
+		return makeProtein(tempDirectory, true);
 	}
 
 	public Structure shapeProtein(String fileName, String shape, boolean keepFile) throws Exception{
@@ -141,17 +150,17 @@ public class PDBfromFASTA {
 	}
 
 	public Structure shapeProtein(String pdb, String shape) throws Exception{
-		PrintWriter writer = new PrintWriter("temp.pdb");
+		PrintWriter writer = new PrintWriter(tempDirectory);
 		writer.println(pdb);
 		writer.close();
-		return shapeProtein("temp.pdb", shape, true);
+		return shapeProtein(tempDirectory, shape, true);
 	}
 
 	public Structure shapeProtein(String pdb) throws Exception{
-		PrintWriter writer = new PrintWriter("temp.pdb");
+		PrintWriter writer = new PrintWriter(tempDirectory);
 		writer.println(pdb);
 		writer.close();
-		return shapeProtein("temp.pdb", "none", true);
+		return shapeProtein(tempDirectory, "none", true);
 	}
 
 	public String pdbFromFile(String fileName, String identifier, int from, int to, String chain, int startAmino, int startAtom) throws Exception{
