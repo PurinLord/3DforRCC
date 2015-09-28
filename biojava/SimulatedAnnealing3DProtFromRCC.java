@@ -110,6 +110,18 @@ public class SimulatedAnnealing3DProtFromRCC
 		return struc;
 	}
 
+	public static Structure alterConformationAll(Structure struc, double deltaPsi, double deltaPhi){
+		Chain chain = struc.getChain(0);
+		int largo = chain.getAtomLength();
+		for(int i=0; i<largo; i++){
+			double dPsi = deltaPsi * Math.random();
+			double dPhi = deltaPhi * Math.random();
+			Trans.rotatePsi(chain, i, dPsi);
+			Trans.rotatePhi(chain, i, dPhi);
+		}
+		return struc;
+	}
+
 	public static Structure alterConformationAll(Structure struc, Structure target){
 		Chain chainT = target.getChain(0);
 		Chain chain = struc.getChain(0);
@@ -131,6 +143,18 @@ public class SimulatedAnnealing3DProtFromRCC
     	}
 		}
 		return struc;
+	}
+
+	public static double stdCooling(double temp){
+		return temp * 1-coolingRate;
+	}
+
+	public static double linearCooling(double temp){
+		return temp - coolingRate;
+	}
+
+	public static double slowCooling(double temp){
+		return temp/Math.log(temp);
 	}
 
 	public static void main(String[] args)
@@ -203,7 +227,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		struc_ini = PDBfromFASTA.readPDB(fileDir + "struc_ini.pdb");
 		 
 		// Loop until system has cooled
-		for (;temp > 1;temp *= 1-coolingRate) 
+		for (;temp > 1;temp = slowCooling(temp)) 
 		{
 		 
 			for(int step = 0; step < searchSteps; step++){

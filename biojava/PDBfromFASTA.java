@@ -96,7 +96,7 @@ public class PDBfromFASTA {
 	}
 
 	public PDBfromFASTA (String directory){
-		tempDirectory = directory; 
+		tempDirectory = directory + "temp.pdb"; 
 	}
 
 	//TODO keepFile
