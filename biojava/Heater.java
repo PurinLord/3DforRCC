@@ -31,14 +31,14 @@ public static void main(String args[]){
 	String dir = "";
 	for (String i : dirs){
 		if(i.substring(i.length() - 4).equals(".pdb")){
-			name = i;
+			name = i.substring(0, i.length() - 4);
 		}else{
 			dir = dir + i + "/";
 		}
 
 	}
 	//System.out.println(dir + " " + name);
-	PDBfromFASTA.writePDB(dir + name + args[1] + "_" + variation , struc_ini);
+	PDBfromFASTA.writePDB(dir + name + "_" + args[1] + "_" + variation , struc_ini);
 }
 
 }
