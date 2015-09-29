@@ -90,8 +90,8 @@ public class SimulatedAnnealing3DProtFromRCC
 		int to = minCambio + (int)(Math.random()*(maxCambio - minCambio));
 		for(int i=0; i<to; i++){
 			int dAmino = (int) (largo * Math.random());
-			double dPsi = Math.round(cambioPsi * Math.random());
-			double dPhi = Math.round(cambioPhi * Math.random());
+			double dPsi = Math.round(cambioPsi * 2*(Math.random() - 0.5));
+			double dPhi = Math.round(cambioPhi * 2*(Math.random() - 0.5));
 			Trans.rotatePsi(chain, dAmino, dPsi);
 			Trans.rotatePhi(chain, dAmino, dPhi);
 		}
@@ -102,8 +102,8 @@ public class SimulatedAnnealing3DProtFromRCC
 		Chain chain = struc.getChain(0);
 		int largo = chain.getAtomLength();
 		for(int i=0; i<largo; i++){
-			double dPsi = cambioPsi * Math.random();
-			double dPhi = cambioPhi * Math.random();
+			double dPsi = cambioPsi * 2*(Math.random() - 0.5);
+			double dPhi = cambioPhi * 2*(Math.random() - 0.5);
 			Trans.rotatePsi(chain, i, dPsi);
 			Trans.rotatePhi(chain, i, dPhi);
 		}
@@ -114,8 +114,8 @@ public class SimulatedAnnealing3DProtFromRCC
 		Chain chain = struc.getChain(0);
 		int largo = chain.getAtomLength();
 		for(int i=0; i<largo; i++){
-			double dPsi = deltaPsi * Math.random();
-			double dPhi = deltaPhi * Math.random();
+			double dPsi = deltaPsi * 2*(Math.random() - 0.5);
+			double dPhi = deltaPhi * 2*(Math.random() - 0.5);
 			Trans.rotatePsi(chain, i, dPsi);
 			Trans.rotatePhi(chain, i, dPhi);
 		}
