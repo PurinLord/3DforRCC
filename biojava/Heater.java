@@ -7,6 +7,13 @@ import java.io.*;
 import org.biojava.bio.structure.Structure;
 import org.biojava.bio.structure.Chain;
 import org.biojava.bio.structure.AminoAcid;
+import org.biojava.bio.structure.Atom;
+import org.biojava.bio.structure.StructureTools;
+
+import org.biojava.bio.structure.align.*;
+import org.biojava.bio.structure.align.model.AFPChain;
+import org.biojava.bio.structure.align.fatcat.calc.FatCatParameters ;
+import org.biojava.bio.structure.align.fatcat.FatCatRigid;
 
 import rccto3d.*;
 import rccto3d.Trans;
@@ -18,11 +25,36 @@ public class Heater{
 public static void main(String args[]){
 	
 	Structure struc_ini = PDBfromFASTA.readPDB(args[0]);
-	int heat = Integer.parseInt(args[1]);
-	double variation = 10.0;
+	Structure struc_fin = PDBfromFASTA.readPDB(args[0]);
+	double minRMSd = Integer.parseInt(args[1]);
+	double variation = 0.3;
+	double currentRMSd = 0.0;
 	
-	for(; heat > 1; heat--){
-		SimulatedAnnealing3DProtFromRCC.alterConformationAll(struc_ini, variation, variation);
+	while(currentRMSd < minRMSd){
+		SimulatedAnnealing3DProtFromRCC.alterConformationAll(struc_fin, variation, variation);
+		
+		try {
+		
+			// To run FATCAT in the flexible variant say
+			// FatCatFlexible.algorithmName below
+			StructureAlignment algorithm  = StructureAlignmentFactory.getAlgorithm(FatCatRigid.algorithmName);
+
+			Atom[] ca1 = StructureTools.getAtomCAArray(struc_ini);
+			Atom[] ca2 = StructureTools.getAtomCAArray(struc_fin);
+			
+			// get default parameters
+			FatCatParameters params = new FatCatParameters();
+			
+			
+			AFPChain afpChain = algorithm.align(ca1,ca2,params);            
+			
+			//afpChain.setName1(name1);
+			//afpChain.setName2(name2);
+
+			currentRMSd = afpChain.getChainRmsd();
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
 	}
 
 	String[] dirs = args[0].split("/");
@@ -38,7 +70,7 @@ public static void main(String args[]){
 
 	}
 	//System.out.println(dir + " " + name);
-	PDBfromFASTA.writePDB(dir + name + "_" + args[1] + "_" + variation , struc_ini);
+	PDBfromFASTA.writePDB(dir + name + "_" + args[1] + ".pdb", struc_fin);
 }
 
 }
