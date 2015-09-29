@@ -42,14 +42,12 @@ def plotTrajectory(dfile):
     dimred = Isomap(n_components=2)
     Vsteps = dimred.fit_transform(Vsteps)
 
-
-
-    #objective vector
-    plt.scatter(Vsteps[0,0],Vsteps[0,1],color='red',s=30,marker=(5,1))
     #Optimization steps
     plt.scatter(Vsteps[1:,0],Vsteps[1:,1],color=colors,alpha=0.5)
-		#
+		#solutions
     plt.scatter(Vsteps[longitud:,0],Vsteps[longitud:,1],color='yellow',s=25)
+    #objective vector
+    plt.scatter(Vsteps[0,0],Vsteps[0,1],color='red',s=30,marker=(5,1))
 
     #plt.show()
     plt.savefig('gabrile_purin/plot.png', dpi=100)
