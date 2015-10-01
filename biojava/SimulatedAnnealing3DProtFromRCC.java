@@ -16,7 +16,7 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	// Set initial temp
 	static double temp = 10000;
-	static int searchSteps = 300;
+	static int searchSteps = 3;
 
   // Cooling rate
   static double coolingRate = 0.003;
@@ -145,8 +145,8 @@ public class SimulatedAnnealing3DProtFromRCC
 		return struc;
 	}
 
-	public static double stdCooling(double temp){
-		return temp * 1-coolingRate;
+	public static double stdCooling(double temperature){
+		return temperature * (1-coolingRate);
 	}
 
 	public static double linearCooling(double temp){
@@ -163,7 +163,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		long elapsedTime = System.nanoTime();
 		System.out.println(args[0] + " " + args[1] + " " + args[2] + 
 				"\ntemp " + temp + " coolRate " + coolingRate + " searchSteps " + searchSteps +
-				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi + " min cambio " + minCambio + " max cambio " +  maxCambio);
+				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi);// + " min cambio " + minCambio + " max cambio " +  maxCambio);
 		// Load Protein Sequence
 		PDBfromFASTA pff = null;
 		String fileDir = "";
@@ -227,7 +227,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		struc_ini = PDBfromFASTA.readPDB(fileDir + "struc_ini.pdb");
 		 
 		// Loop until system has cooled
-		for (;temp > 1;temp = slowCooling(temp)) 
+		for (;temp > 1;temp = stdCooling(temp)) 
 		{
 		 
 			for(int step = 0; step < searchSteps; step++){
@@ -255,8 +255,8 @@ public class SimulatedAnnealing3DProtFromRCC
 				if (neighbourEnergy < best) 
 				{
 					best = neighbourEnergy;
-					PDBfromFASTA.writePDB(fileDir + "best_" + best + ".pdb", struc_ini);
-					System.out.println(temp + ": " + best + " time: " + elapsedTime/3600000000000.0);
+					PDBfromFASTA.writePDB(fileDir + "sol_" + best + ".pdb", struc_ini);
+					System.out.println(temp + "> " + best + " time: " + elapsedTime/3600000000000.0);
 					if(best == 0){
 						temp = 0;
 					}

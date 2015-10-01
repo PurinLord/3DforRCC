@@ -106,6 +106,14 @@ public class PDBfromFASTA {
 		for(int i = 0; i < chain.getAtomLength() - 1; i++){
 			Trans.makeBondTrans(chain, i);
 		}
+		if(!keepFile){
+			try{
+				File file = new File(fileName);
+    		file.delete();
+			}catch(Exception e){
+    		e.printStackTrace();
+    	}
+		}
 		return struc;
 	}
 
@@ -113,7 +121,7 @@ public class PDBfromFASTA {
 		PrintWriter writer = new PrintWriter(tempDirectory);
 		writer.println(pdb);
 		writer.close();
-		return makeProtein(tempDirectory, true);
+		return makeProtein(tempDirectory, false);
 	}
 
 	public Structure shapeProtein(String fileName, String shape, boolean keepFile) throws Exception{
