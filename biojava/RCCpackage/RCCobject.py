@@ -12,7 +12,7 @@ import RCCutils as rcu
 import re
 
 class RCCbase(object):
-		def __init__(self,pdb,chain,autochain,chain_segments,tmpdir=""):
+	def __init__(self,pdb,chain,autochain,chain_segments,tmpdir=""):
 		"""
 		This constructor creates only a Residue Interaction Graph of a given protein chain.
 		chain_segments can be given as a list of pirs indicating start and end position of a segment in chain.

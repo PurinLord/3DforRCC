@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.util.Random;
 
 import org.biojava.bio.structure.io.PDBFileReader;
 import org.biojava.bio.structure.Structure;
@@ -83,13 +84,15 @@ public class PDBfromFASTA {
 			String pdb = pff.pdbFromFile(args[0], args[1]);
 			//System.out.println(pdb);
 			
-			Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, args[2]));
+			Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, args[2], false));
 			
 			//Trans.writePDB("datos/tst9.pdb", pff.shapeProtein("tst.pdb", "alpha", true));
 		}catch(Exception e){
   		e.printStackTrace();
 		}
 	}
+
+	//Todavía no estoy seguro de porqué hice esta clase TAN confusa, todo llama a todo por todos lados O.o
 
 	public PDBfromFASTA (){
 		tempDirectory = "temp.pdb"; 
@@ -99,7 +102,55 @@ public class PDBfromFASTA {
 		tempDirectory = directory + "temp.pdb"; 
 	}
 
-	//TODO keepFile
+	/** First it puts together the aminoacids usin makeProtein, then it folds it in to the chosen shape
+	*/
+	public Structure shapeProtein(String fileName, String shape, boolean keepFile) throws Exception{
+		Structure struc = makeProtein(fileName, keepFile);
+		Chain chain = struc.getChain(0);
+		double phi = -20.0;
+		double psi = -20.0;
+		switch(shape){
+			case "alpha":
+				phi = ALFA_RIGHT_PHI;
+				psi = ALFA_RIGHT_PSI;
+				break;
+			case "betha":
+				phi = BETHA_ANTIPARALLEL_PHI;
+				psi = BETHA_ANTIPARALLEL_PSI;
+				break;
+			case "none":
+				phi = NONE_PHI;
+				psi = NONE_PSI;
+				break;
+		}
+			//System.out.println("phi " + phi + " psi " + psi);
+		for(int i = 0; i < chain.getAtomLength() - 1; i++){
+			Trans.setPhi(chain, i, phi);
+			Trans.setPsi(chain, i, psi);
+		}
+		return struc;
+	}
+
+	public Structure shapeProtein(String pdb) throws Exception{
+		PrintWriter writer = new PrintWriter(tempDirectory);
+		writer.println(pdb);
+		writer.close();
+		return shapeProtein(tempDirectory, "none", true);
+	}
+
+	public Structure randomShapeProtein(String pdb, long seed) throws Exception{
+		Structure struc = makeProtein(pdb);
+		Chain chain = struc.getChain(0);
+		Random rdm = new Random(seed);
+		for(int i = 0; i < chain.getAtomLength() - 1; i++){
+			Trans.setPhi(chain, i, rdm.nextDouble() * 360);
+			Trans.setPsi(chain, i, rdm.nextDouble() * 360);
+		}
+		return struc;
+	}
+
+	/** Pusts together all the amioacids in the pdb with the correct bond distance and omega angle
+	 */
 	public Structure makeProtein(String fileName, boolean keepFile) throws Exception{
 		Structure struc = Trans.readPDB(fileName);
 		Chain chain = struc.getChain(0);
@@ -122,53 +173,6 @@ public class PDBfromFASTA {
 		writer.println(pdb);
 		writer.close();
 		return makeProtein(tempDirectory, false);
-	}
-
-	public Structure shapeProtein(String fileName, String shape, boolean keepFile) throws Exception{
-		Structure struc = makeProtein(fileName, keepFile);
-		Chain chain = struc.getChain(0);
-		double phi = -20.0;
-		double psi = -20.0;
-			AminoAcid a1;
-			AminoAcid a2;
-		switch(shape){
-			case "alpha":
-				phi = ALFA_RIGHT_PHI;
-				psi = ALFA_RIGHT_PSI;
-				break;
-			case "betha":
-				phi = BETHA_ANTIPARALLEL_PHI;
-				psi = BETHA_ANTIPARALLEL_PSI;
-				break;
-			case "none":
-				phi = NONE_PHI;
-				psi = NONE_PSI;
-				break;
-		}
-			//System.out.println("phi " + phi + " psi " + psi);
-		for(int i = 0; i < chain.getAtomLength() - 1; i++){
-				//System.out.println("> " + i);
-				a1 = (AminoAcid)chain.getAtomGroup(i);
-				a2 = (AminoAcid)chain.getAtomGroup(i + 1);
-				//System.out.println(Trans.getDihedral(a1, a2));
-			Trans.setPhi(chain, i, phi);
-			Trans.setPsi(chain, i, psi);
-		}
-		return struc;
-	}
-
-	public Structure shapeProtein(String pdb, String shape) throws Exception{
-		PrintWriter writer = new PrintWriter(tempDirectory);
-		writer.println(pdb);
-		writer.close();
-		return shapeProtein(tempDirectory, shape, true);
-	}
-
-	public Structure shapeProtein(String pdb) throws Exception{
-		PrintWriter writer = new PrintWriter(tempDirectory);
-		writer.println(pdb);
-		writer.close();
-		return shapeProtein(tempDirectory, "none", true);
 	}
 
 	public String pdbFromFile(String fileName, String identifier, int from, int to, String chain, int startAmino, int startAtom) throws Exception{
