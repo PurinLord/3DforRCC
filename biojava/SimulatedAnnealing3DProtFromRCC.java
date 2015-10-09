@@ -39,10 +39,14 @@ public class SimulatedAnnealing3DProtFromRCC
 	}
 
 	public static int[] calcRCC(String s1){
+		calcRCC(s1, "");
+	}
+
+	public static int[] calcRCC(String s1, String tmpdir){
 		int rcc[] = new int[26];
 		try{
 		String s2 = "A";
-		Process p = Runtime.getRuntime().exec("python create_26dvRCC.py "+s1+" "+s2);
+		Process p = Runtime.getRuntime().exec("python create_26dvRCC.py "+s1+" "+s2 +" "+tmpdir);
 		BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		String ret = in.readLine();
 		String val = "";
@@ -210,12 +214,12 @@ public class SimulatedAnnealing3DProtFromRCC
 		
 		
 		// Declaration of variables to store energy values
-		targetRCC = calcRCC(args[2]);
+		targetRCC = calcRCC(args[2], fileDir);
 		for(int i : targetRCC){System.out.print(i + " ");}
 		System.out.print("\n");
 		
 		// Initialize intial solution
-		distance_ini = calcSimilarity(targetRCC, calcRCC(fileDir + "struc_ini.pdb"));
+		distance_ini = calcSimilarity(targetRCC, calcRCC(fileDir + "struc_ini.pdb", fileDir));
 		
 		System.out.println("Initial solution distance: " + distance_ini);
 		double distance_neighbor=0.0;
@@ -231,7 +235,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		{
 		 
 			for(int step = 0; step < searchSteps; step++){
-				currentRCC = calcRCC(fileDir + "struc_ini.pdb");
+				currentRCC = calcRCC(fileDir + "struc_ini.pdb", fileDir);
 				currentEnergy = calcSimilarity(targetRCC, currentRCC);;
 				// Get a random conformation for this new neighbor
 				if(target != null){

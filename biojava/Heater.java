@@ -27,7 +27,7 @@ public static void main(String args[]){
 	Structure struc_ini = PDBfromFASTA.readPDB(args[0]);
 	Structure struc_fin = PDBfromFASTA.readPDB(args[0]);
 	double minRMSd = Integer.parseInt(args[1]);
-	double variation = 0.3;
+	double variation = 1.0;
 	double currentRMSd = 0.0;
 	
 	while(currentRMSd < minRMSd){
