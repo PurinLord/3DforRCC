@@ -22,8 +22,14 @@ rotamer:
 simul:
 	javac -d . SimulatedAnnealing3DProtFromRCC.java
 
+multi:
+	javac -d . MultiSearch.java
+
 heat:
 	javac -d . Heater.java
+
+subst:
+	javac -d . Substitutor.java
 
 test:
 	javac TestRot.java
