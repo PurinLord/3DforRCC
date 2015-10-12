@@ -84,7 +84,7 @@ public class PDBfromFASTA {
 			String pdb = pff.pdbFromFile(args[0], args[1]);
 			//System.out.println(pdb);
 			
-			Trans.writePDB("datos/out.pdb", pff.shapeProtein(pdb, args[2], false));
+			writePDB("datos/out.pdb", pff.shapeProtein(pdb, args[2], false));
 			
 			//Trans.writePDB("datos/tst9.pdb", pff.shapeProtein("tst.pdb", "alpha", true));
 		}catch(Exception e){
@@ -152,7 +152,7 @@ public class PDBfromFASTA {
 	/** Pusts together all the amioacids in the pdb with the correct bond distance and omega angle
 	 */
 	public Structure makeProtein(String fileName, boolean keepFile) throws Exception{
-		Structure struc = Trans.readPDB(fileName);
+		Structure struc = readPDB(fileName);
 		Chain chain = struc.getChain(0);
 		for(int i = 0; i < chain.getAtomLength() - 1; i++){
 			Trans.makeBondTrans(chain, i);

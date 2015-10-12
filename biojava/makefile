@@ -7,17 +7,8 @@ trans:
 pdbfrom:
 	javac -d . PDBfromFASTA.java
 
-aaClass:
-	javac -d . MakeRClass.java
-
-reformat:
-	javac  -d . ReformatAAPDB.java
-
-arrange:
-	javac  -d . ArrangeAAPDB.java
-
-rotamer:
-	javac  -d . RotamerManager.java
+optim:
+	javac -d . SimulatedAnnealing3DProtFromRCC.java MultiSearch.java Substitutor.java
 
 simul:
 	javac -d . SimulatedAnnealing3DProtFromRCC.java
@@ -31,11 +22,23 @@ heat:
 subst:
 	javac -d . Substitutor.java
 
+aaClass:
+	javac -d . MakeRClass.java
+
+reformat:
+	javac  -d . ReformatAAPDB.java
+
+arrange:
+	javac  -d . ArrangeAAPDB.java
+
+rotamer:
+	javac  -d . RotamerManager.java
+
 test:
 	javac TestRot.java
 
 clearAll:
-	rm -v *.class rccto3d/*.class rccto3d/rotamers/*.class
+	rm -v *.class rccto3d/*.class rccto3d/rotamers/*.class rccto3d/optimisation/*.class
 
 clear:
 	rm -v rccto3d/*.class rccto3d/rotamers/*.class
