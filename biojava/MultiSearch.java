@@ -1,7 +1,5 @@
 package rccto3d.optimisation;
 
-import rccto3d.PDBfromFASTA;
-
 import java.lang.Integer;
 import java.io.File;
 import java.lang.Thread;
@@ -11,13 +9,14 @@ public class MultiSearch implements Runnable{
 	private SimulatedAnnealing3DProtFromRCC simA;
 	private String fileDir;
 
-	public MultiSearch(double temp, int searchSteps, double coolingRate, double cambioPhi, double cambioPsi, String startPdb,
-											int targetRCC[], String fileDir, long initSeed){
+	public MultiSearch(double temp, int searchSteps, double coolingRate, double cambioPhi, double cambioPsi, String dirStartStruc,
+											String dirTargetStruc, String fileDir, long initSeed){
 		
 		this.simA = new SimulatedAnnealing3DProtFromRCC(temp, searchSteps, coolingRate, cambioPhi, 
-																																	cambioPsi, startPdb, targetRCC, fileDir, initSeed);
+																																	cambioPsi, dirStartStruc, dirTargetStruc, fileDir, initSeed);
 		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(dirStartStruc, dirTargetStruc);
 		this.fileDir = fileDir;
+		this.simA.initialize(0);
 	}
 
 	public void run(){
@@ -41,13 +40,10 @@ public class MultiSearch implements Runnable{
 		long initSeed = 9;
 
 		MultiSearch mSearch;
-		//TODO (make precreation of rcc and pdb reazonable)
-		PDBfromFASTA pff = new PDBfromFASTA();
-		String startPdb = pff.pdbFromFile(dirStartStruc, "a");
-		int targetRCC[] = SimulatedAnnealing3DProtFromRCC.calcRCC(dirTargetStruc, fileDir);
 		for(int i = 1; i <= Integer.parseInt(args[2]); i++){
-			mSearch = new MultiSearch(temp,searchSteps,coolingRate,cambioPhi,cambioPsi,startPdb,targetRCC,
+			mSearch = new MultiSearch(temp,searchSteps,coolingRate,cambioPhi,cambioPsi,dirStartStruc,dirTargetStruc,
 																	fileDir + i + "/",i);
+
 			(new Thread(mSearch)).start();
 		}
 	}

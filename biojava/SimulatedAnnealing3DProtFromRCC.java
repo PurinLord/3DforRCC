@@ -35,6 +35,8 @@ public class SimulatedAnnealing3DProtFromRCC
 	private String startPdb;
 	private int targetRCC[]; 
 
+	Structure target = null;
+
 	public SimulatedAnnealing3DProtFromRCC(String dirStartStruc, String dirTargetStruc){
 		temp = 10000;
 		searchSteps = 3;
@@ -218,11 +220,9 @@ public class SimulatedAnnealing3DProtFromRCC
 	//verbos 0 - none
 	//			 1 - just solutions
 	//			 2 - all
-	public float run(int verbos){
-		//Mesure time
-		long elapsedTime = 0;
+	
+	public void initialize(int verbos){
 		if (verbos > 0){
-			elapsedTime = System.nanoTime();
 			System.out.println(dirStartStruc + " " + dirTargetStruc + 
 				"\ntemp " + temp + " coolRate " + coolingRate + " searchSteps " + searchSteps +
 				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi);// + " min cambio " + minCambio + " max cambio " +  maxCambio);
@@ -231,82 +231,77 @@ public class SimulatedAnnealing3DProtFromRCC
 		PDBfromFASTA pff = null;
 		String pdb = null;
 		Structure struc_ini = null;
-		
-		Structure struc_model = null;
-		Structure target = null;
-		double currentEnergy = 0, neighbourEnergy = 0;
-		double distance_ini = 0;
-		
-		int currentRCC[]; 
-		
+
 		if(dirStartStruc != null){
-			if(dirStartStruc.length() > 3){
-				if(dirStartStruc.substring(dirStartStruc.length() - 3).equals(".fa")){
-					try{
-						pff = new PDBfromFASTA();
-						pdb = pff.pdbFromFile(dirStartStruc, fastaID);
-						//ProteinSequence seq = new ProteinsSequence(dirStartStruc);
-					
-						// Build initial Protein 3D structure
-						struc_ini = pff.randomShapeProtein(pdb, initSeed);
-					}catch(Exception e){
-						e.printStackTrace();
-					}
-					PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
+			if(dirStartStruc.substring(dirStartStruc.length() - 3).equals(".fa")){
+				try{
+					pff = new PDBfromFASTA();
+					pdb = pff.pdbFromFile(dirStartStruc, fastaID);
+					//ProteinSequence seq = new ProteinsSequence(dirStartStruc);
+				
+					// Build initial Protein 3D structure
+					struc_ini = pff.randomShapeProtein(pdb, initSeed);
+				}catch(Exception e){
+					e.printStackTrace();
 				}
-				if(dirStartStruc.substring(dirStartStruc.length() - 4).equals(".pdb")){
-					struc_ini = PDBfromFASTA.readPDB(dirStartStruc);
-					PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
-				}
-			}else{
-				struc_ini = PDBfromFASTA.readPDB(dirTargetStruc);
-				target = PDBfromFASTA.readPDB(dirTargetStruc);
-				PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
+				PDBfromFASTA.writePDB(fileDir + "struc_fit.pdb", struc_ini);
+			}
+			if(dirStartStruc.substring(dirStartStruc.length() - 4).equals(".pdb")){
+				struc_ini = PDBfromFASTA.readPDB(dirStartStruc);
+				PDBfromFASTA.writePDB(fileDir + "struc_fit.pdb", struc_ini);
 			}
 		}else{
-			try{
-				pff = new PDBfromFASTA();
-				struc_ini = pff.randomShapeProtein(startPdb, initSeed);
-			}catch(Exception e){
-				e.printStackTrace();
-			}
+			struc_ini = PDBfromFASTA.readPDB(dirTargetStruc);
+			target = PDBfromFASTA.readPDB(dirTargetStruc);
+			PDBfromFASTA.writePDB(fileDir + "struc_fit.pdb", struc_ini);
 		}
-
 		
 		// Declaration of variables to store energy values
-		if(targetRCC != null){
-			targetRCC = calcRCC(dirTargetStruc, fileDir);
-		}
+		targetRCC = calcRCC(dirTargetStruc, fileDir);
 		if (verbos > 0){
 			for(int i : targetRCC){System.out.print(i + " ");}
 			System.out.print("\n");
 		}
+	}
+
+	public float run(int verbos){
+		//Mesure time
+		long elapsedTime = 0;
+		if (verbos > 0){
+			elapsedTime = System.nanoTime();
+		}
+		
+		Structure struc_fit = null;
+		Structure struc_model = null;
+		double currentEnergy = 0, neighbourEnergy = 0;
+		double distance_ini = 0;
+		double best;
+		
+		int currentRCC[]; 
 		
 		// Initialize intial solution
-		distance_ini = calcSimilarity(targetRCC, calcRCC(fileDir + "struc_ini.pdb", fileDir));
+		distance_ini = calcSimilarity(targetRCC, calcRCC(fileDir + "struc_fit.pdb", fileDir));
 		
 		if (verbos > 0){
 			System.out.println("Initial solution distance: " + distance_ini);
 		}
-		double distance_neighbor=0.0;
 		
 		// Set as current best
-		double best = distance_ini;
+		best = distance_ini;
 		    
 		// Create new neighbour 3d model
-		struc_ini = PDBfromFASTA.readPDB(fileDir + "struc_ini.pdb");
+		struc_fit = PDBfromFASTA.readPDB(fileDir + "struc_fit.pdb");
 		 
 		// Loop until system has cooled
-		for (;temp > 1;temp = stdCooling(temp)) 
-		{
+		for (;temp > 1;temp = stdCooling(temp)){
 			for(int step = 0; step < searchSteps; step++){
-				currentRCC = calcRCC(fileDir + "struc_ini.pdb", fileDir);
+				currentRCC = calcRCC(fileDir + "struc_fit.pdb", fileDir);
 				currentEnergy = calcSimilarity(targetRCC, currentRCC);;
 				// Get a random conformation for this new neighbor
 				if(target != null){
-					struc_model = alterConformationAll(struc_ini, target);
+					struc_model = alterConformationAll(struc_fit, target);
 				}else{
-					struc_model = alterConformationAll(struc_ini);
+					struc_model = alterConformationAll(struc_fit);
 				}
 				PDBfromFASTA.writePDB(fileDir + "struc_model.pdb", struc_model);
 							
@@ -316,15 +311,14 @@ public class SimulatedAnnealing3DProtFromRCC
 			
 				// Decide if we should accept the neighbour
 				if (acceptanceProbability(currentEnergy, neighbourEnergy, temp) > Math.random()) {
-					struc_ini = struc_model;
-					PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
+					struc_fit = struc_model;
+					PDBfromFASTA.writePDB(fileDir + "struc_fit.pdb", struc_fit);
 				}
 			
 				// Keep track of the best solution found
-				if (neighbourEnergy < best) 
-				{
+				if (neighbourEnergy < best){
 					best = neighbourEnergy;
-					PDBfromFASTA.writePDB(fileDir + "sol_" + best + ".pdb", struc_ini);
+					PDBfromFASTA.writePDB(fileDir + "sol_" + best + ".pdb", struc_fit);
 					if (verbos > 1){
 						if (verbos > 0){
 							System.out.println(temp + "> " + best);
@@ -353,6 +347,7 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	public static void main(String[] args){
 		SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(args[0], args[1]);
+		simA.initialize(2);
 		simA.run(2);
 	}
 }
