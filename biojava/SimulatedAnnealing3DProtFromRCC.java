@@ -32,6 +32,9 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	private long initSeed;
 
+	private String startPdb;
+	private int targetRCC[]; 
+
 	public SimulatedAnnealing3DProtFromRCC(String dirStartStruc, String dirTargetStruc){
 		temp = 10000;
 		searchSteps = 3;
@@ -61,6 +64,22 @@ public class SimulatedAnnealing3DProtFromRCC
 		this.initSeed = initSeed;
 	}
 
+	public SimulatedAnnealing3DProtFromRCC(double temp, int searchSteps, double coolingRate, double cambioPhi, double cambioPsi,
+																					String startPdb, int targetRCC[], String fileDir, long initSeed){
+		this.temp = temp;
+		this.searchSteps = searchSteps;
+
+  	this.coolingRate = coolingRate;
+
+		this.cambioPhi = cambioPhi;
+		this.cambioPsi = cambioPsi;
+
+		this.startPdb = startPdb;
+		this.targetRCC = targetRCC;
+		this.fileDir = fileDir;
+		this.initSeed = initSeed;
+	}
+
 	public void setFastaID(String id){
 		fastaID = id;
 	}
@@ -73,11 +92,11 @@ public class SimulatedAnnealing3DProtFromRCC
 		return Math.exp((energy - newEnergy) / temperature);
 	}
 
-	public int[] calcRCC(String s1){
+	public static int[] calcRCC(String s1){
 		return calcRCC(s1, "");
 	}
 
-	public int[] calcRCC(String s1, String tmpdir){
+	public static int[] calcRCC(String s1, String tmpdir){
 		int rcc[] = new int[26];
 		try{
 		String s2 = "A";
@@ -199,11 +218,11 @@ public class SimulatedAnnealing3DProtFromRCC
 	//verbos 0 - none
 	//			 1 - just solutions
 	//			 2 - all
-	public void run(int verbos){
+	public float run(int verbos){
 		//Mesure time
 		long elapsedTime = 0;
 		if (verbos > 0){
-		elapsedTime = System.nanoTime();
+			elapsedTime = System.nanoTime();
 			System.out.println(dirStartStruc + " " + dirTargetStruc + 
 				"\ntemp " + temp + " coolRate " + coolingRate + " searchSteps " + searchSteps +
 				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi);// + " min cambio " + minCambio + " max cambio " +  maxCambio);
@@ -218,35 +237,46 @@ public class SimulatedAnnealing3DProtFromRCC
 		double currentEnergy = 0, neighbourEnergy = 0;
 		double distance_ini = 0;
 		
-		int targetRCC[]; 
 		int currentRCC[]; 
 		
-		if(dirStartStruc.length() > 3){
-			if(dirStartStruc.substring(dirStartStruc.length() - 3).equals(".fa")){
-				try{
-					pff = new PDBfromFASTA();
-					pdb = pff.pdbFromFile(dirStartStruc, fastaID);
-					//ProteinSequence seq = new ProteinsSequence(dirStartStruc);
-				
-					// Build initial Protein 3D structure
-					struc_ini = pff.randomShapeProtein(pdb, initSeed);
-				}catch(Exception e){
-					e.printStackTrace();
+		if(dirStartStruc != null){
+			if(dirStartStruc.length() > 3){
+				if(dirStartStruc.substring(dirStartStruc.length() - 3).equals(".fa")){
+					try{
+						pff = new PDBfromFASTA();
+						pdb = pff.pdbFromFile(dirStartStruc, fastaID);
+						//ProteinSequence seq = new ProteinsSequence(dirStartStruc);
+					
+						// Build initial Protein 3D structure
+						struc_ini = pff.randomShapeProtein(pdb, initSeed);
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+					PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
 				}
-				PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
-			}
-			if(dirStartStruc.substring(dirStartStruc.length() - 4).equals(".pdb")){
-				struc_ini = PDBfromFASTA.readPDB(dirStartStruc);
+				if(dirStartStruc.substring(dirStartStruc.length() - 4).equals(".pdb")){
+					struc_ini = PDBfromFASTA.readPDB(dirStartStruc);
+					PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
+				}
+			}else{
+				struc_ini = PDBfromFASTA.readPDB(dirTargetStruc);
+				target = PDBfromFASTA.readPDB(dirTargetStruc);
 				PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
 			}
 		}else{
-			struc_ini = PDBfromFASTA.readPDB(dirTargetStruc);
-			target = PDBfromFASTA.readPDB(dirTargetStruc);
-			PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
+			try{
+				pff = new PDBfromFASTA();
+				struc_ini = pff.randomShapeProtein(startPdb, initSeed);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 		}
+
 		
 		// Declaration of variables to store energy values
-		targetRCC = calcRCC(dirTargetStruc, fileDir);
+		if(targetRCC != null){
+			targetRCC = calcRCC(dirTargetStruc, fileDir);
+		}
 		if (verbos > 0){
 			for(int i : targetRCC){System.out.print(i + " ");}
 			System.out.print("\n");
@@ -280,7 +310,7 @@ public class SimulatedAnnealing3DProtFromRCC
 				}
 				PDBfromFASTA.writePDB(fileDir + "struc_model.pdb", struc_model);
 							
-				currentRCC = calcRCC(fileDir + "struc_model.pdb");
+				currentRCC = calcRCC(fileDir + "struc_model.pdb", fileDir);
 				// Get energy of solution
 				neighbourEnergy = calcSimilarity(targetRCC, currentRCC);;
 			
@@ -318,6 +348,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			elapsedTime = System.nanoTime() - elapsedTime;
 			System.out.println("Total execution time: " + elapsedTime/3600000000000.0);
 		}
+		return (float)best;
   }
 
 	public static void main(String[] args){
