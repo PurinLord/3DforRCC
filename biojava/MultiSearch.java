@@ -16,15 +16,15 @@ public class MultiSearch implements Runnable{
 																																	cambioPsi, dirStartStruc, dirTargetStruc, fileDir, initSeed);
 		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(dirStartStruc, dirTargetStruc);
 		this.fileDir = fileDir;
+		File f = new File(fileDir);
+		if (!f.exists()){
+			f.mkdirs();
+		}
 		this.simA.initialize(0);
 	}
 
 	public void run(){
-		File f = new File(fileDir);
-		if (!f.exists()){
-			boolean success = f.mkdirs();
-		}
-		simA.run(0);	
+		System.out.println(fileDir +" "+ simA.run(0));	
 	}
 
 	public static void main(String args[]){

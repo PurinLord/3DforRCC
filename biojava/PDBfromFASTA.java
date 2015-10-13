@@ -1,8 +1,9 @@
 package rccto3d;
 
 import java.util.LinkedHashMap;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.PrintWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
@@ -132,9 +133,15 @@ public class PDBfromFASTA {
 	}
 
 	public Structure shapeProtein(String pdb) throws Exception{
-		PrintWriter writer = new PrintWriter(tempDirectory);
-		writer.println(pdb);
-		writer.close();
+		File file = new File(tempDirectory);
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+		synchronized(file) {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
+			bw.write(pdb);
+			bw.close();
+		}
 		return shapeProtein(tempDirectory, "none", true);
 	}
 
@@ -169,9 +176,15 @@ public class PDBfromFASTA {
 	}
 
 	public Structure makeProtein(String pdb) throws Exception{
-		PrintWriter writer = new PrintWriter(tempDirectory);
-		writer.println(pdb);
-		writer.close();
+		File file = new File(tempDirectory);
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+		synchronized(file) {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
+			bw.write(pdb);
+			bw.close();
+		}
 		return makeProtein(tempDirectory, false);
 	}
 
@@ -273,9 +286,16 @@ public class PDBfromFASTA {
 
 	public static void writePDB(String filename, Structure structure){
 		try{
-		PrintWriter writer = new PrintWriter(filename, "UTF-8");
-		writer.println(structure.toPDB().trim());
-		writer.close();
+			File file = new File(filename);
+			System.out.println(filename);
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			synchronized(file) {
+				BufferedWriter bw = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
+				bw.write(structure.toPDB().trim());
+				bw.close();
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -284,9 +304,11 @@ public class PDBfromFASTA {
 	public static Structure readPDB(String filename){
  		PDBFileReader pdbreader = new PDBFileReader();
 		Structure structure = null;
+		File file = new File(filename);
     try{
-    	structure = pdbreader.getStructure(filename);
-    	//System.out.println(structure);
+			synchronized(file) {
+    		structure = pdbreader.getStructure(file);
+			}
     } catch (Exception e) {
     	e.printStackTrace();
     }

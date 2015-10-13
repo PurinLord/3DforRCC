@@ -8,7 +8,7 @@ pdbfrom:
 	javac -d . PDBfromFASTA.java
 
 optim:
-	javac -d . SimulatedAnnealing3DProtFromRCC.java MultiSearch.java Substitutor.java
+	javac -d . SimulatedAnnealing3DProtFromRCC.java MultiSearch.java Substitutor.java Heater.java
 
 simul:
 	javac -d . SimulatedAnnealing3DProtFromRCC.java
