@@ -1,8 +1,9 @@
 package rccto3d.optimisation;
 
 import java.lang.Math;
-import java.lang.Integer;
+import java.lang.Float;
 import java.io.*;
+import java.io.RandomAccessFile;
 
 import org.biojava.bio.structure.Structure;
 import org.biojava.bio.structure.Chain;
@@ -26,9 +27,10 @@ public static void main(String args[]){
 	
 	Structure struc_ini = PDBfromFASTA.readPDB(args[0]);
 	Structure struc_fin = PDBfromFASTA.readPDB(args[0]);
-	double minRMSd = Integer.parseInt(args[1]);
-	double variation = 1.0;
+	float minRMSd = Float.parseFloat(args[1]);
+	float variation = minRMSd/100;
 	double currentRMSd = 0.0;
+	int searchCount = 0;
 	
 	while(currentRMSd < minRMSd){
 		SimulatedAnnealing3DProtFromRCC.alterConformationAll(struc_fin, variation, variation);
@@ -45,18 +47,16 @@ public static void main(String args[]){
 			// get default parameters
 			FatCatParameters params = new FatCatParameters();
 			
-			
 			AFPChain afpChain = algorithm.align(ca1,ca2,params);            
 			
-			//afpChain.setName1(name1);
-			//afpChain.setName2(name2);
-
 			currentRMSd = afpChain.getChainRmsd();
-	} catch (Exception e) {
+		} catch (Exception e) {
 		e.printStackTrace();
-	}
+		}
+		searchCount ++;
 	}
 
+	//foma MUY idiota de guardar en directorio MUY
 	String[] dirs = args[0].split("/");
 	int last = dirs.length;
 	String name = "";
@@ -70,7 +70,10 @@ public static void main(String args[]){
 
 	}
 	//System.out.println(dir + " " + name);
-	PDBfromFASTA.writePDB(dir + name + "_" + args[1] + ".pdb", struc_fin);
+	System.out.println("RMSd obtenido: " + currentRMSd);
+	System.out.println(("variación promedio: " + variation/2 * searchCount));
+	//struc_fin.setName("RMSd obtenido: " + currentRMSd +"\tvariación promedio: " + variation/2 * searchCount);
+	String fileName = dir + name + "_" + args[1] + ".pdb";
+	PDBfromFASTA.writePDB(fileName, struc_fin);
 }
-
 }
