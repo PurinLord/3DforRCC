@@ -32,27 +32,15 @@ public static void main(String args[]){
 	double currentRMSd = 0.0;
 	int searchCount = 0;
 	
+	SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC("", "");
 	while(currentRMSd < minRMSd){
-		SimulatedAnnealing3DProtFromRCC.alterConformationAll(struc_fin, variation, variation);
+		simA.alterConformationAll(struc_fin, variation, variation);
 		
-		try {
-		
-			// To run FATCAT in the flexible variant say
-			// FatCatFlexible.algorithmName below
-			StructureAlignment algorithm  = StructureAlignmentFactory.getAlgorithm(FatCatRigid.algorithmName);
+		currentRMSd = simA.calcRMSD2(struc_ini, struc_fin);
+		System.out.println("RM2> " + currentRMSd);
+		currentRMSd = simA.calcRMSD(struc_ini, struc_fin);
+		System.out.println("RMS: " + currentRMSd);
 
-			Atom[] ca1 = StructureTools.getAtomCAArray(struc_ini);
-			Atom[] ca2 = StructureTools.getAtomCAArray(struc_fin);
-			
-			// get default parameters
-			FatCatParameters params = new FatCatParameters();
-			
-			AFPChain afpChain = algorithm.align(ca1,ca2,params);            
-			
-			currentRMSd = afpChain.getChainRmsd();
-		} catch (Exception e) {
-		e.printStackTrace();
-		}
 		searchCount ++;
 	}
 

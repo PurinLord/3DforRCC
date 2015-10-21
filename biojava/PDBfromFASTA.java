@@ -287,7 +287,6 @@ public class PDBfromFASTA {
 	public static void writePDB(String filename, Structure structure){
 		try{
 			File file = new File(filename);
-			System.out.println(filename);
 			if (!file.exists()) {
 				file.createNewFile();
 			}
