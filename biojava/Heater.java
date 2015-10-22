@@ -34,7 +34,7 @@ public static void main(String args[]){
 	
 	SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC("", "");
 	while(currentRMSd < minRMSd){
-		simA.alterConformationAll(struc_fin, variation, variation);
+		struc_fin = simA.alterConformationAll(struc_fin, variation, variation);
 		
 		currentRMSd = simA.calcRMSD2(struc_ini, struc_fin);
 		System.out.println("RM2> " + currentRMSd);
