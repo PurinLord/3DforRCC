@@ -25,7 +25,9 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	// Set initial temp
 	private double temp;
-	private int searchSteps;
+	private double tempPercent = 0.7;
+	private int searchStepsTotal;
+	private int searchStepsCicle;
 
   // Cooling rate
   private double coolingRate;
@@ -47,27 +49,27 @@ public class SimulatedAnnealing3DProtFromRCC
 	//steps = -1/log((1/temp), 1+coolingRate)
 
 	public SimulatedAnnealing3DProtFromRCC(String dirStartStruc, String dirTargetStruc){
-		temp = 10000;
-		searchSteps = 1;
-		//searchSteps = 300;
-
-  	coolingRate = 0.003;
+		searchStepsCicle = 1;
+		this.searchStepsTotal = 3000;
+		//searchStepsCicle = 300;
   	//coolingRate = 0.60189;
+		this.temp = 0;
+		this.coolingRate = 0;
 
-		cambioPhi = 0.04;
-		cambioPsi = 0.04;
+		cambioPhi = 1.0;
+		cambioPsi = 1.0;
 		this.dirStartStruc = dirStartStruc;
 		this.dirTargetStruc = dirTargetStruc;
 		fileDir = "out/";
 		initSeed = (long)(1000*Math.random());
 	}
 
-	public SimulatedAnnealing3DProtFromRCC(double temp, int searchSteps, double coolingRate, double cambioPhi, double cambioPsi,
+	public SimulatedAnnealing3DProtFromRCC(int searchStepsTotal, int searchStepsCicle, double cambioPhi, double cambioPsi,
 																					String dirStartStruc, String dirTargetStruc, String fileDir, long initSeed){
-		this.temp = temp;
-		this.searchSteps = searchSteps;
-
-  	this.coolingRate = coolingRate;
+		this.searchStepsTotal = searchStepsTotal;
+		this.searchStepsCicle = searchStepsCicle;
+		this.temp = 0;
+		this.coolingRate = 0;
 
 		this.cambioPhi = cambioPhi;
 		this.cambioPsi = cambioPsi;
@@ -80,6 +82,18 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	public void setFastaID(String id){
 		fastaID = id;
+	}
+
+	public void setTemp(double temp){
+		this.temp = temp;
+	}
+
+	public void setTempPercent(double tempPercent){
+		this.tempPercent = tempPercent;
+	}
+
+	public void setCoolRate(double coolingRate){
+		this.coolingRate = coolingRate;
 	}
 
 	//Calculate the acceptance probability
@@ -270,12 +284,52 @@ public class SimulatedAnnealing3DProtFromRCC
 	//			 1 - just solutions
 	//			 2 - all
 	
-	public void initialize(int verbos){
-		if (verbos > 0){
-			System.out.println(dirStartStruc + " " + dirTargetStruc + 
-				"\ntemp " + temp + " coolRate " + coolingRate + " searchSteps " + searchSteps +
-				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi + " initSeed " + initSeed);
+	public double calcInitialTemp(int verbos, Structure struc_seed){
+		PDBfromFASTA.writePDB(fileDir + "calcTmp0.pdb", struc_seed);
+		int seedRCC[] = calcRCC(fileDir + "calcTmp0.pdb", fileDir);
+		int alterRCC[];
+		Structure alterStruc = (Structure)struc_seed.clone();
+		int count = 0;
+		int searchStepsCicle = 30;
+		double max = 0;
+		double sum = 0;
+		double currentEnergy;
+		while(count < searchStepsCicle){
+			alterStruc = alterConformationAll(alterStruc, 360, 360);
+
+			PDBfromFASTA.writePDB(fileDir + "calcTmp1.pdb", alterStruc);
+			alterRCC = calcRCC(fileDir + "calcTmp1.pdb", fileDir);
+			currentEnergy = calcSimilarity(seedRCC, alterRCC);;
+			//currentEnergy = calcRMSD(struc_seed,alterStruc);
+
+			max = Math.max(max, currentEnergy);
+			sum += currentEnergy;
+			if(verbos > 2){
+				System.out.println("max " + max + " sum " + sum);
+			}
+			count++;
 		}
+		double prom = sum/count;
+		if(verbos > 1){
+			System.out.println("maxE " + max + " promE " + prom);
+		}
+		//double temp = ((3/2)*prom)+(max/2);
+		double temp = 2*max - prom;
+		this.temp = temp * tempPercent;
+		return temp;
+	}
+
+	//TODO
+	public double calcInitialTemp(int verbos){
+		return calcInitialTemp(verbos, null);
+	}
+
+	public void calcCoolRateStd(int verbos, int searchStepsTotal, int searchStepsCicle){
+		double steps = searchStepsTotal/(double)searchStepsCicle;
+		this.coolingRate = 1-(Math.pow((1/this.temp),(1.0/steps)));
+	}
+	
+	public void initialize(int verbos){
 		// Load Protein Sequence
 		PDBfromFASTA pff = null;
 		String pdb = null;
@@ -307,7 +361,18 @@ public class SimulatedAnnealing3DProtFromRCC
 		
 		// Declaration of variables to store energy values
 		targetRCC = calcRCC(dirTargetStruc, fileDir);
+
+		if(temp == 0){
+			calcInitialTemp(verbos, struc_ini);
+		}
+		if(coolingRate == 0){
+			calcCoolRateStd(verbos, searchStepsTotal, searchStepsCicle);
+		}
+
 		if (verbos > 0){
+			System.out.println(dirStartStruc + " " + dirTargetStruc + 
+				"\ntemp " + temp + " coolRate " + coolingRate + " searchStepsCicle " + searchStepsCicle +
+				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi + " initSeed " + initSeed);
 			for(int i : targetRCC){System.out.print(i + " ");}
 			System.out.print("\n");
 		}
@@ -355,32 +420,31 @@ public class SimulatedAnnealing3DProtFromRCC
 		// Loop until system has cooled
 		for (;temp > 1;temp = stdCooling(temp)){
 			// Search steps
-			for(int step = 0; step < searchSteps; step++){
+			for(int step = 0; step < searchStepsCicle; step++){
 				// Get a random conformation for this new neighbor
 				if(target != null){
 					struc_model = alterConformationAll(struc_fit, target);
 				}else{
 					struc_model = alterConformationAll(struc_fit);
 				}
-				//PDBfromFASTA.writePDB(fileDir + "struc_model.pdb", struc_model);
-				//modelRCC = calcRCC(fileDir + "struc_model.pdb", fileDir);
-
 				// Get energy of solution
-				//neighbourEnergy[0] = calcSimilarity(targetRCC, modelRCC);;
+				PDBfromFASTA.writePDB(fileDir + "struc_model.pdb", struc_model);
+				modelRCC = calcRCC(fileDir + "struc_model.pdb", fileDir);
+				neighbourEnergy[0] = calcSimilarity(targetRCC, modelRCC);;
+				
 				neighbourEnergy[1] = calcRMSD(struc_target, struc_model);
 			
 				// Decide if we should accept the neighbour
-				if (acceptanceProbability(currentEnergy[1], neighbourEnergy[1], temp) > Math.random()) {
+				if (rawAcceptanceProbability(currentEnergy[0], neighbourEnergy[0], temp) > Math.random()) {
 					struc_fit = struc_model;
-					//PDBfromFASTA.writePDB(fileDir + "struc_fit.pdb", struc_fit);
-					//currentEnergy[0] = neighbourEnergy[0];
+					PDBfromFASTA.writePDB(fileDir + "struc_fit.pdb", struc_fit);
+					currentEnergy[0] = neighbourEnergy[0];
 					currentEnergy[1] = neighbourEnergy[1];
-					System.out.println("^ " + acceptanceProbability(currentEnergy[1], neighbourEnergy[1], temp));
 				}
 			
 				// Keep track of the best solution found
-				if (neighbourEnergy[1] < best){
-					best = neighbourEnergy[1];
+				if (neighbourEnergy[0] < best){
+					best = neighbourEnergy[0];
 					PDBfromFASTA.writePDB(fileDir + "sol_" + best + ".pdb", struc_fit);
 					if (verbos > 0){
 						if (verbos > 1){
@@ -396,7 +460,8 @@ public class SimulatedAnnealing3DProtFromRCC
 				if (verbos > 1){
 					//for(int i : modelRCC){System.out.print(i + " ");}
 					//System.out.print("\n");
-					System.out.println(calcRMSD(struc_target, struc_fit) +"\t\t"+ neighbourEnergy[1]);
+					//System.out.println(calcRMSD(struc_target, struc_fit) +"\t\t"+ neighbourEnergy[1]);
+					System.out.println(neighbourEnergy[0] +"\t\t"+ neighbourEnergy[1]);
 				}
 			}
 		}
@@ -411,7 +476,7 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	public static void main(String[] args){
 		SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(args[0], args[1]);
-		simA.initialize(2);
+		simA.initialize(3);
 		simA.run(2);
 	}
 }
