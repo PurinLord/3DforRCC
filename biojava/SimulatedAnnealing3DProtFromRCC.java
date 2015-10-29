@@ -1,5 +1,6 @@
 package rccto3d.optimisation;
 
+import java.util.Random;
 import java.lang.Math;
 import java.io.*;
 
@@ -44,8 +45,8 @@ public class SimulatedAnnealing3DProtFromRCC
 	private long initSeed;
 	// 0 - RCC
 	// 1 - RMSD
-	private int energyType = 1;
-	private boolean dualEnergy = false;
+	private int energyType = 0;
+	private boolean dualEnergy = true;
 
 	private int targetRCC[]; 
 
@@ -113,8 +114,8 @@ public class SimulatedAnnealing3DProtFromRCC
 		return 0.0;
 	}
 
-	public static int[] calcRCC(String s1){
-		return calcRCC(s1, "");
+	public int[] calcRCC(String s1){
+		return calcRCC(s1, fileDir);
 	}
 
 	public static int[] calcRCC(String s1, String tmpdir){
@@ -208,9 +209,9 @@ public class SimulatedAnnealing3DProtFromRCC
 		double energy[] = {0.0,0.0};
 		if(energyType == 0 || dualEnergy){
 			PDBfromFASTA.writePDB(fileDir + "struc_1.pdb", s1);
-			int RCC1[] = calcRCC(fileDir + "struc_1.pdb", fileDir);
+			int RCC1[] = calcRCC(fileDir + "struc_1.pdb");
 			PDBfromFASTA.writePDB(fileDir + "struc_2.pdb", s2);
-			int RCC2[] = calcRCC(fileDir + "struc_2.pdb", fileDir);
+			int RCC2[] = calcRCC(fileDir + "struc_2.pdb");
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
@@ -223,7 +224,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		double energy[] = {0.0,0.0};
 		if(energyType == 0 || dualEnergy){
 			PDBfromFASTA.writePDB(fileDir + "struc_2.pdb", s2);
-			int RCC2[] = calcRCC(fileDir + "struc_2.pdb", fileDir);
+			int RCC2[] = calcRCC(fileDir + "struc_2.pdb");
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
@@ -236,11 +237,12 @@ public class SimulatedAnnealing3DProtFromRCC
 		Structure alterStruc = (Structure)struc.clone();
 		Chain chain = alterStruc.getChain(0);
 		int largo = chain.getAtomLength();
-		int to = minCambio + (int)(Math.random()*(maxCambio - minCambio));
+		Random rdm =  new Random(System.currentTimeMillis());
+		int to = minCambio + (int)(rdm.nextDouble()*(maxCambio - minCambio));
 		for(int i=0; i<to; i++){
-			int dAmino = (int) (largo * Math.random());
-			double dPsi = Math.round(cambioPsi * 2*(Math.random() - 0.5));
-			double dPhi = Math.round(cambioPhi * 2*(Math.random() - 0.5));
+			int dAmino = (int) (largo * rdm.nextDouble());
+			double dPsi = Math.round(cambioPsi * 2*(rdm.nextDouble() - 0.5));
+			double dPhi = Math.round(cambioPhi * 2*(rdm.nextDouble() - 0.5));
 			Trans.rotatePsi(chain, dAmino, dPsi);
 			Trans.rotatePhi(chain, dAmino, dPhi);
 		}
@@ -251,10 +253,11 @@ public class SimulatedAnnealing3DProtFromRCC
 	public Structure alterConformationAll(Structure struc){
 		Structure alterStruc = (Structure)struc.clone();
 		Chain chain = alterStruc.getChain(0);
+		Random rdm =  new Random(System.currentTimeMillis());
 		int largo = chain.getAtomLength();
 		for(int i=0; i<largo; i++){
-			double dPsi = cambioPsi * 2*(Math.random() - 0.5);
-			double dPhi = cambioPhi * 2*(Math.random() - 0.5);
+			double dPsi = cambioPsi * 2*(rdm.nextDouble() - 0.5);
+			double dPhi = cambioPhi * 2*(rdm.nextDouble() - 0.5);
 			//System.out.println(dPhi +" "+ dPsi);
 			Trans.rotatePsi(chain, i, dPsi);
 			Trans.rotatePhi(chain, i, dPhi);
@@ -265,10 +268,11 @@ public class SimulatedAnnealing3DProtFromRCC
 	public Structure alterConformationAll(Structure struc, double deltaPsi, double deltaPhi){
 		Structure alterStruc = (Structure)struc.clone();
 		Chain chain = alterStruc.getChain(0);
+		Random rdm =  new Random(System.currentTimeMillis());
 		int largo = chain.getAtomLength();
 		for(int i=0; i<largo; i++){
-			double dPsi = deltaPsi * 2*(Math.random() - 0.5);
-			double dPhi = deltaPhi * 2*(Math.random() - 0.5);
+			double dPsi = deltaPsi * 2*(rdm.nextDouble() - 0.5);
+			double dPhi = deltaPhi * 2*(rdm.nextDouble() - 0.5);
 			//System.out.println(i +" "+ dPhi +" "+ dPsi);
 			Trans.rotatePsi(chain, i, dPsi);
 			Trans.rotatePhi(chain, i, dPhi);
@@ -280,11 +284,12 @@ public class SimulatedAnnealing3DProtFromRCC
 		Chain chainT = target.getChain(0);
 		Structure alterStruc = (Structure)struc.clone();
 		Chain chain = alterStruc.getChain(0);
+		Random rdm =  new Random(System.currentTimeMillis());
 		int largo = chain.getAtomLength();
 		AminoAcid a1;
 		AminoAcid a2;
 		for(int i=0; i <largo; i++){
-			int dAmino = (int) ((largo -1) * Math.random());
+			int dAmino = (int) ((largo -1) * rdm.nextDouble());
 			try{
 			a1 = (AminoAcid)chainT.getAtomGroup(dAmino);
 			a2 = (AminoAcid)chainT.getAtomGroup(dAmino + 1);
@@ -318,36 +323,38 @@ public class SimulatedAnnealing3DProtFromRCC
 	
 	public double calcInitialTemp(int verbos, Structure struc_seed){
 		PDBfromFASTA.writePDB(fileDir + "calcTmp0.pdb", struc_seed);
-		int seedRCC[] = calcRCC(fileDir + "calcTmp0.pdb", fileDir);
-		int alterRCC[];
+		int seedRCC[] = calcRCC(fileDir + "calcTmp0.pdb");
+		//int alterRCC[];
 		Structure alterStruc = (Structure)struc_seed.clone();
 		int count = 0;
 		int searchStepsCicle = 30;
-		double max = 0;
+		//double max = 0;
 		double sum = 0;
 		double currentEnergy[]={0.0,0.0};
+		PDBfromFASTA pff = new PDBfromFASTA();
 		while(count < searchStepsCicle){
-			alterStruc = alterConformationAll(alterStruc, 360, 360);
+			try{
+			alterStruc = alterConformationAll(alterStruc, 180, 180);
 
 			currentEnergy = calcEnergy(struc_seed,alterStruc, seedRCC);
 			//PDBfromFASTA.writePDB(fileDir + "calcTmp1.pdb", alterStruc);
-			//alterRCC = calcRCC(fileDir + "calcTmp1.pdb", fileDir);
+			//alterRCC = calcRCC(fileDir + "calcTmp1.pdb");
 			//currentEnergy = calcSimilarity(seedRCC, alterRCC);;
 			//currentEnergy[1] = calcRMSD(struc_seed,alterStruc);
 
-			max = Math.max(max, currentEnergy[energyType]);
+			//max = Math.max(max, currentEnergy[energyType]);
 			sum += currentEnergy[energyType];
 			if(verbos > 2){
-				System.out.println("max " + max + " sum " + sum);
+				System.out.println("energy " + currentEnergy[energyType] + " sum " + sum);
 			}
 			count++;
 		}
 		double prom = sum/count;
 		if(verbos > 1){
-			System.out.println("maxE " + max + " promE " + prom);
+			System.out.println(" promE " + prom);
 		}
 		//double temp = ((3/2)*prom)+(max/2);
-		double temp = 2*max - prom;
+		double temp = prom;//2*max - prom;
 		this.temp = temp * tempPercent;
 		return temp;
 	}
@@ -367,6 +374,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		PDBfromFASTA pff = null;
 		String pdb = null;
 		Structure struc_ini = null;
+		Structure struc_target;
 
 		if(dirStartStruc != null){
 			if(dirStartStruc.substring(dirStartStruc.length() - 3).equals(".fa")){
@@ -393,10 +401,12 @@ public class SimulatedAnnealing3DProtFromRCC
 		}
 		
 		// Declaration of variables to store energy values
-		targetRCC = calcRCC(dirTargetStruc, fileDir);
+		struc_target = PDBfromFASTA.readPDB(dirTargetStruc);
+		PDBfromFASTA.writePDB(fileDir + "struc_target.pdb", struc_target);
+		targetRCC = calcRCC(dirTargetStruc);
 
 		if(temp == 0){
-			calcInitialTemp(verbos, struc_ini);
+			calcInitialTemp(verbos, struc_target);
 		}
 		if(coolingRate == 0){
 			calcCoolRateStd(verbos, searchStepsTotal, searchStepsCicle);
@@ -426,13 +436,15 @@ public class SimulatedAnnealing3DProtFromRCC
 		double best;
 
 		Structure struc_ini = PDBfromFASTA.readPDB(fileDir + "struc_ini.pdb");
-		Structure struc_target = PDBfromFASTA.readPDB(dirTargetStruc);
+		Structure struc_target = PDBfromFASTA.readPDB(fileDir + "struc_target.pdb");
 		
 		int currentRCC[]; 
 		int modelRCC[]; 
+
+		Random rdm =  new Random(System.currentTimeMillis());
 		
 		// Initialize intial solution
-		currentRCC = calcRCC(fileDir + "struc_ini.pdb", fileDir);
+		currentRCC = calcRCC(fileDir + "struc_ini.pdb");
 		distance_ini[0] = calcSimilarity(targetRCC, currentRCC);
 		distance_ini[1] = calcRMSD(struc_ini,struc_target);
 		
@@ -462,28 +474,28 @@ public class SimulatedAnnealing3DProtFromRCC
 				// Get energy of solution
 				neighbourEnergy = calcEnergy(struc_target, struc_model, targetRCC);
 				//PDBfromFASTA.writePDB(fileDir + "struc_model.pdb", struc_model);
-				//modelRCC = calcRCC(fileDir + "struc_model.pdb", fileDir);
+				//modelRCC = calcRCC(fileDir + "struc_model.pdb");
 				//neighbourEnergy[0] = calcSimilarity(targetRCC, modelRCC);;
 				//neighbourEnergy[1] = calcRMSD(struc_target, struc_model);
 			
 				// Decide if we should accept the neighbour
-				if (rawAcceptanceProbability(currentEnergy[energyType], neighbourEnergy[energyType], temp) > Math.random()) {
+				if (acceptanceProbability(currentEnergy[energyType], neighbourEnergy[energyType], temp) > rdm.nextDouble()) {
 					struc_fit = struc_model;
 					PDBfromFASTA.writePDB(fileDir + "struc_fit.pdb", struc_fit);
 					currentEnergy = neighbourEnergy;
+					if (verbos > 0){
+						if (verbos > 1){
+							System.out.println(temp + "> " + currentEnergy[energyType] + " time: " + elapsedTime/3600000000000.0);
+						}else{
+							System.out.println(temp + "> " + currentEnergy[energyType]);
+						}
+					}
 				}
 			
 				// Keep track of the best solution found
 				if (neighbourEnergy[energyType] < best){
 					best = neighbourEnergy[energyType];
 					PDBfromFASTA.writePDB(fileDir + "sol_" + best + ".pdb", struc_fit);
-					if (verbos > 0){
-						if (verbos > 1){
-							System.out.println(temp + "> " + best + " time: " + elapsedTime/3600000000000.0);
-						}else{
-							System.out.println(temp + "> " + best);
-						}
-					}
 					if(best == 0){
 						temp = 0;
 					}

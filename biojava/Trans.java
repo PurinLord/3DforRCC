@@ -77,14 +77,14 @@ public class Trans extends Calc {
 			double[] axis = getAxisPsi(chain, resNumber);
 			Matrix rot = getRotMatrix(axis, angle);
 			Calc.rotate(amino, rot);
-			writePDB("datos/t1.pdb", chain.getParent());
+			//writePDB("datos/t1.pdb", chain.getParent());
 			//Gets new atom axis position
 			Atom rAtom = amino.getC();
 			Atom tAtom = subtract(cAtom, rAtom);
 			//Corrects
 			Calc.shift(amino, tAtom);
 			positionOxigen(chain, resNumber);
-			writePDB("datos/t2.pdb", chain.getParent());
+			//writePDB("datos/t2.pdb", chain.getParent());
 
 			for(int i = resNumber - 1; i >= 0; i--){
 				amino = (AminoAcid) chain.getAtomGroup(i);
