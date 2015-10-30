@@ -26,7 +26,7 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	// Set initial temp
 	private double temp;
-	private double tempPercent = 0.65;
+	private double tempPercent = 0.30;
 	private int searchStepsTotal;
 	private int searchStepsCicle;
 
@@ -331,9 +331,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		//double max = 0;
 		double sum = 0;
 		double currentEnergy[]={0.0,0.0};
-		PDBfromFASTA pff = new PDBfromFASTA();
 		while(count < searchStepsCicle){
-			try{
 			alterStruc = alterConformationAll(alterStruc, 180, 180);
 
 			currentEnergy = calcEnergy(struc_seed,alterStruc, seedRCC);
@@ -474,8 +472,8 @@ public class SimulatedAnnealing3DProtFromRCC
 				// Get energy of solution
 				neighbourEnergy = calcEnergy(struc_target, struc_model, targetRCC);
 				//PDBfromFASTA.writePDB(fileDir + "struc_model.pdb", struc_model);
-				//modelRCC = calcRCC(fileDir + "struc_model.pdb");
-				//neighbourEnergy[0] = calcSimilarity(targetRCC, modelRCC);;
+				//modelRCC = calcRCC(fileDir + "struc_2.pdb");
+				//neighbourEnergy[0] = calcSimilarity(targetRCC, modelRCC);
 				//neighbourEnergy[1] = calcRMSD(struc_target, struc_model);
 			
 				// Decide if we should accept the neighbour
@@ -501,8 +499,10 @@ public class SimulatedAnnealing3DProtFromRCC
 					}
 				}
 				if (verbos > 1){
-					//for(int i : modelRCC){System.out.print(i + " ");}
-					//System.out.print("\n");
+					if(energyType == 0){
+						//for(int i : modelRCC){System.out.print(i + " ");}
+						//System.out.print("\n");
+					}
 					System.out.println(neighbourEnergy[0] +"\t\t"+ neighbourEnergy[1]);
 				}
 			}
@@ -533,7 +533,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal,searchStepsCicle,cambioPhi,
 																									cambioPsi,dirStartStruc,dirTargetStruc,fileDir,initSeed);
 		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(args[0], args[1]);
-		simA.initialize(3);
+		simA.initialize(2);
 		simA.run(2);
 	}
 }
