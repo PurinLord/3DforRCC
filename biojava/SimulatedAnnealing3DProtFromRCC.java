@@ -26,7 +26,7 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	// Set initial temp
 	private double temp;
-	private double tempPercent = 0.30;
+	private double tempPercent = 0.15;
 	private int searchStepsTotal;
 	private int searchStepsCicle;
 
@@ -46,7 +46,7 @@ public class SimulatedAnnealing3DProtFromRCC
 	// 0 - RCC
 	// 1 - RMSD
 	private int energyType = 0;
-	private boolean dualEnergy = true;
+	private boolean dualEnergy = false;
 
 	private int targetRCC[]; 
 
@@ -483,7 +483,8 @@ public class SimulatedAnnealing3DProtFromRCC
 					currentEnergy = neighbourEnergy;
 					if (verbos > 0){
 						if (verbos > 1){
-							System.out.println(temp + "> " + currentEnergy[energyType] + " time: " + elapsedTime/3600000000000.0);
+							long time = System.nanoTime() - elapsedTime;
+							System.out.println(temp + "> " + currentEnergy[energyType] + " time: " + time/3600000000000.0);
 						}else{
 							System.out.println(temp + "> " + currentEnergy[energyType]);
 						}

@@ -22,7 +22,7 @@ heat:
 subst:
 	javac -d . Substitutor.java
 
-aaClass:
+mrclass:
 	javac -d . MakeRClass.java
 
 reformat:
