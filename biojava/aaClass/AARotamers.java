@@ -6,6 +6,7 @@ import java.util.ArrayList;
 public class AARotamers {
 
 	private int size = 0;
+	private int defaultRotNum;
 	private HashMap<Integer,ArrayList> rotamers  = new HashMap<Integer,ArrayList>();
 	private String aminoName = "";
 
@@ -35,6 +36,9 @@ public class AARotamers {
 		}
 		return pdb;
 	}
+	public String getPDB(String chain, int aminoStart, int atomStart){
+		return getPDB(defaultRotNum,chain,aminoStart,atomStart);
+	}
 
 	public int getSize(){
 		return this.size;
@@ -52,13 +56,17 @@ public class AARotamers {
 		this.aminoName = aminoName;
 	}
 
+	public void setRotNum(int rotNum){
+		this.defaultRotNum = rotNum;
+	}
+
 	public String getAminoName(String aminoName){
 		return this.aminoName;
 	}
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("main");
-		ALARotamers ala = new ALARotamers();
+		ALARotamers ala = new ALARotamers(1);
 		System.out.println(ala.getSize());
 		System.out.println(ala.getPDB(1, "A", 12, 63));
 	}

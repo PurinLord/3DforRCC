@@ -20,54 +20,51 @@ import rccto3d.rotamers.*;
 
 public class PDBfromFASTA {
 
-	private final ASPRotamers ASP = new ASPRotamers();
-	private final GLURotamers GLU = new GLURotamers();
-	private final ILERotamers ILE = new ILERotamers();
-	private final PHERotamers PHE = new PHERotamers();
-	private final TRPRotamers TRP = new TRPRotamers();
-	private final ALARotamers ALA = new ALARotamers();
-	//private final CYHRotamers CYH = new CYHRotamers();
-	private final GLYRotamers GLY = new GLYRotamers();
-	private final LEURotamers LEU = new LEURotamers();
-	private final PRORotamers PRO = new PRORotamers();
-	private final TYRRotamers TYR = new TYRRotamers();
-	private final ARGRotamers ARG = new ARGRotamers();
-	private final CYSRotamers CYS = new CYSRotamers();
-	//private final HIDRotamers HID = new HIDRotamers();
-	private final LYSRotamers LYS = new LYSRotamers();
-	private final SERRotamers SER = new SERRotamers();
-	private final VALRotamers VAL = new VALRotamers();
-	private final ASNRotamers ASN = new ASNRotamers();
-	private final GLNRotamers GLN = new GLNRotamers();
-	private final HISRotamers HIS = new HISRotamers();
-	private final METRotamers MET = new METRotamers();
-	private final THRRotamers THR = new THRRotamers();
-
-	//TODO
-	/*
-	private int defaultASP = 1;
-	private int defaultGLU = 1;
-	private int defaultILE = 1;
-	private int defaultPHE = 1;
-	private int defaultTRP = 1;
+	private int defaultASP = 4;
+	private int defaultGLU = 24;
+	private int defaultILE = 2;
+	private int defaultPHE = 5;
+	private int defaultTRP = 9;
 	private int defaultALA = 1;
-	private int defaultCYH = 1;
+	//private int defaultCYH = 3;
 	private int defaultGLY = 1;
-	private int defaultLEU = 1;
+	private int defaultLEU = 8;
 	private int defaultPRO = 1;
-	private int defaultTYR = 1;
-	private int defaultARG = 1;
-	private int defaultCYS = 1;
-	private int defaultHID = 1;
-	private int defaultLYS = 1;
-	private int defaultSER = 1;
+	private int defaultTYR = 5;
+	private int defaultARG = 65;
+	private int defaultCYS = 3;
+	//private int defaultHID = 14;
+	private int defaultLYS = 69;
+	private int defaultSER = 3;
 	private int defaultVAL = 1;
-	private int defaultASN = 1;
-	private int defaultGLN = 1;
-	private int defaultHIS = 1;
-	private int defaultMET = 1;
-	private int defaultTHR = 1;
-	*/
+	private int defaultASN = 7;
+	private int defaultGLN = 46;
+	private int defaultHIS = 17;
+	private int defaultMET = 24;
+	private int defaultTHR = 3;
+
+	private final ASPRotamers ASP = new ASPRotamers(defaultASP);
+	private final GLURotamers GLU = new GLURotamers(defaultGLU);
+	private final ILERotamers ILE = new ILERotamers(defaultILE);
+	private final PHERotamers PHE = new PHERotamers(defaultPHE);
+	private final TRPRotamers TRP = new TRPRotamers(defaultTRP);
+	private final ALARotamers ALA = new ALARotamers(defaultALA);
+	//private final CYHRotamers CYH = new CYHRotamers();
+	private final GLYRotamers GLY = new GLYRotamers(defaultGLY);
+	private final LEURotamers LEU = new LEURotamers(defaultLEU);
+	private final PRORotamers PRO = new PRORotamers(defaultPRO);
+	private final TYRRotamers TYR = new TYRRotamers(defaultTYR);
+	private final ARGRotamers ARG = new ARGRotamers(defaultARG);
+	private final CYSRotamers CYS = new CYSRotamers(defaultCYS);
+	//private final HIDRotamers HID = new HIDRotamers();
+	private final LYSRotamers LYS = new LYSRotamers(defaultLYS);
+	private final SERRotamers SER = new SERRotamers(defaultSER);
+	private final VALRotamers VAL = new VALRotamers(defaultVAL);
+	private final ASNRotamers ASN = new ASNRotamers(defaultASN);
+	private final GLNRotamers GLN = new GLNRotamers(defaultGLN);
+	private final HISRotamers HIS = new HISRotamers(defaultHIS);
+	private final METRotamers MET = new METRotamers(defaultMET);
+	private final THRRotamers THR = new THRRotamers(defaultTHR);
 
 	//public static final double ALFA_RIGHT_PHI = -0.9948; //-57°;
 	//public static final double ALFA_RIGHT_PSI = -0.8203; //-47°;
@@ -85,7 +82,8 @@ public class PDBfromFASTA {
 			String pdb = pff.pdbFromFile(args[0], args[1]);
 			//System.out.println(pdb);
 			
-			writePDB("datos/out.pdb", pff.shapeProtein(pdb, args[2], false));
+			//writePDB("datos/out.pdb", pff.shapeProtein(pdb, args[2], false));
+			writePDB("datos/out.pdb", pff.shapeProtein(pdb));
 			
 			//Trans.writePDB("datos/tst9.pdb", pff.shapeProtein("tst.pdb", "alpha", true));
 		}catch(Exception e){
@@ -97,6 +95,7 @@ public class PDBfromFASTA {
 
 	public PDBfromFASTA (){
 		tempDirectory = "temp.pdb"; 
+		GLY.setRotNum(defaultGLY);
 	}
 
 	public PDBfromFASTA (String directory){

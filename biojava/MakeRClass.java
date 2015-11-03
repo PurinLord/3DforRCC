@@ -29,9 +29,10 @@ public static void main(String[] args) throws Exception {
 										"\tprivate ArrayList<ArrayList> aminoAcid;\n" +
 										"\tprivate ArrayList<String> atom;\n\n";
 	String cnstr = 		"\tpublic ";
-	String cnstrEnd =	"Rotamers(){\n\n" +
+	String cnstrEnd =	"Rotamers(int rotNum){\n\n" +
 										"\tsuper.setSize(this.size);\n" +
-										"\tsuper.setRotamers(this.rotamers);\n";
+										"\tsuper.setRotamers(this.rotamers);\n" +
+										"\tsuper.setRotNum(rotNum);\n";
 	String setName =	"\tsuper.setAminoName(\"";
 	String setNameEnd="\");\n";
 
