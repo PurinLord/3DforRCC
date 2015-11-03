@@ -133,16 +133,14 @@ public class Trans extends Calc {
 	 */
 	public static void rotateOmega(Chain chain, int resNumber, double angle){
 		try{
-			AminoAcid amino = (AminoAcid) chain.getAtomGroup(resNumber);
-			AminoAcid amino2 = (AminoAcid) chain.getAtomGroup(resNumber + 1);
-			Atom cAtom = (Atom) amino2.getN().clone();
+			AminoAcid amino = (AminoAcid) chain.getAtomGroup(resNumber + 1);
+			Atom cAtom = (Atom) amino.getN().clone();
 			double[] axis = getAxisOmega(chain, resNumber);
 			Matrix rot = getRotMatrix(axis, angle);
-			Calc.rotate(amino2, rot);
-			Atom rAtom = amino2.getN();
+			Calc.rotate(amino, rot);
+			Atom rAtom = amino.getN();
 			Atom tAtom = subtract(cAtom, rAtom);
-			Calc.shift(amino2, tAtom);
-
+			Calc.shift(amino, tAtom);
 		}catch (ClassCastException e){
     	e.printStackTrace();
 			System.out.println("Chain has non-aminoacid elements");

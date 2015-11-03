@@ -60,6 +60,7 @@ public class TestRot {
 		static double[] axis2;
 		static double angle;
 		static double angle2;
+		static double angle3;
 
 		static AminoAcid a1;
 		static AminoAcid a2;
@@ -146,22 +147,52 @@ public class TestRot {
 			Chain chain2 = struc2.getChain(0);
 			//rccto3d.Trans.writePDB("simDatos/deltaEst_pre.pdb", chain2.getParent());
 			for(int i = 0; i < chain.getAtomLength() - 1; i++){
+			rccto3d.Trans.writePDB("datos/d_"+i+".pdb", chain2.getParent());
 				a1 = (AminoAcid)chain.getAtomGroup(i);
 				a2 = (AminoAcid)chain.getAtomGroup(i + 1);
 				angle = rccto3d.Trans.getPhi(a1, a2);
 				angle2 = rccto3d.Trans.getPsi(a1, a2);
-				System.out.println(angle + "  " + angle2);
+				angle3 = rccto3d.Trans.getOmega(a1, a2);
+				System.out.println(angle + "  " + angle2 + "  " + angle3);
 				rccto3d.Trans.setPhi(chain2, i, angle);
 				rccto3d.Trans.setPsi(chain2, i, angle2);
+				//rccto3d.Trans.setOmega(chain2, i, angle3);
 				a1 = (AminoAcid)chain2.getAtomGroup(i);
 				a2 = (AminoAcid)chain2.getAtomGroup(i + 1);
 				angle = rccto3d.Trans.getPhi(a1, a2);
 				angle2 = rccto3d.Trans.getPsi(a1, a2);
-				System.out.println(angle + "  " + angle2);
+				angle3 = rccto3d.Trans.getOmega(a1, a2);
+				System.out.println(angle + "  " + angle2 + "  " + angle3);
 			}
 			rccto3d.Trans.writePDB("simDatos/deltaEst.pdb", chain2.getParent());
 			System.out.println("> "+simA.calcEnergy(chain.getParent(),chain2.getParent())[0]);
 			System.out.println("> "+simA.calcEnergy(chain.getParent(),chain2.getParent())[1]);
+
+			////////	Checa diferencia entre omega
+			//String pdb = pff.pdbFromFile(args[1], "a");
+			//Structure struc2 = pff.shapeProtein(pdb);
+			//Chain chain2 = struc2.getChain(0);
+			//for(int i = 0; i < chain.getAtomLength() - 1; i++){
+			//	a1 = (AminoAcid)chain.getAtomGroup(i);
+			//	a2 = (AminoAcid)chain.getAtomGroup(i + 1);
+			//	angle = rccto3d.Trans.getPhi(a1, a2);
+			//	angle2 = rccto3d.Trans.getPsi(a1, a2);
+			//	angle3 = rccto3d.Trans.getOmega(a1, a2);
+			//	rccto3d.Trans.setPhi(chain2, i, angle);
+			//	rccto3d.Trans.setPsi(chain2, i, angle2);
+			//	a1 = (AminoAcid)chain2.getAtomGroup(i);
+			//	a2 = (AminoAcid)chain2.getAtomGroup(i + 1);
+			//	angle2 =rccto3d.Trans.getOmega(a1, a2);
+			//	if(angle3>angle2){
+			//	angle3 = angle3 - angle2; 
+			//	}else{
+			//	angle3 =angle2 - angle3;
+			//	}
+			//	if(angle3>180){
+			//		angle3 = 360 - angle3;
+			//	}
+			//	System.out.println(angle3);
+			//}
 
 			////////	Regresa estructura a tripa
 			//for(int i = 0; i < chain.getAtomLength() - 1; i++){
