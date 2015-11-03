@@ -89,6 +89,10 @@ public class SimulatedAnnealing3DProtFromRCC
 		fastaID = id;
 	}
 
+	public double getTemp(){
+		return this.temp;
+	}
+
 	public void setTemp(double temp){
 		this.temp = temp;
 	}
@@ -327,7 +331,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		//int alterRCC[];
 		Structure alterStruc = (Structure)struc_seed.clone();
 		int count = 0;
-		int searchStepsCicle = 30;
+		int searchStepsCicle = 50;
 		//double max = 0;
 		double sum = 0;
 		double currentEnergy[]={0.0,0.0};
@@ -367,12 +371,13 @@ public class SimulatedAnnealing3DProtFromRCC
 		this.coolingRate = 1-(Math.pow((1/this.temp),(1.0/steps)));
 	}
 	
-	public void initialize(int verbos){
+	public String initialize(int verbos){
 		// Load Protein Sequence
 		PDBfromFASTA pff = null;
 		String pdb = null;
 		Structure struc_ini = null;
 		Structure struc_target;
+		String outString = null;
 
 		if(dirStartStruc != null){
 			if(dirStartStruc.substring(dirStartStruc.length() - 3).equals(".fa")){
@@ -411,12 +416,17 @@ public class SimulatedAnnealing3DProtFromRCC
 		}
 
 		if (verbos > 0){
-			System.out.println(dirStartStruc + " " + dirTargetStruc + 
+			outString = dirStartStruc + " " + dirTargetStruc + 
 				"\ntemp " + temp + " coolRate " + coolingRate + " searchStepsCicle " + searchStepsCicle +
-				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi + " initSeed " + initSeed);
-			for(int i : targetRCC){System.out.print(i + " ");}
-			System.out.print("\n");
+				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi + " initSeed " + initSeed;
+			if (verbos > 1){
+				for(int i : targetRCC){System.out.print(i + " ");}
+				System.out.println(outString);
+				System.out.print("\n");
+			}
+			return outString;
 		}
+		return null;
 	}
 
 	public float run(int verbos){
