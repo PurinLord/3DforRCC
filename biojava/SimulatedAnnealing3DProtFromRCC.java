@@ -45,7 +45,7 @@ public class SimulatedAnnealing3DProtFromRCC
 	private long initSeed;
 	// 0 - RCC
 	// 1 - RMSD
-	private int energyType = 0;
+	private int energyType = 1;
 	private boolean dualEnergy = false;
 
 	private int targetRCC[]; 
@@ -178,6 +178,25 @@ public class SimulatedAnnealing3DProtFromRCC
 		return currentRMSd;
 	}
 
+	public double calcBackboneRMSD(Structure struc_target, Structure struc_current){
+		double currentRMSd = 0.0;
+		try {
+			StructureAlignment algorithm  = StructureAlignmentFactory.getAlgorithm(FatCatRigid.algorithmName);
+
+			Atom[] ca1 = StructureTools.getBackboneAtomArray(struc_target);
+			Atom[] ca2 = StructureTools.getBackboneAtomArray(struc_current);
+			
+			FatCatParameters params = new FatCatParameters();
+			
+			AFPChain afpChain = algorithm.align(ca1,ca2,params);            
+			
+			currentRMSd = afpChain.getChainRmsd();
+		} catch (Exception e) {
+		e.printStackTrace();
+		}
+		return currentRMSd;
+	}
+
 	public double calcRMSD2(Structure struc_target, Structure struc_current){
 		double currentRMSd = 0.0;
 		try {
@@ -219,7 +238,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
-			energy[1] = calcRMSD(s1, s2);
+			energy[1] = calcBackboneRMSD(s1, s2);
 		}
 		return energy;
 	}
@@ -232,7 +251,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
-			energy[1] = calcRMSD(s1, s2);
+			energy[1] = calcBackboneRMSD(s1, s2);
 		}
 		return energy;
 	}
@@ -417,7 +436,7 @@ public class SimulatedAnnealing3DProtFromRCC
 
 		if (verbos > 0){
 			outString = dirStartStruc + " " + dirTargetStruc + 
-				"\ntemp " + temp + " coolRate " + coolingRate + " searchStepsCicle " + searchStepsCicle +
+				"\ntemp "+temp +" coolRate "+coolingRate+" totalSearchSteps "+searchStepsTotal+" searchStepsCicle "+searchStepsCicle +
 				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi + " initSeed " + initSeed;
 			if (verbos > 1){
 				for(int i : targetRCC){System.out.print(i + " ");}
@@ -454,7 +473,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		// Initialize intial solution
 		currentRCC = calcRCC(fileDir + "struc_ini.pdb");
 		distance_ini[0] = calcSimilarity(targetRCC, currentRCC);
-		distance_ini[1] = calcRMSD(struc_ini,struc_target);
+		distance_ini[1] = calcBackboneRMSD(struc_ini,struc_target);
 		
 		if (verbos > 0){
 			System.out.println("Initial solution distance: " + distance_ini[0] + " " + distance_ini[1]);
@@ -528,11 +547,11 @@ public class SimulatedAnnealing3DProtFromRCC
   }
 
 	public static void main(String[] args){
-		int searchStepsTotal = 3500;
-		int searchStepsCicle = 10;
+		int searchStepsTotal = 3000;
+		int searchStepsCicle = 4;
 
-		double cambioPhi = 9.0;
-		double cambioPsi = 9.0;
+		double cambioPhi = 3.0;
+		double cambioPsi = 3.0;
 
 		String dirStartStruc = args[0];
 		String dirTargetStruc = args[1];

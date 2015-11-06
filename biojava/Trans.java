@@ -128,10 +128,34 @@ public class Trans extends Calc {
 		}
 	}
 
+	public static void rotateOmega(Chain chain, int resNumber, double angle){
+		try{
+			AminoAcid amino = (AminoAcid) chain.getAtomGroup(resNumber + 1);
+			Atom cAtom = (Atom) amino.getN().clone();
+			double[] axis = getAxisOmega(chain, resNumber);
+			Matrix rot = getRotMatrix(axis, angle);
+			Calc.rotate(amino, rot);
+			Atom rAtom = amino.getN();
+			Atom tAtom = subtract(cAtom, rAtom);
+			Calc.shift(amino, tAtom);
+			positionOxigen(chain, resNumber);
+			for(int i = resNumber + 2; i < chain.getAtomLength(); i++){
+				amino = (AminoAcid) chain.getAtomGroup(i);
+				Calc.rotate(amino, rot);
+				Calc.shift(amino, tAtom);
+			}
+		}catch (ClassCastException e){
+    	e.printStackTrace();
+			System.out.println("Chain has non-aminoacid elements");
+		}catch (Exception e){
+    	e.printStackTrace();
+		}
+	}
+
 	/** Rotates residue resNumber of chain to change its dihedral angle Omega
 	 * this is a NON SOLID BODY rotation
 	 */
-	public static void rotateOmega(Chain chain, int resNumber, double angle){
+	public static void rotateOmegaNonSolid(Chain chain, int resNumber, double angle){
 		try{
 			AminoAcid amino = (AminoAcid) chain.getAtomGroup(resNumber + 1);
 			Atom cAtom = (Atom) amino.getN().clone();
@@ -189,14 +213,21 @@ public class Trans extends Calc {
 		rotatePhi(chain, resNumber + 1, (-angle2 +angle)*ANG_TO_RAD);
 	}
 
-	/** Set the dihedral angle Omega of residue resNumber in chain to the given angle
-	 * this is a NON SOLID BODY rotation
-	 */
 	public static void setOmega(Chain chain, int resNumber, double angle) throws Exception{
 		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
 		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
 		double angle2 = getOmega(a1, a2);
 		rotateOmega(chain, resNumber, -angle2*ANG_TO_RAD +angle*ANG_TO_RAD);
+	}
+
+	/** Set the dihedral angle Omega of residue resNumber in chain to the given angle
+	 * this is a NON SOLID BODY rotation
+	 */
+	public static void setOmegaNonSolid(Chain chain, int resNumber, double angle) throws Exception{
+		AminoAcid a1 = (AminoAcid)chain.getAtomGroup(resNumber);
+		AminoAcid a2 = (AminoAcid)chain.getAtomGroup(resNumber + 1);
+		double angle2 = getOmega(a1, a2);
+		rotateOmegaNonSolid(chain, resNumber, -angle2*ANG_TO_RAD +angle*ANG_TO_RAD);
 	}
 
 	public static void setPhiNonSolid(Chain chain, int resNumber, double angle) throws Exception{
@@ -253,7 +284,7 @@ public class Trans extends Calc {
 	public static void makeBondTrans(Chain chain, int resNumber){
 		try{
 		joinAmino(chain, resNumber);
-		setOmega(chain, resNumber, OMEGA_TRANS);
+		setOmegaNonSolid(chain, resNumber, OMEGA_TRANS);
 		}catch (Exception e){
 			e.printStackTrace();
 		}
