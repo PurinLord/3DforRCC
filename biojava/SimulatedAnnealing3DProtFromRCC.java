@@ -1,5 +1,6 @@
 package rccto3d.optimisation;
 
+import java.util.Vector;
 import java.util.Random;
 import java.lang.Math;
 import java.io.*;
@@ -26,7 +27,7 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	// Set initial temp
 	private double temp;
-	private double tempPercent = 0.15;
+	private double tempPercent = 0.1;
 	private int searchStepsTotal;
 	private int searchStepsCicle;
 
@@ -42,11 +43,20 @@ public class SimulatedAnnealing3DProtFromRCC
 	private String dirTargetStruc;
 	private String fileDir = "";
 
+	private int divNumSegment;
+	private int divMaxSize;
+	private int divMinSize;
+	private int divUndefMax;
+	private int divUndefMin;
+
 	private long initSeed;
 	// 0 - RCC
 	// 1 - RMSD
-	private int energyType = 1;
+	private int energyType = 0;
 	private boolean dualEnergy = false;
+
+	private Substitutor sub = null;
+	private Structure struc_seed = null;
 
 	private int targetRCC[]; 
 
@@ -103,6 +113,11 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	public void setCoolRate(double coolingRate){
 		this.coolingRate = coolingRate;
+	}
+
+	public void setSubsitutor(Substitutor sub, Structure struc_seed){
+		this.sub = sub;
+		this.struc_seed = struc_seed;
 	}
 
 	//Calculate the acceptance probability
@@ -238,7 +253,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
-			energy[1] = calcBackboneRMSD(s1, s2);
+			energy[1] = calcRMSD(s1, s2);
 		}
 		return energy;
 	}
@@ -251,7 +266,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
-			energy[1] = calcBackboneRMSD(s1, s2);
+			energy[1] = calcRMSD(s1, s2);
 		}
 		return energy;
 	}
@@ -281,6 +296,32 @@ public class SimulatedAnnealing3DProtFromRCC
 		for(int i=0; i<largo; i++){
 			double dPsi = cambioPsi * 2*(rdm.nextDouble() - 0.5);
 			double dPhi = cambioPhi * 2*(rdm.nextDouble() - 0.5);
+			//System.out.println(dPhi +" "+ dPsi);
+			Trans.rotatePsi(chain, i, dPsi);
+			Trans.rotatePhi(chain, i, dPhi);
+		}
+		return alterStruc;
+	}
+
+	public Structure alterConformationParts(Structure struc){
+		Structure alterStruc = (Structure)struc.clone();
+		Chain chain = alterStruc.getChain(0);
+		Random rdm =  new Random(System.currentTimeMillis());
+		int largo = chain.getAtomLength();
+		double dPsi;
+		double dPhi;
+		int index = 0;
+		Vector<Integer> segment = sub.getDivition().elementAt(index);
+		for(int i=0; i<largo; i++){
+			if(i == segment.elementAt(0)){
+				i += segment.elementAt(1);
+				index++;
+				if(index < sub.getDivition().size()){
+					segment = sub.getDivition().elementAt(index);
+				}
+			}
+			dPsi = cambioPsi * 2*(rdm.nextDouble() - 0.5);
+			dPhi = cambioPhi * 2*(rdm.nextDouble() - 0.5);
 			//System.out.println(dPhi +" "+ dPsi);
 			Trans.rotatePsi(chain, i, dPsi);
 			Trans.rotatePhi(chain, i, dPhi);
@@ -401,12 +442,16 @@ public class SimulatedAnnealing3DProtFromRCC
 		if(dirStartStruc != null){
 			if(dirStartStruc.substring(dirStartStruc.length() - 3).equals(".fa")){
 				try{
-					pff = new PDBfromFASTA();
-					pdb = pff.pdbFromFile(dirStartStruc, fastaID);
-					//ProteinSequence seq = new ProteinsSequence(dirStartStruc);
+					if(sub != null){
+						struc_ini = sub.fakeSubstitute(struc_seed);
+					}else{
+						pff = new PDBfromFASTA();
+						pdb = pff.pdbFromFile(dirStartStruc, fastaID);
+						//ProteinSequence seq = new ProteinsSequence(dirStartStruc);
 				
-					// Build initial Protein 3D structure
-					struc_ini = pff.randomShapeProtein(pdb, initSeed);
+						// Build initial Protein 3D structure
+						struc_ini = pff.randomShapeProtein(pdb, initSeed);
+					}
 				}catch(Exception e){
 					e.printStackTrace();
 				}
@@ -473,7 +518,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		// Initialize intial solution
 		currentRCC = calcRCC(fileDir + "struc_ini.pdb");
 		distance_ini[0] = calcSimilarity(targetRCC, currentRCC);
-		distance_ini[1] = calcBackboneRMSD(struc_ini,struc_target);
+		distance_ini[1] = calcRMSD(struc_ini,struc_target);
 		
 		if (verbos > 0){
 			System.out.println("Initial solution distance: " + distance_ini[0] + " " + distance_ini[1]);
@@ -493,10 +538,14 @@ public class SimulatedAnnealing3DProtFromRCC
 			// Search steps
 			for(int step = 0; step < searchStepsCicle; step++){
 				// Get a random conformation for this new neighbor
-				if(target != null){
-					struc_model = alterConformationAll(struc_fit, target);
+				if(sub != null){
+					struc_model = alterConformationParts(struc_fit);
 				}else{
-					struc_model = alterConformationAll(struc_fit);
+					if(target != null){
+						struc_model = alterConformationAll(struc_fit, target);
+					}else{
+						struc_model = alterConformationAll(struc_fit);
+					}
 				}
 				// Get energy of solution
 				neighbourEnergy = calcEnergy(struc_target, struc_model, targetRCC);
@@ -548,7 +597,7 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	public static void main(String[] args){
 		int searchStepsTotal = 3000;
-		int searchStepsCicle = 4;
+		int searchStepsCicle = 1;
 
 		double cambioPhi = 3.0;
 		double cambioPsi = 3.0;
@@ -563,6 +612,10 @@ public class SimulatedAnnealing3DProtFromRCC
 		SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal,searchStepsCicle,cambioPhi,
 																									cambioPsi,dirStartStruc,dirTargetStruc,fileDir,initSeed);
 		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(args[0], args[1]);
+		simA.setTemp(2);
+		Substitutor sub = new Substitutor(Trans.readPDB(args[1]));
+		sub.createDivition(4, 20, 10, 5, 2);
+		simA.setSubsitutor(sub, PDBfromFASTA.readPDB(args[3]));
 		simA.initialize(2);
 		simA.run(2);
 	}
