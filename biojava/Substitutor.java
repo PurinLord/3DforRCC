@@ -43,7 +43,7 @@ public void createDivition(int numSegment, int maxSize, int minSize, int undefMa
 	for(int i = 0; i < numSegment; i++){
 		start += size + generateRandom(undefMax, undefMin);
 		size = generateRandom(maxSize, minSize);
-		System.out.println(start+" "+size);
+		//System.out.println(start+" "+size);
 		segment = new Vector<Integer>(2);
 		segment.add(start);
 		segment.add(size);
@@ -63,11 +63,10 @@ public Structure fakeSubstitute(Structure moldStructure){
 	int index = 0;
 	for(int i = 0; i < divition.size(); i ++){
 		segment = divition.elementAt(i);
-		System.out.println(">"+segment.elementAt(0));
 		for(int j = 0; j < segment.elementAt(1); j++){
 			try{
 				index = segment.elementAt(0) + j;
-				System.out.println(index);
+				//System.out.println(index);
 				a1 = (AminoAcid)chainFrom.getAtomGroup(i);
 				a2 = (AminoAcid)chainFrom.getAtomGroup(i + 1);
 				angle = Trans.getPhiFix(a1, a2);

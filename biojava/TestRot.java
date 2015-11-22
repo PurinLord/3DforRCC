@@ -61,6 +61,7 @@ public class TestRot {
 		static double angle;
 		static double angle2;
 		static double angle3;
+		static double bondDist;
 
 		static AminoAcid a1;
 		static AminoAcid a2;
@@ -96,30 +97,55 @@ public class TestRot {
 
 			//struc2 = rccto3d.Trans.readPDB(args[0]);
 
-			//for(int i = 0; i < chain.getAtomLength() - 1; i++){
+			////////	Test Omega solid rotation
+			//for(int i = 9; i < 16; i++){
 			//	a1 = (AminoAcid)chain.getAtomGroup(i);
 			//	a2 = (AminoAcid)chain.getAtomGroup(i + 1);
-			//		//System.out.println(a1.toString());
 			//	angle = rccto3d.Trans.getPhi(a1, a2);
 			//	angle2 = rccto3d.Trans.getPsi(a1, a2);
-			//		System.out.println(angle + "  " + angle2);
-			//		//System.out.println(rccto3d.Trans.getDihedral(a1, a2));
-			//	//rccto3d.Trans.setOmega(chain, i, angle);
-			//	//angle = Math.round(angle);
-			//	//angle2 = Math.round(angle2);
-			//		//System.out.println(angle + "  " + angle2);
-			//	rccto3d.Trans.setPhi(chain2, i, angle);
-			//	rccto3d.Trans.setPsi(chain2, i, angle2);
-			//	a1 = (AminoAcid)chain2.getAtomGroup(i);
-			//	a2 = (AminoAcid)chain2.getAtomGroup(i + 1);
-			//	angle = rccto3d.Trans.getPhi(a1, a2);
-			//	angle2 = rccto3d.Trans.getPsi(a1, a2);
-			//	System.out.println(angle + "  " + angle2);
-			//		//System.out.println(rccto3d.Trans.getDihedral(a1, a2));
-			//	//rccto3d.Trans.makeBondTrans(chain, i);
-			//		//System.out.println(rccto3d.Trans.getDihedral(a1, a2));
+			//	angle3 = rccto3d.Trans.getOmega(a1, a2);
+			//	System.out.println(angle + "  " + angle2 + "  " + angle3);
 			//}
-			//rccto3d.Trans.writePDB("datos/tst1.pdb", chain2.getParent());
+			//System.out.println("");
+			//rccto3d.Trans.setOmega(chain, 11, 160);
+			//for(int i = 9; i < 16; i++){
+			//	a1 = (AminoAcid)chain.getAtomGroup(i);
+			//	a2 = (AminoAcid)chain.getAtomGroup(i + 1);
+			//	angle = rccto3d.Trans.getPhi(a1, a2);
+			//	angle2 = rccto3d.Trans.getPsi(a1, a2);
+			//	angle3 = rccto3d.Trans.getOmega(a1, a2);
+			//	System.out.println(angle + "  " + angle2 + "  " + angle3);
+			//}
+			
+			struc2 = rccto3d.Trans.readPDB(args[1]);
+			long elapsedTime = 0;
+			double dist;
+			long time;
+			simA.setEnergyType(0);
+			elapsedTime = System.nanoTime();
+			dist = simA.calcEnergy(struc, struc2)[0];
+			time = System.nanoTime() - elapsedTime;
+			System.out.println(dist+" "+ time/100000000.0);
+			elapsedTime = System.nanoTime();
+			double rmsd1 = simA.calcRMSD(struc, struc2);
+			time = System.nanoTime() - elapsedTime;
+			System.out.println(rmsd1 +" "+ time/100000000.0);
+			elapsedTime = System.nanoTime();
+			double rmsd1_1 = simA.calcBackboneRMSD(struc, struc2);
+			time = System.nanoTime() - elapsedTime;
+			System.out.println(rmsd1_1 +" "+ time/100000000.0);
+			elapsedTime = System.nanoTime();
+			double rmsd2 = simA.calcRMSD2(struc, struc2);
+			time = System.nanoTime() - elapsedTime;
+			System.out.println(rmsd2 +" "+ time/100000000.0);
+			elapsedTime = System.nanoTime();
+			double rmsd2_1 = simA.calcBackboneRMSD2(struc, struc2);
+			time = System.nanoTime() - elapsedTime;
+			System.out.println(rmsd2_1 +" "+ time/100000000.0);
+			elapsedTime = System.nanoTime();
+			double rmsd3 = simA.calcRMSD3(struc, struc2);
+			time = System.nanoTime() - elapsedTime;
+			System.out.println(rmsd3 +" "+ time/100000000.0);
 
 			//////	Redondea ángulos
 			//struc2 = (Structure)struc.clone();
@@ -141,32 +167,33 @@ public class TestRot {
 			//System.out.println(dist[0] + "  " + dist[1]);
 			//rccto3d.PDBfromFASTA.writePDB("datos/tst1.pdb", chain.getParent());
 
-			//////	Checa diferencia entre estructura original y la generada
-			String pdb = pff.pdbFromFile(args[1], "a");
-			Structure struc2 = pff.shapeProtein(pdb);
-			Chain chain2 = struc2.getChain(0);
-			//rccto3d.Trans.writePDB("simDatos/deltaEst_pre.pdb", chain2.getParent());
-			for(int i = 0; i < chain.getAtomLength() - 1; i++){
-			rccto3d.Trans.writePDB("datos/d_"+i+".pdb", chain2.getParent());
-				a1 = (AminoAcid)chain.getAtomGroup(i);
-				a2 = (AminoAcid)chain.getAtomGroup(i + 1);
-				angle = rccto3d.Trans.getPhi(a1, a2);
-				angle2 = rccto3d.Trans.getPsi(a1, a2);
-				angle3 = rccto3d.Trans.getOmega(a1, a2);
-				System.out.println(angle + "  " + angle2 + "  " + angle3);
-				rccto3d.Trans.setPhi(chain2, i, angle);
-				rccto3d.Trans.setPsi(chain2, i, angle2);
-				//rccto3d.Trans.setOmega(chain2, i, angle3);
-				a1 = (AminoAcid)chain2.getAtomGroup(i);
-				a2 = (AminoAcid)chain2.getAtomGroup(i + 1);
-				angle = rccto3d.Trans.getPhi(a1, a2);
-				angle2 = rccto3d.Trans.getPsi(a1, a2);
-				angle3 = rccto3d.Trans.getOmega(a1, a2);
-				System.out.println(angle + "  " + angle2 + "  " + angle3);
-			}
-			rccto3d.Trans.writePDB("simDatos/deltaEst.pdb", chain2.getParent());
-			System.out.println("> "+simA.calcEnergy(chain.getParent(),chain2.getParent())[0]);
-			System.out.println("> "+simA.calcEnergy(chain.getParent(),chain2.getParent())[1]);
+			////////	Checa diferencia entre estructura original y la generada
+			//String pdb = pff.pdbFromFile(args[1], "a");
+			//Structure struc2 = pff.shapeProtein(pdb);
+			//Chain chain2 = struc2.getChain(0);
+			////rccto3d.Trans.writePDB("simDatos/deltaEst_pre.pdb", chain2.getParent());
+			//for(int i = 0; i < chain.getAtomLength() - 1; i++){
+			//	a1 = (AminoAcid)chain.getAtomGroup(i);
+			//	a2 = (AminoAcid)chain.getAtomGroup(i + 1);
+			//	angle = rccto3d.Trans.getPhi(a1, a2);
+			//	angle2 = rccto3d.Trans.getPsi(a1, a2);
+			//	angle3 = rccto3d.Trans.getOmega(a1, a2);
+			//	bondDist = rccto3d.Trans.bondDist(chain, i);
+			//	System.out.println(angle + "  " + angle2 + "\t" + angle3 + "\t\t" + bondDist);
+			//	rccto3d.Trans.setPhi(chain2, i, angle);
+			//	rccto3d.Trans.setPsi(chain2, i, angle2);
+			//	rccto3d.Trans.setOmega(chain2, i, angle3);
+			//	a1 = (AminoAcid)chain2.getAtomGroup(i);
+			//	a2 = (AminoAcid)chain2.getAtomGroup(i + 1);
+			//	angle = rccto3d.Trans.getPhi(a1, a2);
+			//	angle2 = rccto3d.Trans.getPsi(a1, a2);
+			//	angle3 = rccto3d.Trans.getOmega(a1, a2);
+			//	bondDist = rccto3d.Trans.bondDist(chain2, i);
+			//	System.out.println(angle + "  " + angle2 + "\t" + angle3 + "\t\t" + bondDist);
+			//}
+			//rccto3d.Trans.writePDB("simDatos/deltaEst.pdb", chain2.getParent());
+			//System.out.println("> "+simA.calcEnergy(chain.getParent(),chain2.getParent())[0]);
+			//System.out.println("> "+simA.calcEnergy(chain.getParent(),chain2.getParent())[1]);
 
 			////////	Checa diferencia entre omega
 			//String pdb = pff.pdbFromFile(args[1], "a");

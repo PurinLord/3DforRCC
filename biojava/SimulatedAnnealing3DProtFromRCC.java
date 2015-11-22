@@ -17,6 +17,7 @@ import org.biojava.bio.structure.align.fatcat.calc.FatCatParameters ;
 import org.biojava.bio.structure.align.fatcat.FatCatRigid;
 import org.biojava.bio.structure.align.ce.CeParameters;
 import org.biojava.bio.structure.align.ce.CeMain;
+import org.biojava.bio.structure.align.seq.SmithWaterman3Daligner;
 
 import rccto3d.*;
 import rccto3d.Trans;
@@ -52,7 +53,7 @@ public class SimulatedAnnealing3DProtFromRCC
 	private long initSeed;
 	// 0 - RCC
 	// 1 - RMSD
-	private int energyType = 0;
+	private int energyType = 1;
 	private boolean dualEnergy = false;
 
 	private Substitutor sub = null;
@@ -93,6 +94,10 @@ public class SimulatedAnnealing3DProtFromRCC
 		this.dirTargetStruc = dirTargetStruc;
 		this.fileDir = fileDir;
 		this.initSeed = initSeed;
+	}
+
+	public void setEnergyType(int type){
+		this.energyType = type;
 	}
 
 	public void setFastaID(String id){
@@ -223,9 +228,50 @@ public class SimulatedAnnealing3DProtFromRCC
  			// get default parameters
  			CeParameters params = new CeParameters();
  			// set the maximum gap size to unlimited 
+ 			//params.setMaxGapSize(-1);
+ 			
+ 			AFPChain afpChain = algorithm.align(ca1,ca2,params);            
+
+			currentRMSd = afpChain.getChainRmsd();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return currentRMSd;
+	}
+
+	public double calcBackboneRMSD2(Structure struc_target, Structure struc_current){
+		double currentRMSd = 0.0;
+		try {
+ 			StructureAlignment algorithm  = StructureAlignmentFactory.getAlgorithm(CeMain.algorithmName);
+ 			
+			Atom[] ca1 = StructureTools.getBackboneAtomArray(struc_target);
+			Atom[] ca2 = StructureTools.getBackboneAtomArray(struc_current);
+ 			
+ 			// get default parameters
+ 			CeParameters params = new CeParameters();
+ 			// set the maximum gap size to unlimited 
  			params.setMaxGapSize(-1);
  			
  			AFPChain afpChain = algorithm.align(ca1,ca2,params);            
+
+			currentRMSd = afpChain.getChainRmsd();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return currentRMSd;
+	}
+
+	public double calcRMSD3(Structure struc_target, Structure struc_current){
+		double currentRMSd = 0.0;
+		try {
+ 			StructureAlignment algorithm  = StructureAlignmentFactory.getAlgorithm(CeMain.algorithmName);
+ 			
+			Atom[] ca1 = StructureTools.getAtomCAArray(struc_target);
+			Atom[] ca2 = StructureTools.getAtomCAArray(struc_current);
+ 			
+			SmithWaterman3Daligner swAligner = new SmithWaterman3Daligner();
+ 			
+ 			AFPChain afpChain = swAligner.align(ca1,ca2);            
 
 			currentRMSd = afpChain.getChainRmsd();
 		}catch (Exception e) {
@@ -253,7 +299,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
-			energy[1] = calcRMSD(s1, s2);
+			energy[1] = calcRMSD3(s1, s2);
 		}
 		return energy;
 	}
@@ -266,7 +312,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
-			energy[1] = calcRMSD(s1, s2);
+			energy[1] = calcRMSD3(s1, s2);
 		}
 		return energy;
 	}
@@ -402,7 +448,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			//PDBfromFASTA.writePDB(fileDir + "calcTmp1.pdb", alterStruc);
 			//alterRCC = calcRCC(fileDir + "calcTmp1.pdb");
 			//currentEnergy = calcSimilarity(seedRCC, alterRCC);;
-			//currentEnergy[1] = calcRMSD(struc_seed,alterStruc);
+			//currentEnergy[1] = calcRMSD3(struc_seed,alterStruc);
 
 			//max = Math.max(max, currentEnergy[energyType]);
 			sum += currentEnergy[energyType];
@@ -518,7 +564,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		// Initialize intial solution
 		currentRCC = calcRCC(fileDir + "struc_ini.pdb");
 		distance_ini[0] = calcSimilarity(targetRCC, currentRCC);
-		distance_ini[1] = calcRMSD(struc_ini,struc_target);
+		distance_ini[1] = calcRMSD3(struc_ini,struc_target);
 		
 		if (verbos > 0){
 			System.out.println("Initial solution distance: " + distance_ini[0] + " " + distance_ini[1]);
@@ -552,7 +598,7 @@ public class SimulatedAnnealing3DProtFromRCC
 				//PDBfromFASTA.writePDB(fileDir + "struc_model.pdb", struc_model);
 				//modelRCC = calcRCC(fileDir + "struc_2.pdb");
 				//neighbourEnergy[0] = calcSimilarity(targetRCC, modelRCC);
-				//neighbourEnergy[1] = calcRMSD(struc_target, struc_model);
+				//neighbourEnergy[1] = calcRMSD3(struc_target, struc_model);
 			
 				// Decide if we should accept the neighbour
 				if (acceptanceProbability(currentEnergy[energyType], neighbourEnergy[energyType], temp) > rdm.nextDouble()) {
@@ -596,11 +642,11 @@ public class SimulatedAnnealing3DProtFromRCC
   }
 
 	public static void main(String[] args){
-		int searchStepsTotal = 3000;
-		int searchStepsCicle = 1;
+		int searchStepsTotal = 4000;
+		int searchStepsCicle = 4;
 
-		double cambioPhi = 3.0;
-		double cambioPsi = 3.0;
+		double cambioPhi = 8.0;
+		double cambioPsi = 8.0;
 
 		String dirStartStruc = args[0];
 		String dirTargetStruc = args[1];
@@ -613,9 +659,9 @@ public class SimulatedAnnealing3DProtFromRCC
 																									cambioPsi,dirStartStruc,dirTargetStruc,fileDir,initSeed);
 		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(args[0], args[1]);
 		simA.setTemp(2);
-		Substitutor sub = new Substitutor(Trans.readPDB(args[1]));
-		sub.createDivition(4, 20, 10, 5, 2);
-		simA.setSubsitutor(sub, PDBfromFASTA.readPDB(args[3]));
+		//Substitutor sub = new Substitutor(Trans.readPDB(args[1]));
+		//sub.createDivition(4, 20, 10, 5, 2);
+		//simA.setSubsitutor(sub, PDBfromFASTA.readPDB(args[3]));
 		simA.initialize(2);
 		simA.run(2);
 	}

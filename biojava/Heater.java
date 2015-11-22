@@ -38,8 +38,8 @@ public static void main(String args[]){
 		
 		currentRMSd = simA.calcRMSD2(struc_ini, struc_fin);
 		System.out.println("RM2> " + currentRMSd);
-		currentRMSd = simA.calcRMSD(struc_ini, struc_fin);
-		System.out.println("RMS: " + currentRMSd);
+		//currentRMSd = simA.calcRMSD(struc_ini, struc_fin);
+		//System.out.println("RMS: " + currentRMSd);
 
 		searchCount ++;
 	}
