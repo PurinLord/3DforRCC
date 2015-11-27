@@ -28,7 +28,7 @@ public static void main(String args[]){
 	Structure struc_ini = PDBfromFASTA.readPDB(args[0]);
 	Structure struc_fin = PDBfromFASTA.readPDB(args[0]);
 	float minRMSd = Float.parseFloat(args[1]);
-	float variation = minRMSd/100;
+	float variation = minRMSd/1000;
 	double currentRMSd = 0.0;
 	int searchCount = 0;
 	
@@ -36,7 +36,7 @@ public static void main(String args[]){
 	while(currentRMSd < minRMSd){
 		struc_fin = simA.alterConformationAll(struc_fin, variation, variation);
 		
-		currentRMSd = simA.calcRMSD2(struc_ini, struc_fin);
+		currentRMSd = simA.calcRMSD3(struc_ini, struc_fin);
 		System.out.println("RM2> " + currentRMSd);
 		//currentRMSd = simA.calcRMSD(struc_ini, struc_fin);
 		//System.out.println("RMS: " + currentRMSd);

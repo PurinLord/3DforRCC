@@ -117,35 +117,42 @@ public class TestRot {
 			//	System.out.println(angle + "  " + angle2 + "  " + angle3);
 			//}
 			
-			struc2 = rccto3d.Trans.readPDB(args[1]);
-			long elapsedTime = 0;
-			double dist;
-			long time;
-			simA.setEnergyType(0);
-			elapsedTime = System.nanoTime();
-			dist = simA.calcEnergy(struc, struc2)[0];
-			time = System.nanoTime() - elapsedTime;
-			System.out.println(dist+" "+ time/100000000.0);
-			elapsedTime = System.nanoTime();
-			double rmsd1 = simA.calcRMSD(struc, struc2);
-			time = System.nanoTime() - elapsedTime;
-			System.out.println(rmsd1 +" "+ time/100000000.0);
-			elapsedTime = System.nanoTime();
-			double rmsd1_1 = simA.calcBackboneRMSD(struc, struc2);
-			time = System.nanoTime() - elapsedTime;
-			System.out.println(rmsd1_1 +" "+ time/100000000.0);
-			elapsedTime = System.nanoTime();
-			double rmsd2 = simA.calcRMSD2(struc, struc2);
-			time = System.nanoTime() - elapsedTime;
-			System.out.println(rmsd2 +" "+ time/100000000.0);
-			elapsedTime = System.nanoTime();
-			double rmsd2_1 = simA.calcBackboneRMSD2(struc, struc2);
-			time = System.nanoTime() - elapsedTime;
-			System.out.println(rmsd2_1 +" "+ time/100000000.0);
-			elapsedTime = System.nanoTime();
-			double rmsd3 = simA.calcRMSD3(struc, struc2);
-			time = System.nanoTime() - elapsedTime;
-			System.out.println(rmsd3 +" "+ time/100000000.0);
+			System.out.println(simA.angleCooling(0));
+			System.out.println(simA.angleCooling(0.01));
+			System.out.println(simA.angleCooling(0.2));
+			System.out.println(simA.angleCooling(0.4));
+			System.out.println(simA.angleCooling(1));
+			
+			////////	Energy comparation
+			//struc2 = rccto3d.Trans.readPDB(args[1]);
+			//long elapsedTime = 0;
+			//double dist;
+			//long time;
+			//simA.setEnergyType(0);
+			//elapsedTime = System.nanoTime();
+			//dist = simA.calcEnergy(struc, struc2)[0];
+			//time = System.nanoTime() - elapsedTime;
+			//System.out.println(dist+" "+ time/100000000.0);
+			//elapsedTime = System.nanoTime();
+			//double rmsd1 = simA.calcRMSD(struc, struc2);
+			//time = System.nanoTime() - elapsedTime;
+			//System.out.println(rmsd1 +" "+ time/100000000.0);
+			//elapsedTime = System.nanoTime();
+			//double rmsd1_1 = simA.calcBackboneRMSD(struc, struc2);
+			//time = System.nanoTime() - elapsedTime;
+			//System.out.println(rmsd1_1 +" "+ time/100000000.0);
+			//elapsedTime = System.nanoTime();
+			//double rmsd2 = simA.calcRMSD2(struc, struc2);
+			//time = System.nanoTime() - elapsedTime;
+			//System.out.println(rmsd2 +" "+ time/100000000.0);
+			//elapsedTime = System.nanoTime();
+			//double rmsd2_1 = simA.calcBackboneRMSD2(struc, struc2);
+			//time = System.nanoTime() - elapsedTime;
+			//System.out.println(rmsd2_1 +" "+ time/100000000.0);
+			//elapsedTime = System.nanoTime();
+			//double rmsd3 = simA.calcRMSD3(struc, struc2);
+			//time = System.nanoTime() - elapsedTime;
+			//System.out.println(rmsd3 +" "+ time/100000000.0);
 
 			//////	Redondea ángulos
 			//struc2 = (Structure)struc.clone();

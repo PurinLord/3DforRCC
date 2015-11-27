@@ -28,7 +28,7 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	// Set initial temp
 	private double temp;
-	private double tempPercent = 0.1;
+	private double tempPercent = 0.15;
 	private int searchStepsTotal;
 	private int searchStepsCicle;
 
@@ -36,19 +36,24 @@ public class SimulatedAnnealing3DProtFromRCC
   private double coolingRate;
 
 	//factor de cambio para Phi y Psi
+	private double initPhi;
+	private double initPsi;
+	private double minPhi;
+	private double minPsi;
 	private double cambioPhi;
 	private double cambioPsi;
+	private double angleSteps = 0;
 
 	private String dirStartStruc;
 	private String fastaID = "a";
 	private String dirTargetStruc;
 	private String fileDir = "";
 
-	private int divNumSegment;
-	private int divMaxSize;
-	private int divMinSize;
-	private int divUndefMax;
-	private int divUndefMin;
+	//private int divNumSegment;
+	//private int divMaxSize;
+	//private int divMinSize;
+	//private int divUndefMax;
+	//private int divUndefMin;
 
 	private long initSeed;
 	// 0 - RCC
@@ -72,23 +77,25 @@ public class SimulatedAnnealing3DProtFromRCC
 		this.temp = 0;
 		this.coolingRate = 0;
 
-		cambioPhi = 9.0;
-		cambioPsi = 9.0;
+		initPhi = cambioPhi = 9.0;
+		initPsi = cambioPsi = 9.0;
+		this.minPhi = 0.01;
+		this.minPsi = 0.01;
 		this.dirStartStruc = dirStartStruc;
 		this.dirTargetStruc = dirTargetStruc;
 		fileDir = "out/";
 		initSeed = (long)(1000*Math.random());
 	}
 
-	public SimulatedAnnealing3DProtFromRCC(int searchStepsTotal, int searchStepsCicle, double cambioPhi, double cambioPsi,
+	public SimulatedAnnealing3DProtFromRCC(int searchStepsTotal, int searchStepsCicle, double anguloInicial, double anguloFinal,
 																					String dirStartStruc, String dirTargetStruc, String fileDir, long initSeed){
 		this.searchStepsTotal = searchStepsTotal;
 		this.searchStepsCicle = searchStepsCicle;
 		this.temp = 0;
 		this.coolingRate = 0;
 
-		this.cambioPhi = cambioPhi;
-		this.cambioPsi = cambioPsi;
+		this.initPhi = this.cambioPhi = this.initPsi = this.cambioPsi = anguloInicial;
+		this.minPhi = this.minPsi = anguloFinal;
 
 		this.dirStartStruc = dirStartStruc;
 		this.dirTargetStruc = dirTargetStruc;
@@ -415,8 +422,12 @@ public class SimulatedAnnealing3DProtFromRCC
 		return alterStruc;
 	}
 
-	public double stdCooling(double temperature){
-		return temperature * (1-coolingRate);
+	public double angleCooling(double time){
+		return initPhi*Math.exp(-time/(-1.0/Math.log(minPhi/initPhi)));
+	}
+
+	public double stdCooling(double temp){
+		return temp * (1-coolingRate);
 	}
 
 	public double linearCooling(double temp){
@@ -430,6 +441,7 @@ public class SimulatedAnnealing3DProtFromRCC
 	//verbos 0 - none
 	//			 1 - just solutions
 	//			 2 - all
+	//			 3 - temp calc
 	
 	public double calcInitialTemp(int verbos, Structure struc_seed){
 		PDBfromFASTA.writePDB(fileDir + "calcTmp0.pdb", struc_seed);
@@ -437,7 +449,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		//int alterRCC[];
 		Structure alterStruc = (Structure)struc_seed.clone();
 		int count = 0;
-		int searchStepsCicle = 50;
+		int searchStepsCicle = 100;
 		//double max = 0;
 		double sum = 0;
 		double currentEnergy[]={0.0,0.0};
@@ -582,6 +594,9 @@ public class SimulatedAnnealing3DProtFromRCC
 		// Loop until system has cooled
 		for (;temp > 1;temp = stdCooling(temp)){
 			// Search steps
+			cambioPhi = angleCooling(angleSteps);
+			cambioPsi = cambioPhi;
+			angleSteps += (double)searchStepsCicle/searchStepsTotal;
 			for(int step = 0; step < searchStepsCicle; step++){
 				// Get a random conformation for this new neighbor
 				if(sub != null){
@@ -628,7 +643,11 @@ public class SimulatedAnnealing3DProtFromRCC
 						//for(int i : modelRCC){System.out.print(i + " ");}
 						//System.out.print("\n");
 					}
-					System.out.println(neighbourEnergy[0] +"\t\t"+ neighbourEnergy[1]);
+					if(dualEnergy){
+						System.out.println(neighbourEnergy[0] +"\t\t"+ neighbourEnergy[1]);
+					}else{
+						System.out.println(neighbourEnergy[energyType] +"\t\t"+ cambioPhi);
+					}
 				}
 			}
 		}
@@ -643,10 +662,10 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	public static void main(String[] args){
 		int searchStepsTotal = 4000;
-		int searchStepsCicle = 4;
+		int searchStepsCicle = 3;
 
-		double cambioPhi = 8.0;
-		double cambioPsi = 8.0;
+		double cambioPhi = 15.0;
+		double cambioPsi = 15.0;
 
 		String dirStartStruc = args[0];
 		String dirTargetStruc = args[1];
@@ -658,7 +677,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal,searchStepsCicle,cambioPhi,
 																									cambioPsi,dirStartStruc,dirTargetStruc,fileDir,initSeed);
 		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(args[0], args[1]);
-		simA.setTemp(2);
+		//simA.setTemp(2.5);
 		//Substitutor sub = new Substitutor(Trans.readPDB(args[1]));
 		//sub.createDivition(4, 20, 10, 5, 2);
 		//simA.setSubsitutor(sub, PDBfromFASTA.readPDB(args[3]));
