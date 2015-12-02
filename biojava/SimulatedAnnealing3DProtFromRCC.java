@@ -284,7 +284,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		return currentRMSd;
+		return currentRMSd*100;
 	}
 
 	public double calcSimilarity(int[] rcc1, int[] rcc2){
@@ -540,7 +540,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		if (verbos > 0){
 			outString = dirStartStruc + " " + dirTargetStruc + 
 				"\ntemp "+temp +" coolRate "+coolingRate+" totalSearchSteps "+searchStepsTotal+" searchStepsCicle "+searchStepsCicle +
-				"\ncamio Phi " + cambioPhi + " cambio Psi " + cambioPsi + " initSeed " + initSeed;
+				"\nangulo Inicial " + initPhi + " angulo final " + minPhi + " initSeed " + initSeed;
 			if (verbos > 1){
 				for(int i : targetRCC){System.out.print(i + " ");}
 				System.out.println(outString);
@@ -661,11 +661,11 @@ public class SimulatedAnnealing3DProtFromRCC
   }
 
 	public static void main(String[] args){
-		int searchStepsTotal = 4000;
-		int searchStepsCicle = 3;
+		int searchStepsTotal = 20000;
+		int searchStepsCicle = 1;
 
-		double cambioPhi = 15.0;
-		double cambioPsi = 15.0;
+		double anguloInicial = 0.05;
+		double anguloFinal = 0.001;
 
 		String dirStartStruc = args[0];
 		String dirTargetStruc = args[1];
@@ -674,10 +674,10 @@ public class SimulatedAnnealing3DProtFromRCC
 		if(args.length>2){
 			fileDir = args[2];
 		}
-		SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal,searchStepsCicle,cambioPhi,
-																									cambioPsi,dirStartStruc,dirTargetStruc,fileDir,initSeed);
+		SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal,searchStepsCicle,anguloInicial,
+																									anguloFinal,dirStartStruc,dirTargetStruc,fileDir,initSeed);
 		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(args[0], args[1]);
-		//simA.setTemp(2.5);
+		simA.setTemp(2.5);
 		//Substitutor sub = new Substitutor(Trans.readPDB(args[1]));
 		//sub.createDivition(4, 20, 10, 5, 2);
 		//simA.setSubsitutor(sub, PDBfromFASTA.readPDB(args[3]));

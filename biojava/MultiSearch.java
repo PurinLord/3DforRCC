@@ -43,8 +43,9 @@ public class MultiSearch implements Runnable{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-	} public static void main(String args[]){
-
+	}
+	
+	public static void main(String args[]){
 		int searchStepsTotal = 4000;
 		int searchSteps = 3;
 		double anguloInicial = 14;
