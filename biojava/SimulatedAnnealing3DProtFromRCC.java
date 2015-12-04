@@ -58,7 +58,7 @@ public class SimulatedAnnealing3DProtFromRCC
 	private long initSeed;
 	// 0 - RCC
 	// 1 - RMSD
-	private int energyType = 1;
+	private int energyType = 0;
 	private boolean dualEnergy = false;
 
 	private Substitutor sub = null;
@@ -551,7 +551,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		return null;
 	}
 
-	public float run(int verbos){
+	public double run(int verbos){
 		//Mesure time
 		long elapsedTime = 0;
 		if (verbos > 0){
@@ -657,11 +657,11 @@ public class SimulatedAnnealing3DProtFromRCC
 			elapsedTime = System.nanoTime() - elapsedTime;
 			System.out.println("Total execution time: " + elapsedTime/3600000000000.0);
 		}
-		return (float)best;
+		return best;
   }
 
 	public static void main(String[] args){
-		int searchStepsTotal = 20000;
+		int searchStepsTotal = 3000;
 		int searchStepsCicle = 1;
 
 		double anguloInicial = 0.05;
