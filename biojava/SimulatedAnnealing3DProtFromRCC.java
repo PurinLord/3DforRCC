@@ -58,7 +58,7 @@ public class SimulatedAnnealing3DProtFromRCC
 	private long initSeed;
 	// 0 - RCC
 	// 1 - RMSD
-	private int energyType = 0;
+	private int energyType = 1;
 	private boolean dualEnergy = false;
 
 	private Substitutor sub = null;
