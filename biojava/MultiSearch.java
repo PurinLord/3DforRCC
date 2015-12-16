@@ -18,6 +18,7 @@ public class MultiSearch implements Runnable{
 		this.simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal, searchSteps, angIni, angFin, dirStartStruc,
 																	 dirTargetStruc, fileDir, initSeed);
 		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(dirStartStruc, dirTargetStruc);
+		this.simA.setEnergyType(1);
 		this.fileDir = fileDir;
 		File f = new File(fileDir);
 		if (!f.exists()){

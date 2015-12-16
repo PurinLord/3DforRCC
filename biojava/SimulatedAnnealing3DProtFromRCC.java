@@ -60,6 +60,7 @@ public class SimulatedAnnealing3DProtFromRCC
 	// 1 - RMSD
 	private int energyType = 1;
 	private boolean dualEnergy = false;
+	private boolean rawAccept = false;
 
 	private Substitutor sub = null;
 	private Structure struc_seed = null;
@@ -107,6 +108,10 @@ public class SimulatedAnnealing3DProtFromRCC
 		this.energyType = type;
 	}
 
+	public void setRawAccept(boolean rawAccept){
+		this.rawAccept = rawAccept;
+	}
+
 	public void setFastaID(String id){
 		fastaID = id;
 	}
@@ -134,13 +139,16 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	//Calculate the acceptance probability
 	public double acceptanceProbability(double energy, double newEnergy, double temperature) {
+		if(rawAccept){
+			return rawAcceptanceProbability(energy, newEnergy);
+   	}
 		// If the new solution is better, accept it
 		if (newEnergy < energy) return 1.0;
 		// If the new solution is worse, calculate an acceptance probability
 		return Math.exp((energy - newEnergy) / temperature);
 	}
 
-	public double rawAcceptanceProbability(double energy, double newEnergy, double blhe) {
+	public double rawAcceptanceProbability(double energy, double newEnergy) {
 		if (newEnergy < energy) return 1.0;
 		return 0.0;
 	}

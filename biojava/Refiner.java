@@ -20,7 +20,7 @@ public class Refiner{
 	static double beast;
 
 	public Refiner(String dirStartStruc, String dirTargetStruc, String fileDir){
-		searchStepsTotal = 20000;
+		searchStepsTotal = 2000;
 		searchStepsCicle = 1;
 		anguloInicial = 0.01;
 		anguloFinal = 0.001;
@@ -47,9 +47,10 @@ public class Refiner{
 		}
 		SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal,searchStepsCicle,anguloInicial,
 																									anguloFinal,dirStartStruc,dirTargetStruc,fileDir,initSeed);
+		simA.setRawAccept(true);
 		simA.setEnergyType(1);
 		simA.setTemp(4);
-		simA.initialize(1);
+		simA.initialize(0);
 		beast = simA.run(0);
 		return beast;
 	}
