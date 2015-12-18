@@ -47,9 +47,9 @@ public class MultiSearch implements Runnable{
 	}
 	
 	public static void main(String args[]){
-		int searchStepsTotal = 4000;
+		int searchStepsTotal = 3000;
 		int searchSteps = 3;
-		double anguloInicial = 14;
+		double anguloInicial = 9;
 		double anguloFinal = 0.001;
 		String dirStartStruc = args[0];
 		String dirTargetStruc = args[1];
@@ -69,6 +69,7 @@ public class MultiSearch implements Runnable{
 			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,dirStartStruc,dirTargetStruc,
 																	fileDir + i + "/",i*rdm.nextLong());
 			mSearch.simA.setTemp(temp);
+			mSearch.simA.setSubsitutor(args[1]);
 			mSearch.write("rcc.out", mSearch.simA.initialize(1));
 
 			(new Thread(mSearch)).start();

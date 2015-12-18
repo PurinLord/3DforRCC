@@ -25,6 +25,9 @@ heat:
 subst:
 	javac -d . Substitutor.java
 
+manager:
+	javac -d . RCCManager.java
+
 mrclass:
 	javac -d . MakeRClass.java
 

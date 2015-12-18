@@ -21,8 +21,8 @@ int divLength;
 PDBfromFASTA pff = null;
 Random rdm;
 
-public Substitutor(Structure struc){
-	subStructure = struc;
+public Substitutor(Structure subStructure){
+	this.subStructure = subStructure;
 	//rdm =  new Random(System.currentTimeMillis());
 }
 
@@ -36,6 +36,11 @@ public Vector<Vector<Integer>> getDivition(){
 
 public void createDivition(int numSegment, int maxSize, int minSize, int undefMax, int undefMin){
 	//Vector<Integer>[] divition = (Vector<Integer>[]) new Vector<Integer>[numSegment];
+	int largoStruc = this.subStructure.getChain(0).getAtomLength();
+	int largoDiv = (numSegment * maxSize) + (numSegment * undefMax);
+	//if(largoStruc < largoDiv){
+	//	throw new IllegalArgumentException();
+	//}
 	Vector<Vector<Integer>> divition = new Vector<Vector<Integer>>(numSegment);
 	Vector<Integer> segment;
 	int size = 0;
@@ -100,38 +105,11 @@ public Structure fakeSubstitute(Structure fitStruc, int getFrom, int getTo, int 
 	return subStructure;
 }
 
-public Structure fakeSubstitute(Structure outStruc, int startAt){
-	//System.out.println(fitStruc.getChain(0).getAtomLength() + " " + outStruc.getChain(0).getAtomLength());
-	//for(int i = 0; i < outStruc.getChain(0).getAtomLength() -1; i ++){
-	//	Chain chain = fitStruc.getChain(0);
-	//	try{
-	//		double angle = Trans.getPhiFix((AminoAcid)chain.getAtomGroup(i + startAt), (AminoAcid)chain.getAtomGroup(i + startAt + 1));
-	//		Trans.setPhi(outStruc.getChain(0), i, angle);
-	//	}catch(Exception e){
-  //		e.printStackTrace();
-	//	}
-	//}
-	return outStruc;
-}
-
-public Structure fakeSubstitute(String fileName, String identifier, int startAt){
-	pff = new PDBfromFASTA();
-	try{
-		Structure outStruc = pff.makeProtein(pff.pdbFromFile(fileName, identifier));
-		return fakeSubstitute(outStruc, startAt);
-	}catch(Exception e){
-  	e.printStackTrace();
-		return null;
-	}
-}
-
 public int generateRandom(int max, int min){
 	Random rdm =  new Random(System.currentTimeMillis());
-	int size = rdm.nextInt(max);
-	while(size<min){
-		size = rdm.nextInt(max);
-	}
-	return size;
+	if(max == min)return max;
+	int size = rdm.nextInt(max-min);
+	return size+min;
 }
 
 public static void main(String args[]){
