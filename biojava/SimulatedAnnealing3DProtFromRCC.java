@@ -142,8 +142,7 @@ public class SimulatedAnnealing3DProtFromRCC
 	}
 
 	public void setSubsitutor(String dirStrucSeed){
-		Structure struc_seed =PDBfromFASTA.readPDB(dirStrucSeed);
-		this.struc_subSeed = struc_subSeed;
+		this.struc_subSeed =PDBfromFASTA.readPDB(dirStrucSeed);
 	}
 
 	//Calculate the acceptance probability

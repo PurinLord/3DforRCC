@@ -70,7 +70,7 @@ public class MultiSearch implements Runnable{
 																	fileDir + i + "/",i*rdm.nextLong());
 			mSearch.simA.setTemp(temp);
 			mSearch.simA.setSubsitutor(args[1]);
-			mSearch.write("rcc.out", mSearch.simA.initialize(1));
+			mSearch.write("rep.out", mSearch.simA.initialize(1));
 
 			(new Thread(mSearch)).start();
 		}
