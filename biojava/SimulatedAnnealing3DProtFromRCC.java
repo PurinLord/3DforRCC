@@ -23,6 +23,8 @@ import rccto3d.*;
 import rccto3d.Trans;
 import rccto3d.PDBfromFASTA;
 
+//import org.SmithWaterman3Daligner;
+
 public class SimulatedAnnealing3DProtFromRCC 
 {
 
@@ -287,11 +289,8 @@ public class SimulatedAnnealing3DProtFromRCC
 	public double calcRMSD3(Structure struc_current, Structure struc_target){
 		double currentRMSd = 0.0;
 		try {
- 			StructureAlignment algorithm  = StructureAlignmentFactory.getAlgorithm(CeMain.algorithmName);
- 			
 			Atom[] ca1 = StructureTools.getAtomCAArray(struc_current);
 			Atom[] ca2 = StructureTools.getAtomCAArray(struc_target);
- 			
 			SmithWaterman3Daligner swAligner = new SmithWaterman3Daligner();
  			
  			AFPChain afpChain = swAligner.align(ca1,ca2);            
@@ -301,6 +300,25 @@ public class SimulatedAnnealing3DProtFromRCC
 			e.printStackTrace();
 		}
 		return currentRMSd*100;
+	}
+
+	public double calcRMSD_New(String dir1, String dir2){
+		double rmsd=0;
+		try{
+		String s1 = "-rmsOnly -pair";
+		Process p = Runtime.getRuntime().exec("./SPalignNS "+s1+" "+dir1+" "+dir2);
+		BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		rmsd = Double.parseDouble(in.readLine());
+		}catch(Exception e){
+  		e.printStackTrace();
+		}
+		return rmsd;
+	}
+
+	public double calcRMSD_New(Structure struc_current, Structure struc_target){
+		PDBfromFASTA.writePDB(fileDir + "struc_1.pdb", struc_current);
+		PDBfromFASTA.writePDB(fileDir + "struc_2.pdb", struc_target);
+		return calcRMSD_New(fileDir + "struc_1.pdb", fileDir + "struc_2.pdb");
 	}
 
 	public double calcSimilarity(int[] rcc1, int[] rcc2){
@@ -322,7 +340,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
-			energy[1] = calcRMSD3(s1, s2);
+			energy[1] = calcRMSD_New(s1, s2);
 		}
 		return energy;
 	}
@@ -335,7 +353,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
-			energy[1] = calcRMSD3(s1, s2);
+			energy[1] = calcRMSD_New(s1, s2);
 		}
 		return energy;
 	}
@@ -639,7 +657,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			currentRCC = calcRCC(fileDir + "struc_ini.pdb");
 			distance_ini[0] = calcSimilarity(targetRCC, currentRCC);
 		}
-		distance_ini[1] = calcRMSD3(struc_ini,struc_target);
+		distance_ini[1] = calcRMSD_New(struc_ini,struc_target);
 		
 		if (verbos > 0){
 			System.out.println("Initial solution distance: " + distance_ini[0] + " " + distance_ini[1]);
@@ -743,7 +761,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		simA.setTemp(2.5);
 		//Substitutor sub = new Substitutor(Trans.readPDB(args[1]));
 		//sub.createDivition(4, 20, 20, 4, 2);
-		simA.setSubsitutor(PDBfromFASTA.readPDB(args[3]));
+		//simA.setSubsitutor(PDBfromFASTA.readPDB(args[3]));
 		simA.initialize(2);
 		simA.run(2);
 	}
