@@ -23,7 +23,33 @@ Random rdm;
 
 public Substitutor(Structure subStructure){
 	this.subStructure = subStructure;
-	//rdm =  new Random(System.currentTimeMillis());
+	rdm =  new Random(System.currentTimeMillis());
+}
+
+public void randomInitialize(){
+	//Random rdm =  new Random(System.currentTimeMillis());
+	int largo = subStructure.getChain(0).getAtomLength();
+	int numSegment, maxSize, minSize, undefMax, undefMin;
+	numSegment = rdm.nextInt(largo) + 2;
+	maxSize = rdm.nextInt(largo) + 5;
+	undefMax = rdm.nextInt(largo) + 1;
+	if(undefMax > maxSize){int tmp = maxSize; maxSize = undefMax; undefMax = tmp;}//SWAP
+	minSize = rdm.nextInt(maxSize);
+	undefMin = rdm.nextInt(undefMax);
+	int largoActual = numSegment*maxSize + numSegment*undefMax + undefMin;
+	numSegment *= Math.sqrt(largo/(float)largoActual);
+	maxSize *= Math.sqrt(largo/(float)largoActual);
+	undefMax *= Math.sqrt(largo/(float)largoActual);
+	undefMin *= Math.sqrt(largo/(float)largoActual);
+	minSize *= Math.sqrt(largo/(float)largoActual);
+	if(maxSize == 0){maxSize = 1;}
+	if(undefMax == 0){undefMax = 1;}
+	if(minSize == 0){minSize = 1;}
+	if(undefMin == 0){undefMin = 1;}
+	largoActual = numSegment*maxSize + numSegment*undefMax + undefMin;
+	//System.out.println(numSegment+"\t"+maxSize+"\t"+minSize+"\t"+undefMax+"\t"+undefMin+"\t"+largoActual);
+
+	this.createDivition(numSegment, maxSize, minSize, undefMax, undefMin);
 }
 
 public void setDivition(Vector<Vector<Integer>> divition){
@@ -37,7 +63,7 @@ public Vector<Vector<Integer>> getDivition(){
 public void createDivition(int numSegment, int maxSize, int minSize, int undefMax, int undefMin){
 	//Vector<Integer>[] divition = (Vector<Integer>[]) new Vector<Integer>[numSegment];
 	int largoStruc = this.subStructure.getChain(0).getAtomLength();
-	int largoDiv = (numSegment * maxSize) + (numSegment * undefMax);
+	//int largoDiv = (numSegment * maxSize) + (numSegment * undefMax);
 	//if(largoStruc < largoDiv){
 	//	throw new IllegalArgumentException();
 	//}
@@ -48,7 +74,6 @@ public void createDivition(int numSegment, int maxSize, int minSize, int undefMa
 	for(int i = 0; i < numSegment; i++){
 		start += size + generateRandom(undefMax, undefMin);
 		size = generateRandom(maxSize, minSize);
-		//System.out.println(start+" "+size);
 		segment = new Vector<Integer>(2);
 		segment.add(start);
 		segment.add(size);
@@ -106,7 +131,6 @@ public Structure fakeSubstitute(Structure fitStruc, int getFrom, int getTo, int 
 }
 
 public int generateRandom(int max, int min){
-	Random rdm =  new Random(System.currentTimeMillis());
 	if(max == min)return max;
 	int size = rdm.nextInt(max-min);
 	return size+min;

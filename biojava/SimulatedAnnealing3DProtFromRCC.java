@@ -71,6 +71,8 @@ public class SimulatedAnnealing3DProtFromRCC
 
 	Structure target = null;
 	//steps = -1/log((1/temp), 1+coolingRate)
+	
+	Random rdm;
 
 	public SimulatedAnnealing3DProtFromRCC(String dirStartStruc, String dirTargetStruc){
 		searchStepsCicle = 1;
@@ -88,6 +90,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		this.dirTargetStruc = dirTargetStruc;
 		fileDir = "out/";
 		initSeed = (long)(1000*Math.random());
+		rdm =  new Random(System.currentTimeMillis());
 	}
 
 	public SimulatedAnnealing3DProtFromRCC(int searchStepsTotal, int searchStepsCicle, double anguloInicial, double anguloFinal,
@@ -104,6 +107,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		this.dirTargetStruc = dirTargetStruc;
 		this.fileDir = fileDir;
 		this.initSeed = initSeed;
+		rdm =  new Random(System.currentTimeMillis());
 	}
 
 	public void setEnergyType(int type){
@@ -362,7 +366,6 @@ public class SimulatedAnnealing3DProtFromRCC
 		Structure alterStruc = (Structure)struc.clone();
 		Chain chain = alterStruc.getChain(0);
 		int largo = chain.getAtomLength();
-		Random rdm =  new Random(System.currentTimeMillis());
 		int to = minCambio + (int)(rdm.nextDouble()*(maxCambio - minCambio));
 		for(int i=0; i<to; i++){
 			int dAmino = (int) (largo * rdm.nextDouble());
@@ -378,7 +381,6 @@ public class SimulatedAnnealing3DProtFromRCC
 	public Structure alterConformationAll(Structure struc){
 		Structure alterStruc = (Structure)struc.clone();
 		Chain chain = alterStruc.getChain(0);
-		Random rdm =  new Random(System.currentTimeMillis());
 		int largo = chain.getAtomLength();
 		for(int i=0; i<largo; i++){
 			double dPsi = cambioPsi * 2*(rdm.nextDouble() - 0.5);
@@ -393,7 +395,6 @@ public class SimulatedAnnealing3DProtFromRCC
 	public Structure alterConformationParts(Structure struc){
 		Structure alterStruc = (Structure)struc.clone();
 		Chain chain = alterStruc.getChain(0);
-		Random rdm =  new Random(System.currentTimeMillis());
 		int largo = chain.getAtomLength();
 		double dPsi;
 		double dPhi;
@@ -419,7 +420,6 @@ public class SimulatedAnnealing3DProtFromRCC
 	public Structure alterConformationAll(Structure struc, double deltaPsi, double deltaPhi){
 		Structure alterStruc = (Structure)struc.clone();
 		Chain chain = alterStruc.getChain(0);
-		Random rdm =  new Random(System.currentTimeMillis());
 		int largo = chain.getAtomLength();
 		for(int i=0; i<largo; i++){
 			double dPsi = deltaPsi * 2*(rdm.nextDouble() - 0.5);
@@ -435,7 +435,6 @@ public class SimulatedAnnealing3DProtFromRCC
 		Chain chainT = target.getChain(0);
 		Structure alterStruc = (Structure)struc.clone();
 		Chain chain = alterStruc.getChain(0);
-		Random rdm =  new Random(System.currentTimeMillis());
 		int largo = chain.getAtomLength();
 		AminoAcid a1;
 		AminoAcid a2;
@@ -460,33 +459,6 @@ public class SimulatedAnnealing3DProtFromRCC
 	//Random de 0 error
 	//al dividir salen 0 donde no deberían
 	//todo mayor que 0!!!!!
-	public Substitutor createSubstitutor(Structure subStructure){
-		Substitutor sub = new Substitutor(subStructure);
-		Random rdm =  new Random(System.currentTimeMillis());
-		int largo = subStructure.getChain(0).getAtomLength();
-		int numSegment, maxSize, minSize, undefMax, undefMin;
-		numSegment = rdm.nextInt(largo) + 2;
-		maxSize = rdm.nextInt(largo) + 5;
-		undefMax = rdm.nextInt(largo) + 1;
-		if(undefMax > maxSize){int tmp = maxSize; maxSize = undefMax; undefMax = tmp;}//SWAP
-		minSize = rdm.nextInt(maxSize);
-		undefMin = rdm.nextInt(undefMax);
-		int largoActual = numSegment*maxSize + numSegment*undefMax + undefMin;
-		numSegment *= Math.sqrt(largo/(float)largoActual);
-		maxSize *= Math.sqrt(largo/(float)largoActual);
-		undefMax *= Math.sqrt(largo/(float)largoActual);
-		undefMin *= Math.sqrt(largo/(float)largoActual);
-		minSize *= Math.sqrt(largo/(float)largoActual);
-		if(maxSize == 0){maxSize = 1;}
-		if(undefMax == 0){undefMax = 1;}
-		if(minSize == 0){minSize = 1;}
-		if(undefMin == 0){undefMin = 1;}
-		largoActual = numSegment*maxSize + numSegment*undefMax + undefMin;
-		//System.out.println(numSegment+"\t"+maxSize+"\t"+minSize+"\t"+undefMax+"\t"+undefMin+"\t"+largoActual);
-
-		sub.createDivition(numSegment, maxSize, minSize, undefMax, undefMin);
-		return sub;
-	}
 
 	public double angleCooling(double time){
 		return initPhi*Math.exp(-time/(-1.0/Math.log(minPhi/initPhi)));
@@ -597,7 +569,8 @@ public class SimulatedAnnealing3DProtFromRCC
 
 		if(struc_subSeed != null){
 			if(sub == null){
-				sub = createSubstitutor(struc_ini);
+				sub = new Substitutor(struc_ini);
+				sub.randomInitialize();
 			}else{
 				struc_ini = sub.fakeSubstitute(struc_subSeed);
 			}
@@ -650,7 +623,6 @@ public class SimulatedAnnealing3DProtFromRCC
 		int currentRCC[]; 
 		int modelRCC[]; 
 
-		Random rdm =  new Random(System.currentTimeMillis());
 		
 		// Initialize intial solution
 		if(energyType == 0 || dualEnergy){
