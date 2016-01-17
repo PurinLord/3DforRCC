@@ -401,19 +401,28 @@ void Salign::calscores_all(){
 	int minLength = min(nA, nB);
 	int maxLength = max(nA, nB);
 	int noMatchCount = 0;
+	double massCenter[] = {0,0,0};
+	for(int i=0; i<(*xbp).size(); i++){
+		for(int j=0;j<3;j++) massCenter[j] += (*xbp)[i][j];
+	}
+	for(int j=0;j<3;j++) massCenter[j] = massCenter[j]/(*xbp).size();
 		//printf("&%d %d\n",maxLength,minLength);
 	//for(int i=0; i<maxLength; i++){
+	//std::cout << massCenter[0]<<" "<<massCenter[1]<<" "<<massCenter[2]<<"\n";
 	for(int i=0; i<ialign[0].size(); i++){
 		i1 = ialign[0][i];
 		i2 = ialign[1][i];
 			//printf("i> %d %d\n",i1,i2);
 		if(i1 < 0 || i2 < 0){
-			noMatchCount++;
-			continue;
+			//noMatchCount++;
+			//continue;
+			if(i1 < 0) r2 = (*xbp)[i2].distance2(massCenter);
+			if(i2 < 0) r2 = xn1[i1].distance2(massCenter);
+		}else{
+			r2 = xn1[i1].distance2((*xbp)[i2]);
 		}
 			//printf("xbp- %.2f %.2f %.2f\n",(*xbp)[i2][0],(*xbp)[i2][1],(*xbp)[i2][2]);
 			//printf("xn1- %.2f %.2f %.2f\n",(xn1)[i1][0],(xn1)[i1][1],(xn1)[i1][2]);
-		r2 = xn1[i1].distance2((*xbp)[i2]);
 			//printf("r2- %.2f\n",r2);
 			//printf("i> %d %d - %.2f\n",i1,i2,r2);
 		for(int m=0; m<3; m++) TMs[m] += 1. / (1. + r2/DTM2[m]);
@@ -425,11 +434,11 @@ void Salign::calscores_all(){
 		}
 		if(r2 < D2*4) SP0 += 1.25 * (1/ (1. + r2/D2) - 0.2);
 		//if(r2 < 64.) { nali ++; rms += r2; }
-		if(r2 < 1000){
+		//if(r2 < 1000){
 			nali ++; rms += r2;
-		}else{
-			noMatchCount++;
-		}
+		//}else{
+		//	noMatchCount++;
+		//}
 		if(pa->resid[i1] == pb->resid[i2]) nid1 ++;
 			//printf("/ %d %.2f %.2f\n",i ,rms, nali);
 	}
@@ -582,7 +591,6 @@ void Salign::calSPscores(double *sp){
 void Salign::prtali(string &sinfo){
 	if(rmsOnly){
 		char str[20];
-		//sprintf(str,"%.2f", scores_all[ieRMS]);
 		printf("%.2f", scores_all[ieRMS]);
 	}else{
 	sinfo = "";
