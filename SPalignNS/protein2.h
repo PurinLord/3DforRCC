@@ -50,6 +50,7 @@ class Salign{
 	double gap0, gap1;
 	double Rscore, u[4][3];		//	current score; rotation matrix
 	double scores_all[20];		// series of scores saved as ieLA... below
+	double SO;
 	vector< vector<short> > Idir;					// direction matrix for DP
 	vector< vector<double> > Smat, Rmat;		// matrix for DP, sum & unit value
 	vector<int> ialign[3];		// the aligned idx, only 2 are used 
@@ -137,7 +138,7 @@ inline int aaDefine1(char rn, int DEBUG=0){
 namespace Salign_PARAMS{
 	extern int iprint, inorm, score_type, fragsize, bscoreOnly;
 	extern double Alpha, Beta, D00, Denv, cutoff;
-	extern bool bfullalign, nonSeqAlign, rmsOnly;
+	extern bool bfullalign, nonSeqAlign, rmsOnly, soOnly;
 	extern string outpdb, repAtom;
 }
 using namespace Salign_PARAMS;

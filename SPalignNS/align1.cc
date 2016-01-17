@@ -397,12 +397,12 @@ void Salign::calscores_all(){
 //
 	double r2 = 0;
 	int i1, i2 = 0;
+	int penalty = 1000;
 		//printf("&%d %d\n",ialign[0].size(),ialign[1].size());
 	int minLength = min(nA, nB);
 	int maxLength = max(nA, nB);
 	int noMatchCount = 0;
 		//printf("&%d %d\n",maxLength,minLength);
-	//for(int i=0; i<maxLength; i++){
 	for(int i=0; i<ialign[0].size(); i++){
 		i1 = ialign[0][i];
 		i2 = ialign[1][i];
@@ -436,10 +436,10 @@ void Salign::calscores_all(){
 	int diffLength = ialign[0].size()-minLength;
 			//printf("rms %.2f nail %.2f\n",rms, nali);
 	if(noMatchCount > diffLength){
-		int penalty = noMatchCount-diffLength;
-		rms += 1000 * penalty;
-		nali += penalty;
-			//printf("penalty %d noMa %d\n",penalty, noMatchCount);
+		int diffNum = noMatchCount-diffLength;
+		rms += penalty * diffNum;
+		nali += diffNum;
+			//printf("diffNum %d noMa %d\n",diffNum, noMatchCount);
 	}
 			//printf("rms %.2f nail %.2f\n",rms, nali);
 	scores_all[ieLA] = nali;
@@ -461,6 +461,25 @@ void Salign::calscores_all(){
 	scores_all[ieGDT] = GDT / Lmin;
 	scores_all[ieLG] = LG0 / Lmin;
 	scores_all[ieSEQ] = 100.*nid1 / Lmin;
+
+	string sa1, sa2, sdis; sa1 = sa2 = sdis = "";
+	int SOres = 0;
+	for(int i=0; i<ialign[0].size(); i++){
+		int i1=ialign[0][i], i2=ialign[1][i];
+		if(i1 < 0) sa1 += '-';
+		else sa1 += rnam1_std[pa->resid[i1]];
+		if(i2 < 0) sa2 += '-';
+		else sa2 += rnam1_std[pb->resid[i2]];
+		char c1 = ' ';
+		if(i1>=0 && i2>=0) {
+			double r2 = xn1[i1].distance2( (*xbp)[i2] );
+			if(r2 <= 12.25) SOres++;
+			if(r2 <= 16) c1 = ':';
+			else if(r2 < 64) c1 = '.';
+		}
+		sdis += c1;
+	}
+	SO = (SOres / (double)min(nA,nB))*100;
 	return;
 }
 bool Salign::save_align(){
@@ -580,10 +599,17 @@ void Salign::calSPscores(double *sp){
 	sp[3] = 1. / (1. + exp(-(sp[0] - 0.523) / 0.044));
 }
 void Salign::prtali(string &sinfo){
-	if(rmsOnly){
-		char str[20];
-		//sprintf(str,"%.2f", scores_all[ieRMS]);
-		printf("%.2f", scores_all[ieRMS]);
+	if(rmsOnly || soOnly){
+		if(rmsOnly && soOnly){
+				printf("rms= %f SO= %f\n", scores_all[ieRMS], SO);
+		}else{
+			if(rmsOnly){
+				printf("%f", scores_all[ieRMS]);
+			}
+			if(soOnly){
+				printf("%f", SO);
+			}
+		}
 	}else{
 	sinfo = "";
 	char str[max(nA+nB+100,2001)];
@@ -624,11 +650,11 @@ void Salign::prtali(string &sinfo){
 	if(iprint == 2) return;
 //
 	string sa1, sa2, sdis; sa1 = sa2 = sdis = "";
+		/*
 	int SOres = 0; double SO; // Structure Overlap: defined as the percentage of aligned representative
 	                          // atoms within 3.5Å of corresponding superimposed atoms.
 	for(int i=0; i<ialign[0].size(); i++){
-		int i1=ialign[0][i], i2=ialign[1][i];
-		if(i1 < 0) sa1 += '-';
+		int i1=ialign[0][i], i2=ialign[1][i]; if(i1 < 0) sa1 += '-';
 		else sa1 += rnam1_std[pa->resid[i1]];
 		if(i2 < 0) sa2 += '-';
 		else sa2 += rnam1_std[pb->resid[i2]];
@@ -642,6 +668,7 @@ void Salign::prtali(string &sinfo){
 		sdis += c1;
 	}
 	SO = (SOres / (double)min(nA,nB))*100;
+		*/
 //
 	int is1=0, is2=0, ie1=0, ie2=0;
 	for(int i=0; i<ialign[0].size(); i++){

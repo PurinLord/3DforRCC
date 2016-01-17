@@ -12,6 +12,7 @@ namespace Salign_PARAMS{
 // 1,scored according to resi No.; 2,scored according to residues sequentially
 	int bscoreOnly=0;
 	bool rmsOnly=0;
+	bool soOnly=0;
 	bool bfullalign=0, nonSeqAlign=0;
 // repAtom defines the representative atom from input structure to use for alignment
     string repAtom = "CA";
@@ -83,12 +84,13 @@ void rdparams(int argc, char *argv[]){
 				Qlist.push_back(argv[i0+1]);
 			}
 		}
+		else if(opt1 == "-rmsOnly") rmsOnly = true;
+		else if(opt1 == "-soOnly") soOnly = true;
 		else if(opt1 == "-idir") idir = getdir(argv[++i0]);
 		else if(opt1 == "-odir") odir = getdir(argv[++i0]);
 		else if (opt1 == "-iprint") iprint = atoi(argv[++i0]);
 		else if(opt1 == "-scoreOnly") bscoreOnly = 1;
 		else if(opt1 == "-scoreOnly2") bscoreOnly = 2;
-		else if(opt1 == "-rmsOnly") rmsOnly = true;
 		else if (opt1 == "-a") Alpha = strtod(argv[++i0], NULL);
 		else if (opt1 == "-d0") D00 = strtod(argv[++i0], NULL);
 		else if(opt1 == "-frag") fragsize = atoi(argv[++i0]);
