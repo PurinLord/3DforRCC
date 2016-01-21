@@ -397,26 +397,24 @@ void Salign::calscores_all(){
 //
 	double r2 = 0;
 	int i1, i2 = 0;
-		//printf("&%d %d\n",ialign[0].size(),ialign[1].size());
+	int penalty = 1000;
 	int minLength = min(nA, nB);
 	int maxLength = max(nA, nB);
 	int noMatchCount = 0;
 	double massCenter[] = {0,0,0};
 	for(int i=0; i<(*xbp).size(); i++){
+		//std::cout << (*xbp)[i][0]<<" "<<(*xbp)[i][1]<<" "<<(*xbp)[i][2]<<"\n";
 		for(int j=0;j<3;j++) massCenter[j] += (*xbp)[i][j];
 	}
 	for(int j=0;j<3;j++) massCenter[j] = massCenter[j]/(*xbp).size();
 		//printf("&%d %d\n",maxLength,minLength);
-	//for(int i=0; i<maxLength; i++){
 	//std::cout << massCenter[0]<<" "<<massCenter[1]<<" "<<massCenter[2]<<"\n";
 	for(int i=0; i<ialign[0].size(); i++){
 		i1 = ialign[0][i];
 		i2 = ialign[1][i];
 			//printf("i> %d %d\n",i1,i2);
 		if(i1 < 0 || i2 < 0){
-			//noMatchCount++;
-			//continue;
-			if(i1 < 0) r2 = (*xbp)[i2].distance2(massCenter);
+			if(i1 < 0) continue;
 			if(i2 < 0) r2 = xn1[i1].distance2(massCenter);
 		}else{
 			r2 = xn1[i1].distance2((*xbp)[i2]);
@@ -433,22 +431,24 @@ void Salign::calscores_all(){
 			GDT += 1 - m/4.; break;
 		}
 		if(r2 < D2*4) SP0 += 1.25 * (1/ (1. + r2/D2) - 0.2);
-		//if(r2 < 64.) { nali ++; rms += r2; }
-		//if(r2 < 1000){
-			nali ++; rms += r2;
-		//}else{
-		//	noMatchCount++;
-		//}
+		nali ++; rms += r2;
 		if(pa->resid[i1] == pb->resid[i2]) nid1 ++;
 			//printf("/ %d %.2f %.2f\n",i ,rms, nali);
 	}
-	int diffLength = ialign[0].size()-minLength;
 			//printf("rms %.2f nail %.2f\n",rms, nali);
-	if(noMatchCount > diffLength){
-		int penalty = noMatchCount-diffLength;
-		rms += 1000 * penalty;
-		nali += penalty;
-			//printf("penalty %d noMa %d\n",penalty, noMatchCount);
+	if(nali < nA){
+		int i;
+		int to;
+		for(i=0;i<ialign[0][0];i++){
+			r2 = (*xbp)[i].distance2(massCenter);
+			//printf("/ %d \n",i );
+			nali ++; rms += r2;
+		}
+		for(i=i1+1;i<nA;i++){
+			r2 = (*xbp)[i].distance2(massCenter);
+			//printf("/ %d \n",i );
+			nali ++; rms += r2;
+		}
 	}
 			//printf("rms %.2f nail %.2f\n",rms, nali);
 	scores_all[ieLA] = nali;
