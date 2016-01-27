@@ -401,28 +401,36 @@ void Salign::calscores_all(){
 	int minLength = min(nA, nB);
 	int maxLength = max(nA, nB);
 	int noMatchCount = 0;
-	double massCenter[] = {0,0,0};
-	for(int i=0; i<(*xbp).size(); i++){
-		//std::cout << (*xbp)[i][0]<<" "<<(*xbp)[i][1]<<" "<<(*xbp)[i][2]<<"\n";
-		for(int j=0;j<3;j++) massCenter[j] += (*xbp)[i][j];
-	}
-	for(int j=0;j<3;j++) massCenter[j] = massCenter[j]/(*xbp).size();
-		//printf("&%d %d\n",maxLength,minLength);
-	//std::cout << massCenter[0]<<" "<<massCenter[1]<<" "<<massCenter[2]<<"\n";
+	int lastMatch[] = {0,0};
+	int itarget, ifit = 0;
+	//-- Secuencia A / xap / xn1 es la que se alinia
 	for(int i=0; i<ialign[0].size(); i++){
 		i1 = ialign[0][i];
 		i2 = ialign[1][i];
-			//printf("i> %d %d\n",i1,i2);
+			//printf("index> %d %d ",i1,i2);
 		if(i1 < 0 || i2 < 0){
-			if(i1 < 0) continue;
-			if(i2 < 0) r2 = xn1[i1].distance2(massCenter);
+			if(i1 < 0) {
+				lastMatch[1] = i2;
+				lastMatch[0] = i1;
+				ifit = i2;
+				//r2 = xn1[lastMatch[0]].distance2((*xbp)[i2]);
+				//continue;
+			}
+			if(i2 < 0){
+				lastMatch[0] = i1;
+				itarget = i1;
+				lastMatch[1] = i2;
+				//r2 = xn1[i1].distance2((*xbp)[lastMatch[1]]);
+			}
 		}else{
-			r2 = xn1[i1].distance2((*xbp)[i2]);
+			itarget = i1;
+			ifit = i2;
 		}
+		r2 = xn1[itarget].distance2((*xbp)[ifit]);
 			//printf("xbp- %.2f %.2f %.2f\n",(*xbp)[i2][0],(*xbp)[i2][1],(*xbp)[i2][2]);
 			//printf("xn1- %.2f %.2f %.2f\n",(xn1)[i1][0],(xn1)[i1][1],(xn1)[i1][2]);
-			//printf("r2- %.2f\n",r2);
-			//printf("i> %d %d - %.2f\n",i1,i2,r2);
+			//printf("r2- %.2f\t",r2);
+			//printf("i> %d %d\n",itarget,ifit);
 		for(int m=0; m<3; m++) TMs[m] += 1. / (1. + r2/DTM2[m]);
 		LG0 += 1. / (1. + r2/D2);
 		for(int m=0; m<4; m++){
@@ -438,14 +446,17 @@ void Salign::calscores_all(){
 			//printf("rms %.2f nail %.2f\n",rms, nali);
 	if(nali < nA){
 		int i;
-		int to;
+		itarget = ialign[1][0];
+		ifit = i2;
 		for(i=0;i<ialign[0][0];i++){
-			r2 = (*xbp)[i].distance2(massCenter);
+			if(0 < itarget) {itarget --;}
+			r2 = xn1[itarget].distance2((*xbp)[i]);
 			//printf("/ %d \n",i );
 			nali ++; rms += r2;
 		}
 		for(i=i1+1;i<nA;i++){
-			r2 = (*xbp)[i].distance2(massCenter);
+			if(ifit < nB) ifit ++;
+			r2 = xn1[i].distance2((*xbp)[ifit]);
 			//printf("/ %d \n",i );
 			nali ++; rms += r2;
 		}
@@ -591,7 +602,7 @@ void Salign::calSPscores(double *sp){
 void Salign::prtali(string &sinfo){
 	if(rmsOnly){
 		char str[20];
-		printf("%.2f", scores_all[ieRMS]);
+		printf("%f", scores_all[ieRMS]);
 	}else{
 	sinfo = "";
 	char str[max(nA+nB+100,2001)];
