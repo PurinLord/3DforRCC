@@ -34,9 +34,9 @@ public class ReformatAAPDB
            for(i=0; i<emptySpaces; i++) serial=" "+serial;
            newLine=newLine+serial+" ";
           
-           emptySpaces=3-atomName.length();
+           emptySpaces=4-atomName.length();
            for(i=0; i<emptySpaces; i++) atomName=" "+atomName;
-           newLine=newLine+atomName + " ";
+           newLine=newLine+atomName;
 
 					 if(file.getName().substring(0,3).equals("HIE") || file.getName().substring(0,3).equals("HID")){
 				 		System.out.println(file);

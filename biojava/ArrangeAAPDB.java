@@ -12,7 +12,7 @@ import org.biojava.bio.structure.Atom;
 import org.biojava.bio.structure.AtomImpl;
 import org.biojava.bio.structure.jama.Matrix;
 
-import rccto3d.rotamers.*;
+//import rccto3d.rotamers.*;
 import rccto3d.*;
 
 public class ArrangeAAPDB{
@@ -31,13 +31,14 @@ public class ArrangeAAPDB{
 		Atom a3;
 		double alpha;
 
-		File directory = new File(args[0]);
+		//File directory = new File(args[0]);
+		File directory = new File("aaNew/");
 		File[] fList = directory.listFiles();
 		for (File file : fList){
 
 			struc = Trans.readPDB(file.getPath());
 			System.out.println(file.getName());
-			//struc = possition(struc);
+			struc = possition(struc);
 			struc = possOx(struc);
 			Trans.writePDB("aaPos/" + file.getName(), struc);
 		}

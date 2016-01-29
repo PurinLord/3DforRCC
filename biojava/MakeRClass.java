@@ -8,7 +8,7 @@ public static void main(String[] args) throws Exception {
 
 	String dirName = "aaClass/";
 
-  if(args.length==1){
+  //if(args.length==1){
 
 	PrintWriter writer;
 	String amino, rotNum;
@@ -45,7 +45,8 @@ public static void main(String[] args) throws Exception {
 	String addParEnd = 		"); ";
 	String nline = 				"\n";
 
-	File directory = new File(args[0]);
+	//File directory = new File(args[0]);
+	File directory = new File("aaPos/");
 	File[] fList = directory.listFiles();
 	Arrays.sort(fList);
 
@@ -105,8 +106,8 @@ public static void main(String[] args) throws Exception {
 	writer.close();
 	//System.out.println(ID + "|" + atom + "|");
 	//System.out.println(x + "|" + y + "|" + z + "|");
-	}else {
-		System.err.println("Usage:\njava MakeRClass <directory>");
-	}
+	//}else {
+	//	System.err.println("Usage:\njava MakeRClass <directory>");
+	//}
 }
 }
