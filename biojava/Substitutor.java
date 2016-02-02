@@ -14,21 +14,20 @@ import org.biojava.bio.structure.AminoAcid;
 
 public class Substitutor{
 
-Structure subStructure = null;
 Structure moldStructure = null;
 Vector<Vector<Integer>> divition;
 int divLength;
 PDBfromFASTA pff = null;
 Random rdm;
 
-public Substitutor(Structure subStructure){
-	this.subStructure = subStructure;
+public Substitutor(Structure moldStructure){
+	this.moldStructure = moldStructure;
 	rdm =  new Random(System.currentTimeMillis());
 }
 
 public void randomInitialize(){
 	//Random rdm =  new Random(System.currentTimeMillis());
-	int largo = subStructure.getChain(0).getAtomLength();
+	int largo = moldStructure.getChain(0).getAtomLength();
 	int numSegment, maxSize, minSize, undefMax, undefMin;
 	numSegment = rdm.nextInt(largo) + 2;
 	maxSize = rdm.nextInt(largo) + 5;
@@ -62,7 +61,7 @@ public Vector<Vector<Integer>> getDivition(){
 
 public void createDivition(int numSegment, int maxSize, int minSize, int undefMax, int undefMin){
 	//Vector<Integer>[] divition = (Vector<Integer>[]) new Vector<Integer>[numSegment];
-	int largoStruc = this.subStructure.getChain(0).getAtomLength();
+	int largoStruc = this.moldStructure.getChain(0).getAtomLength();
 	//int largoDiv = (numSegment * maxSize) + (numSegment * undefMax);
 	//if(largoStruc < largoDiv){
 	//	throw new IllegalArgumentException();
@@ -83,9 +82,10 @@ public void createDivition(int numSegment, int maxSize, int minSize, int undefMa
 	this.divition = divition;
 }
 
-public Structure fakeSubstitute(Structure moldStructure){
+public Structure fakeSubstitute(Structure subStructure){
 	Chain chainFrom = moldStructure.getChain(0);
-	Chain chainTo = subStructure.getChain(0);
+	Structure strucTo = (Structure)subStructure.clone();
+	Chain chainTo = strucTo.getChain(0);
 	AminoAcid a1;
 	AminoAcid a2;
 	double angle;
@@ -93,28 +93,28 @@ public Structure fakeSubstitute(Structure moldStructure){
 	int index = 0;
 	for(int i = 0; i < divition.size(); i ++){
 		segment = divition.elementAt(i);
-		for(int j = 0; j < segment.elementAt(1); j++){
+		for(int j = 0; j <= segment.elementAt(1); j++){
 			try{
 				index = segment.elementAt(0) + j;
-				//System.out.println(index);
-				a1 = (AminoAcid)chainFrom.getAtomGroup(i);
-				a2 = (AminoAcid)chainFrom.getAtomGroup(i + 1);
+				System.out.println(index);
+				a1 = (AminoAcid)chainFrom.getAtomGroup(index);
+				a2 = (AminoAcid)chainFrom.getAtomGroup(index + 1);
 				angle = Trans.getPhiFix(a1, a2);
-				Trans.setPhi(chainTo, i, angle);
+				Trans.setPhi(chainTo, index, angle);
 				angle = Trans.getPsiFix(a1, a2);
-				Trans.setPsi(chainTo, i, angle);
+				Trans.setPsi(chainTo, index, angle);
 				angle = Trans.getOmega(a1, a2);
-				Trans.setOmega(chainTo, i, angle);
+				Trans.setOmega(chainTo, index, angle);
 			}catch(Exception e){
   			e.printStackTrace();
 			}
 		}
 	}
-	return subStructure;
+	return strucTo;
 }
 
-public Structure fakeSubstitute(Structure fitStruc, int getFrom, int getTo, int setFrom){
-	Chain chainFrom = fitStruc.getChain(0);
+public Structure fakeSubstitute(Structure subStructure, int getFrom, int getTo, int setFrom){
+	Chain chainFrom = moldStructure.getChain(0);
 	Chain chainTo = subStructure.getChain(0);
 	double angle;
 	for(int i = 0; i < getTo - getFrom-1; i ++){
