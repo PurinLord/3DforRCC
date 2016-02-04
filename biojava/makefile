@@ -1,5 +1,5 @@
 default:
-	javac -d . aaClass/* PDBfromFASTA.java RotChain.java Trans.java MakeRClass.java ReformatAAPDB.java ArrangeAAPDB.java
+	javac -d . aaClass/* PDBfromFASTA.java Trans.java SimulatedAnnealing3DProtFromRCC.java MultiSearch.java Substitutor.java Refiner.java
 
 trans:
 	javac -d . Trans.java

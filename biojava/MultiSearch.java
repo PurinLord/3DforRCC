@@ -12,11 +12,11 @@ public class MultiSearch implements Runnable{
 	private SimulatedAnnealing3DProtFromRCC simA;
 	private String fileDir;
 
-	public MultiSearch(int searchStepsTotal, int searchSteps, double angIni, double angFin, String dirStartStruc,
-											String dirTargetStruc, String fileDir, long initSeed){
+	public MultiSearch(int searchStepsTotal, int searchSteps, double angIni, double angFin,
+			String dirStartStruc,String dirTargetStruc, String fileDir, long initSeed){
 		
-		this.simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal, searchSteps, angIni, angFin, dirStartStruc,
-																	 dirTargetStruc, fileDir, initSeed);
+		this.simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal, searchSteps, angIni, angFin,
+				dirStartStruc,dirTargetStruc, fileDir, initSeed);
 		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(dirStartStruc, dirTargetStruc);
 		this.simA.setEnergyType(1);
 		this.fileDir = fileDir;
@@ -63,16 +63,20 @@ public class MultiSearch implements Runnable{
 		//temp = mSearch.simA.getTemp();
 		temp = 2.5;
 		Random rdm = null;
+		long elapsedTime = 0;
+		elapsedTime = System.nanoTime();
 		for(int i = 1; i <= Integer.parseInt(args[2]); i++){
 			rdm =  new Random(System.currentTimeMillis());
 
-			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,dirStartStruc,dirTargetStruc,
-																	fileDir + i + "/",i*rdm.nextLong());
+			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,dirStartStruc,
+					dirTargetStruc,fileDir + i + "/",i*rdm.nextLong());
 			mSearch.simA.setTemp(temp);
 			mSearch.simA.setSubsitutor(args[1]);
 			mSearch.write("rep.out", mSearch.simA.initialize(1));
 
 			(new Thread(mSearch)).start();
 		}
+		long time = System.nanoTime() - elapsedTime;
+		System.out.println(temp + "> time: " + time/3600000000000.0);
 	}
 }

@@ -96,7 +96,7 @@ public Structure fakeSubstitute(Structure subStructure){
 		for(int j = 0; j <= segment.elementAt(1); j++){
 			try{
 				index = segment.elementAt(0) + j;
-				System.out.println(index);
+				//System.out.println(index);
 				a1 = (AminoAcid)chainFrom.getAtomGroup(index);
 				a2 = (AminoAcid)chainFrom.getAtomGroup(index + 1);
 				angle = Trans.getPhiFix(a1, a2);
