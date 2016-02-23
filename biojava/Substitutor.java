@@ -51,12 +51,29 @@ public void randomInitialize(){
 	this.createDivition(numSegment, maxSize, minSize, undefMax, undefMin);
 }
 
+public Vector<Vector<Integer>> getDivition(){
+	return this.divition;
+}
+
 public void setDivition(Vector<Vector<Integer>> divition){
 	this.divition = divition;
 }
 
-public Vector<Vector<Integer>> getDivition(){
-	return this.divition;
+public void readDivition(String stringVector){
+	Vector<Vector<Integer>> divition = new Vector<Vector<Integer>>();
+	Vector<Integer> set = new Vector<Integer>(2);
+	String[] split = stringVector.split(",");
+	for(String a : split){
+		if(set.size() >= 2){
+			divition.add(set);
+			set = new Vector<Integer>(2);
+			set.add(Integer.parseInt(a.replace("[","").replace("]","").trim()));
+		}else{
+			set.add(Integer.parseInt(a.replace("[","").replace("]","").trim()));
+		}
+	}
+	divition.add(set);
+	this.divition = divition;
 }
 
 public void createDivition(int numSegment, int maxSize, int minSize, int undefMax, int undefMin){
@@ -140,7 +157,8 @@ public static void main(String args[]){
 	Substitutor sub = new Substitutor(Trans.readPDB(args[0]));
 	sub.createDivition(Integer.parseInt(args[2]), 20, 10, 5, 2);
 	Structure out = sub.fakeSubstitute(Trans.readPDB(args[1]));
-	Trans.writePDB("simDatos/out.pdb", out);
+	//sub.readDivition("[[4, 16], [26, 5], [33, 25], [67, 35], [110, 31]]");
+	//Trans.writePDB("simDatos/out.pdb", out);
 }
 
 }

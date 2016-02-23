@@ -8,9 +8,11 @@ import java.util.Vector;
 import java.lang.Double;
 import java.util.PriorityQueue;
 
+import org.biojava.bio.structure.StructureImpl;
+
+import rccto3d.*;
+
 public class Refiner implements Runnable{
-
-
 	int searchStepsTotal;
 	int searchStepsCicle;
 	double anguloInicial;
@@ -20,14 +22,15 @@ public class Refiner implements Runnable{
 	double iniPend;
 	double finalPend;
 	int numBusquedas;
+	String startDir;
 	String dirStartStruc;
 	String dirTargetStruc;
 	String fileDir;
 	long initSeed;
 	double beast;
 
-	public Refiner(String dirStartStruc, String dirTargetStruc, String fileDir){
-		searchStepsTotal = 2;
+	public Refiner(String rootDir, int startIndex, double startValue, String targetStruc, int i){
+		searchStepsTotal = 2000;
 		searchStepsCicle = 1;
 		anguloInicial = 0.01;
 		anguloFinal = 0.001;
@@ -36,13 +39,29 @@ public class Refiner implements Runnable{
 		numBusquedas = 40;
 		iniPend = (anguloInicial-iniFin)/numBusquedas;
 		finalPend = (anguloFinal-finalFin)/numBusquedas;
-		this.dirStartStruc = dirStartStruc;
-		this.dirTargetStruc = dirTargetStruc;
-		this.fileDir = fileDir;
+		this.startDir = rootDir+startIndex+"/";
+		this.dirStartStruc = startDir+"sol_"+startValue+".pdb";
+		this.dirTargetStruc = targetStruc;
+		this.fileDir = rootDir+"ref_"+(i+1)+"/";
 		initSeed = (long)(1000*Math.random());
 		beast = 0;
 	}
 
+	public Substitutor setSubsitutor(String startDir){
+ 		String lastLine = "";
+		Substitutor sub = new Substitutor(new StructureImpl());
+		try{
+			File file = new File(startDir+"rep.out");
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String line = "";
+    	while ((line = br.readLine()) != null){ lastLine=line;}
+			sub.readDivition(lastLine);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+			System.out.println(sub.getDivition());
+		return sub;
+	}
 
 	public void run(){
 		File f = new File(fileDir);
@@ -64,6 +83,7 @@ public class Refiner implements Runnable{
 			simA.setEnergyType(1);
 			simA.setTemp(4);
 			simA.initialize(0);
+			simA.setSubsitutor(this.setSubsitutor(startDir));
 			beast = simA.run(0);
 			dirStartStruc = fileDir + "sol_" + beast + ".pdb";
 			//System.out.println(beast);
@@ -81,9 +101,10 @@ public class Refiner implements Runnable{
 		Vector<Pair> pair = scan.scan(rootDir+reportFileName, Integer.parseInt(args[1]));
 		Refiner ref;
 		for(int i=0;i<pair.size();i++){
-			double startName = pair.elementAt(i).energy;
-			int startDir = pair.elementAt(i).searchNum;
-			ref = new Refiner(rootDir+startDir+"/sol_"+startName+".pdb", targetStruc, rootDir+"ref_"+(i+1)+"/");
+			double startValue = pair.elementAt(i).energy;
+			int startIndex = pair.elementAt(i).searchNum;
+			ref = new Refiner(rootDir,startIndex,startValue, targetStruc,i);
+			//ref = new Refiner(rootDir+startDir+"/sol_"+startName+".pdb", targetStruc, rootDir+"ref_"+(i+1)+"/");
 			//ref.refine();
 			(new Thread(ref)).start();
 		}
