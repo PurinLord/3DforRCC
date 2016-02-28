@@ -6,15 +6,18 @@ import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.lang.Thread;
+import java.util.concurrent.CyclicBarrier;
 
 public class MultiSearch implements Runnable{
 
-	private SimulatedAnnealing3DProtFromRCC simA;
-	private String fileDir;
+	protected SimulatedAnnealing3DProtFromRCC simA;
+	protected String fileDir;
+	CyclicBarrier cb = null;
 
 	public MultiSearch(int searchStepsTotal, int searchSteps, double angIni, double angFin,
-			String dirStartStruc,String dirTargetStruc, String fileDir, long initSeed){
+			String dirStartStruc,String dirTargetStruc, String fileDir, long initSeed, CyclicBarrier cb){
 		
+		this.cb = cb;
 		this.simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal, searchSteps, angIni, angFin,
 				dirStartStruc,dirTargetStruc, fileDir, initSeed);
 		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(dirStartStruc, dirTargetStruc);
@@ -27,7 +30,13 @@ public class MultiSearch implements Runnable{
 	}
 
 	public void run(){
-		System.out.println(fileDir +" "+ simA.run(0));	
+		try{
+			double result = simA.run(0);
+			cb.await();
+			System.out.println(fileDir +" "+ result);	
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	public void write(String filename, String string){
@@ -47,36 +56,45 @@ public class MultiSearch implements Runnable{
 	}
 	
 	public static void main(String args[]){
+		Group g = new Group(Integer.parseInt(args[2]), 8);
+		g.run(args[0], args[1]);
+	}
+}
+
+class Group{
+	int total = 0;
+	int size = 0;
+	CyclicBarrier cbl = null;
+	public Group(int total, int size){
+		this.total = total/size;
+		this.size = size;
+		cbl = new CyclicBarrier(size);
+	}
+
+	public void run(String dirStart, String dirTarget){
+		Random rdm =  new Random(System.currentTimeMillis());
 		int searchStepsTotal = 3000;
 		int searchSteps = 3;
 		double anguloInicial = 9;
 		double anguloFinal = 0.001;
-		String dirStartStruc = args[0];
-		String dirTargetStruc = args[1];
+		String dirStartStruc = dirStart;
+		String dirTargetStruc = dirTarget;
 		String fileDir = "out/";
 		double temp = 0;
 
 		MultiSearch mSearch;
-		//mSearch = new MultiSearch(searchStepsTotal,searchSteps,cambioPhi,cambioPsi,dirStartStruc,dirTargetStruc,
-		//														fileDir + 0 + "/",0);
-		//mSearch.simA.initialize(0);
-		//temp = mSearch.simA.getTemp();
 		temp = 2.5;
-		Random rdm = null;
-		long elapsedTime = 0;
-		elapsedTime = System.nanoTime();
-		for(int i = 1; i <= Integer.parseInt(args[2]); i++){
-			rdm =  new Random(System.currentTimeMillis());
+		for(int i = 0; i < total; i++){
+			for(int j = 1; j <= size; j++){
 
-			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,dirStartStruc,
-					dirTargetStruc,fileDir + i + "/",i*rdm.nextLong());
-			mSearch.simA.setTemp(temp);
-			mSearch.simA.setSubsitutor(args[1]);
-			mSearch.write("rep.out", mSearch.simA.initialize(1));
+				mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,dirStartStruc,
+						dirTargetStruc,fileDir + ((i*size)+j) + "/",i*rdm.nextLong(), cbl);
+				mSearch.simA.setTemp(temp);
+				mSearch.simA.setSubsitutor(dirTarget);
+				mSearch.write("rep.out", mSearch.simA.initialize(1));
 
-			(new Thread(mSearch)).start();
+				(new Thread(mSearch)).start();
+			}
 		}
-		long time = System.nanoTime() - elapsedTime;
-		System.out.println(temp + "> time: " + time/3600000000000.0);
 	}
 }

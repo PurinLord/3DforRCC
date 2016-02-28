@@ -59,7 +59,6 @@ public class Refiner implements Runnable{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-			System.out.println(sub.getDivition());
 		return sub;
 	}
 
@@ -98,11 +97,11 @@ public class Refiner implements Runnable{
 		String reportFileName = "rep.out";
 		String targetStruc = rootDir+"1/struc_target.pdb";
 		ScanReport scan = new ScanReport();
-		Vector<Pair> pair = scan.scan(rootDir+reportFileName, Integer.parseInt(args[1]));
+		Vector<Pair> vec = scan.scan(rootDir+reportFileName, Integer.parseInt(args[1]));
 		Refiner ref;
-		for(int i=0;i<pair.size();i++){
-			double startValue = pair.elementAt(i).energy;
-			int startIndex = pair.elementAt(i).searchNum;
+		for(int i=0;i<vec.size();i++){
+			double startValue = vec.elementAt(i).energy;
+			int startIndex = vec.elementAt(i).searchNum;
 			ref = new Refiner(rootDir,startIndex,startValue, targetStruc,i);
 			//ref = new Refiner(rootDir+startDir+"/sol_"+startName+".pdb", targetStruc, rootDir+"ref_"+(i+1)+"/");
 			//ref.refine();
