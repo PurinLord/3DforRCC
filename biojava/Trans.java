@@ -517,7 +517,7 @@ public class Trans extends Calc {
 		/* calc the sign: */
 		Atom vecprod = vectorProduct(abc,bcd);
 		//TODO Deprecated 
-		double val = skalarProduct(cb,vecprod);
+		double val = scalarProduct(cb,vecprod);
 		if (val<0.0) angl = -angl ;
 
 		return angl;
@@ -525,12 +525,12 @@ public class Trans extends Calc {
 
 	public static final double angleFix(Atom a, Atom b){
 
-		double skalar;
+		double scalar;
 		double angle;
 
-		skalar = skalarProduct(a,b);
+		scalar = scalarProduct(a,b);
 
-		angle = skalar/( amount(a) * amount (b) );
+		angle = scalar/( amount(a) * amount (b) );
 		if(Math.abs(angle) > 1.0){
 			angle = (double) Math.round(angle);
 		}
