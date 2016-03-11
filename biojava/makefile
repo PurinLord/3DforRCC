@@ -13,6 +13,12 @@ optim:
 simul:
 	javac -d . SimulatedAnnealing3DProtFromRCC.java
 
+gccSimul:
+	javah -jni -d ../SPalignNS/ rccto3d.optimisation.SimulatedAnnealing3DProtFromRCC
+	g++ -I/usr/lib/jvm/java-7-openjdk-amd64/include/ -I/usr/lib/jvm/java-7-openjdk-amd64/include/linux/ -o libSPalig.so -shared -fpic ../SPalignNS/sim2sp.cc ../SPalignNS/sim2spImpl.cpp ../SPalignNS/sim2spImpl.h ../SPalignNS/protein2.cc ../SPalignNS/protein2.h ../SPalignNS/align1.cc ../SPalignNS/quatfit.cc ../SPalignNS/sp_misc.h ../SPalignNS/alignNS.cc ../SPalignNS/rccto3d_optimisation_SimulatedAnnealing3DProtFromRCC.h ../SPalignNS/sp_type.h ../SPalignNS/spalign.cc  
+#javah -jni -d . rccto3d.optimisation.SimulatedAnnealing3DProtFromRCC
+#gcc -shared -fpic -o libSPalig.so -I/usr/lib/jvm/java-7-openjdk-amd64/include/ -I/usr/lib/jvm/java-7-openjdk-amd64/include/linux/ sim2sp.cpp rccto3d_optimisation_SimulatedAnnealing3DProtFromRCC.h 
+
 multi:
 	javac -d . MultiSearch.java
 

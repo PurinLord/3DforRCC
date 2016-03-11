@@ -4,6 +4,11 @@
 #include "sp_misc.h"
 #include "sp_type.h"
 
+#include <string>
+#include <sstream>
+#include <iostream>
+
+
 class Protein2{
 	string name;
 	int nres;

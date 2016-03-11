@@ -589,9 +589,13 @@ void Salign::calSPscores(double *sp){
 	sp[3] = 1. / (1. + exp(-(sp[0] - 0.523) / 0.044));
 }
 void Salign::prtali(string &sinfo){
-	if(rmsOnly){
+	//if(rmsOnly){
 		char str[20];
-		printf("%.2f", scores_all[ieRMS]);
+		std::ostringstream ss;
+		ss << scores_all[ieRMS];
+		std::string s(ss.str());
+		sinfo = s;
+	/*	printf("%.2f", scores_all[ieRMS]);
 	}else{
 	sinfo = "";
 	char str[max(nA+nB+100,2001)];
@@ -694,6 +698,7 @@ void Salign::prtali(string &sinfo){
 		sprintf(str, "%-4d %s %d\n", is2, sa2.c_str(), ie2); sinfo += str;
 	}
 	}
+	else */
 }
 //
 int Salign::fit1(vector<int> *iali2){

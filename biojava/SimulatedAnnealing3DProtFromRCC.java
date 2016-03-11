@@ -324,6 +324,14 @@ public class SimulatedAnnealing3DProtFromRCC
 		return calcRMSD_New(fileDir + "struc_1.pdb", fileDir + "struc_2.pdb");
 	}
 
+ 	static {
+  	System.loadLibrary("SPalig");
+  }
+	public native double calcRMSD_New_fast(String pdb_struc_current, String pdb_struc_target);
+	public double calcRMSD_New_fast(Structure struc_current, Structure struc_target){
+		return calcRMSD_New_fast(struc_current.toPDB(), struc_target.toPDB());
+	}
+
 	public double calcSimilarity(int[] rcc1, int[] rcc2){
 		int sum = 0;
     int i=0;
