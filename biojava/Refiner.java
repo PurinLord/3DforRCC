@@ -30,13 +30,13 @@ public class Refiner implements Runnable{
 	double beast;
 
 	public Refiner(String rootDir, int startIndex, double startValue, String targetStruc, int i){
-		searchStepsTotal = 2000;
+		searchStepsTotal = 1000;
 		searchStepsCicle = 1;
 		anguloInicial = 0.01;
 		anguloFinal = 0.001;
 		iniFin = 0.0001;
 		finalFin = 0.000001;
-		numBusquedas = 40;
+		numBusquedas = 20;
 		iniPend = (anguloInicial-iniFin)/numBusquedas;
 		finalPend = (anguloFinal-finalFin)/numBusquedas;
 		this.startDir = rootDir+startIndex+"/";

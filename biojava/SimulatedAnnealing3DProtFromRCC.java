@@ -70,6 +70,8 @@ public class SimulatedAnnealing3DProtFromRCC
 	private int targetRCC[]; 
 
 	Structure target = null;
+	String target_pdb = null;
+	String current_pdb = null;
 	//steps = -1/log((1/temp), 1+coolingRate)
 	
 	Random rdm;
@@ -329,7 +331,11 @@ public class SimulatedAnnealing3DProtFromRCC
   }
 	public native double calcRMSD_New_fast(String pdb_struc_current, String pdb_struc_target);
 	public double calcRMSD_New_fast(Structure struc_current, Structure struc_target){
-		return calcRMSD_New_fast(struc_current.toPDB(), struc_target.toPDB());
+		if(target_pdb == null){
+			target_pdb = struc_target.toPDB();
+		}
+		String s2 = struc_current.toPDB();
+		return 100*calcRMSD_New_fast(target_pdb, s2);
 	}
 
 	public double calcSimilarity(int[] rcc1, int[] rcc2){
@@ -351,7 +357,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
-			energy[1] = calcRMSD_New(s1, s2);
+			energy[1] = calcRMSD_New_fast(s1, s2);
 		}
 		return energy;
 	}
@@ -364,7 +370,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			energy[0] = calcSimilarity(RCC1, RCC2);;
 		}
 		if(energyType == 1 || dualEnergy){
-			energy[1] = calcRMSD_New(s1, s2);
+			energy[1] = calcRMSD_New_fast(s1, s2);
 		}
 		return energy;
 	}
@@ -636,7 +642,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			currentRCC = calcRCC(fileDir + "struc_ini.pdb");
 			distance_ini[0] = calcSimilarity(targetRCC, currentRCC);
 		}
-		distance_ini[1] = calcRMSD_New(struc_ini,struc_target);
+		distance_ini[1] = calcRMSD_New_fast(struc_ini,struc_target);
 		
 		if (verbos > 0){
 			System.out.println("Initial solution distance: " + distance_ini[0] + " " + distance_ini[1]);

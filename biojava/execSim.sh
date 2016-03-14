@@ -1,11 +1,12 @@
 #!/bin/bash
 sim (){
-	java rccto3d.optimisation.MultiSearch $1.fa $1.pdb 1000 > out/rep.out
+	java $JAVA_LIB rccto3d.optimisation.MultiSearch $1.fa $1.pdb 1000 > out/rep.out
 }
 ref (){
-	java rccto3d.optimisation.Refiner out/ 5 > repRef.out
+	java $JAVA_LIB rccto3d.optimisation.Refiner out/ 5 > out/repRef.out
 }
 
+JAVA_LIB=-Djava.library.path=.
 DIREC=testEfficiency/use/
 echo ${DIREC}
 #for X in ${DIREC}*.pdb; do
@@ -17,8 +18,8 @@ for X in `ls ${DIREC}`; do
 		XX=`echo $X | sed 's/\(.*\)\.pdb/\1/'`
 		echo $XX
 		mkdir -p ${DIREC}final/$XX 
-		sim $XX
-		ref $XX
+		sim $DIREC$XX
+		ref $DIREC$XX
 		#(java rccto3d.optimisation.MultiSearch $XX.fa $XX.pdb 1000 > out/rep.out);(java rccto3d.optimisation.Refiner out/ 10 > repRef.out); 
 		res2=$(date +%s.%N)
 		echo "Elapsed:    $(echo "$res2 - $res1"|bc )" > out/time.out
