@@ -46,7 +46,7 @@ public class MultiSearch implements Runnable{
 	
 	public static void main(String args[]){
 		int searchStepsTotal = 3000;
-		int searchSteps = 3;
+		int searchSteps = 5;
 		double anguloInicial = 9;
 		double anguloFinal = 0.001;
 		String dirStartStruc = args[0];
@@ -54,21 +54,40 @@ public class MultiSearch implements Runnable{
 		String fileDir = "out/";
 		double temp = 0;
 
+		int threadSize = 4;
+		int defaultThreads = Thread.getAllStackTraces().size();
+		int liveThreads = 0;
+
 		MultiSearch mSearch;
 		//mSearch.simA.initialize(0);
 		//temp = mSearch.simA.getTemp();
 		temp = 2.5;
 		Random rdm = null;
-		for(int i = 1; i <= Integer.parseInt(args[2]); i++){
+		int i = 1;
+		for(i = 1; i <= threadSize; i++){
 			rdm =  new Random(System.currentTimeMillis());
-
 			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,dirStartStruc,
 					dirTargetStruc,fileDir + i + "/",i*rdm.nextLong());
 			mSearch.simA.setTemp(temp);
 			mSearch.simA.setSubsitutor(args[1]);
 			mSearch.write("rep.out", mSearch.simA.initialize(1));
-
 			(new Thread(mSearch)).start();
+		}
+		liveThreads = Thread.getAllStackTraces().size();
+		for(; i <= Integer.parseInt(args[2]); i++){
+			while(liveThreads - defaultThreads >= threadSize){
+				liveThreads = Thread.getAllStackTraces().size();
+			}
+
+			rdm =  new Random(System.currentTimeMillis());
+			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,dirStartStruc,
+					dirTargetStruc,fileDir + i + "/",i*rdm.nextLong());
+			mSearch.simA.setTemp(temp);
+			mSearch.simA.setSubsitutor(args[1]);
+			mSearch.write("rep.out", mSearch.simA.initialize(1));
+			(new Thread(mSearch)).start();
+
+			liveThreads = Thread.getAllStackTraces().size();
 		}
 	}
 }
