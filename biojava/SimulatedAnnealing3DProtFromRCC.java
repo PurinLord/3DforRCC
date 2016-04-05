@@ -331,11 +331,12 @@ public class SimulatedAnnealing3DProtFromRCC
   }
 	public native double calcRMSD_New_fast(String pdb_struc_current, String pdb_struc_target);
 	public double calcRMSD_New_fast(Structure struc_current, Structure struc_target){
-		if(target_pdb == null){
-			target_pdb = struc_target.toPDB();
-		}
+		//if(target_pdb == null){
+		//	target_pdb = struc_target.toPDB();
+		//}
+		String s1 = struc_target.toPDB();
 		String s2 = struc_current.toPDB();
-		return 100*calcRMSD_New_fast(target_pdb, s2);
+		return 100*calcRMSD_New_fast(s1, s2);
 	}
 
 	public double calcSimilarity(int[] rcc1, int[] rcc2){
@@ -629,6 +630,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		double neighbourEnergy[] = {0.0,0.0};
 		double distance_ini[] = {0.0,0.0};
 		double best;
+		Structure struc_best = null;
 
 		Structure struc_ini = PDBfromFASTA.readPDB(fileDir + "struc_ini.pdb");
 		Structure struc_target = PDBfromFASTA.readPDB(fileDir + "struc_target.pdb");
@@ -650,6 +652,7 @@ public class SimulatedAnnealing3DProtFromRCC
 		
 		// Set as current best
 		best = distance_ini[energyType];
+		struc_best = struc_ini;
 		    
 		// Create new neighbour 3d model
 		struc_fit = PDBfromFASTA.readPDB(fileDir + "struc_ini.pdb");
@@ -684,7 +687,7 @@ public class SimulatedAnnealing3DProtFromRCC
 				// Decide if we should accept the neighbour
 				if (acceptanceProbability(currentEnergy[energyType], neighbourEnergy[energyType], temp) > rdm.nextDouble()) {
 					struc_fit = struc_model;
-					PDBfromFASTA.writePDB(fileDir + "struc_fit.pdb", struc_fit);
+					//PDBfromFASTA.writePDB(fileDir + "struc_fit.pdb", struc_fit);
 					currentEnergy = neighbourEnergy;
 					if (verbos > 0){
 						if (verbos > 1){
@@ -699,7 +702,8 @@ public class SimulatedAnnealing3DProtFromRCC
 				// Keep track of the best solution found
 				if (neighbourEnergy[energyType] < best){
 					best = neighbourEnergy[energyType];
-					PDBfromFASTA.writePDB(fileDir + "sol_" + best + ".pdb", struc_fit);
+					struc_best = struc_fit;
+					//PDBfromFASTA.writePDB(fileDir + "sol_" + best + ".pdb", struc_fit);
 					if(best == 0){
 						temp = 0;
 					}
@@ -723,6 +727,7 @@ public class SimulatedAnnealing3DProtFromRCC
 			elapsedTime = System.nanoTime() - elapsedTime;
 			System.out.println("Total execution time: " + elapsedTime/3600000000000.0);
 		}
+		PDBfromFASTA.writePDB(fileDir + "sol_" + best + ".pdb", struc_best);
 		return best;
   }
 
@@ -744,16 +749,16 @@ public class SimulatedAnnealing3DProtFromRCC
 																									anguloFinal,dirStartStruc,dirTargetStruc,fileDir,initSeed);
 		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(args[0], args[1]);
 		simA.setTemp(2.5);
-		Substitutor sub = new Substitutor(Trans.readPDB(args[1]));
-		Vector<Vector<Integer>> divition = new Vector<Vector<Integer>>(5);
-		Vector<Integer> segment = new Vector<Integer>(2);
-		segment.add(4); segment.add(16); divition.add(segment); segment = new Vector<Integer>(2);
-		segment.add(26); segment.add(5); divition.add(segment); segment = new Vector<Integer>(2);
-		segment.add(33); segment.add(25); divition.add(segment); segment = new Vector<Integer>(2);
-		segment.add(67); segment.add(35); divition.add(segment); segment = new Vector<Integer>(2);
-		segment.add(110); segment.add(31); divition.add(segment);
-		sub.setDivition(divition);
-		simA.setSubsitutor(sub);
+		//Substitutor sub = new Substitutor(Trans.readPDB(args[1]));
+		//Vector<Vector<Integer>> divition = new Vector<Vector<Integer>>(5);
+		//Vector<Integer> segment = new Vector<Integer>(2);
+		//segment.add(4); segment.add(16); divition.add(segment); segment = new Vector<Integer>(2);
+		//segment.add(26); segment.add(5); divition.add(segment); segment = new Vector<Integer>(2);
+		//segment.add(33); segment.add(25); divition.add(segment); segment = new Vector<Integer>(2);
+		//segment.add(67); segment.add(35); divition.add(segment); segment = new Vector<Integer>(2);
+		//segment.add(110); segment.add(31); divition.add(segment);
+		//sub.setDivition(divition);
+		//simA.setSubsitutor(sub);
 		//sub.createDivition(4, 20, 20, 4, 2);
 		//simA.setSubsitutor(PDBfromFASTA.readPDB(args[3]));
 		simA.initialize(2);

@@ -3,6 +3,7 @@ import java.util.*;
 
 import java.io.File;
 import java.io.BufferedWriter;
+import java.lang.StringBuilder;
 
 public class extractSeqPDB
 {
@@ -13,7 +14,7 @@ public class extractSeqPDB
 
  public static String translate(String aa)
  {
-  String result="*";
+  String result="";
   if(aa.equalsIgnoreCase("ALA")) result="A";
   if(aa.equalsIgnoreCase("CYS")) result="C";
   if(aa.equalsIgnoreCase("ASP")) result="D";
@@ -40,7 +41,7 @@ public class extractSeqPDB
  public void extract(String inPDB, String chain) throws IOException, FileNotFoundException{
     //String file = inPDB;
 		//String chain = args[1]
-		String line="", residue="", token="", number="";
+		String line="", residue="", currentChain="", number="";
     StringBuffer print = new StringBuffer();
     StringTokenizer st = null;
     BufferedReader infile = new BufferedReader(new FileReader(inPDB));
@@ -49,50 +50,63 @@ public class extractSeqPDB
 		String pdb = "";
 		String name = inPDB.substring(inPDB.lastIndexOf("/"), inPDB.length()-4);
 
-    while((line=infile.readLine())!=null)
-     {
-      if(line.startsWith("ATOM"))
-       {
+    while((line=infile.readLine())!=null){
+      if(line.startsWith("ATOM")){
         st = new StringTokenizer(line);
-        st.nextElement(); st.nextElement(); st.nextElement();
-        residue=(String)st.nextElement();
+        st.nextElement(); st.nextElement(); 
+		  String checkRes = (String)st.nextElement();
+		  if(checkRes.length() > 3){
+			  residue = checkRes.substring(3);
+		  }else{
+        		residue=(String)st.nextElement();
+		  }
 
-        token=(String)st.nextElement();
+        currentChain=(String)st.nextElement();
 
-        if(Character.isDigit(token.charAt(0)) && chain.equalsIgnoreCase("none"))
-         {
-          if(!seq.contains(token))
-           {
-            seq.add(token);
+        if(Character.isDigit(currentChain.charAt(0)) && chain.equalsIgnoreCase("none")){
+          if(!seq.contains(currentChain)){
+            seq.add(currentChain);
             print.append(translate(residue));
-            if(print.length()==50)
-             {
+            if(print.length()==50){
               //System.out.println(print);
 							fasta += print + "\n";
               print.delete(0,50);
              }
            }
          }
-        if(Character.isLetter(token.charAt(0)) && token.equalsIgnoreCase(chain))
-         {
+        if(Character.isLetter(currentChain.charAt(0)) && currentChain.equalsIgnoreCase(chain)){
           number=(String)st.nextElement();
-					pdb += line + "\n";
+			 String subAmino = "";
+			String resID = "";
+			if(residue.length() == 3){
+				resID = translate(residue);
+				line += "\n";
+			}else{
+				subAmino = residue.substring(0,1);
+				if(subAmino.equals("A")){
+					resID = translate(residue.substring(1));
+					StringBuilder edit = new StringBuilder(line);
+					edit.setCharAt(16, ' ');
+					line = edit.toString() + "\n";
+				}else{
+					line = "";
+				}
+			 }
+				pdb += line;
 
-          if(!seq.contains(number))
-           {
+          if(!seq.contains(number)){
             seq.add(number);
-            print.append(translate(residue));
-            if(print.length()==50)
-             {
+            print.append(resID);
+            if(print.length()==50){
               //System.out.println(print.toString());
-							fasta += print + "\n";
-              print.delete(0,50);
-             }
-           }
-         }
+					fasta += print + "\n";
+              print.delete(0,50); 
+				}
+			 }
+		  }
         while(st.hasMoreElements()) st.nextElement();
-       }
-     }
+		}
+	 }
     infile.close();
     //System.out.println(print.toString());
 		try{
@@ -102,6 +116,7 @@ public class extractSeqPDB
 			}
 			File file = new File(targetDir + name +".fa");
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
+			fasta += print;
 			bw.write(fasta.trim());
 			bw.close();
 
