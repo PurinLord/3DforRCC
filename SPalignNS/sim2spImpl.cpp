@@ -2,9 +2,9 @@
 
 double SPalignNS_RMSD(JNIEnv *env, jobject thisObj, jstring pdb1, jstring pdb2){
 
-    const char *s1 = env->GetStringUTFChars(pdb1, 0);
-    const char *s2 = env->GetStringUTFChars(pdb2, 0);
-    std::string result;    
+	const char *s1 = env->GetStringUTFChars(pdb1, 0);
+	const char *s2 = env->GetStringUTFChars(pdb2, 0);
+	std::string result;    
 		Protein2 *p1 = new Protein2(s1);
 		Protein2 *p2 = new Protein2(s2);
 		Salign *sa1 = new Salign();

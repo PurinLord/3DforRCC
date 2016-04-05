@@ -2,17 +2,37 @@
 
 void Protein2::rdpdb(string fn){
 	info_err = "";
-	//FILE *fp = openfile(fn, "r");
-	//if(fp == NULL) die("wrong file: %s\n", fn.c_str());
 	char str[121], rn[8], an[5]; string rinfo0="", rinfo;
 	double xt[3];
 	name = basename((char*)fn.c_str());
   std::istringstream iss(fn);
   std::string line;    
+  		if(fn.size() > 200){
   while (std::getline(iss,line)) {
 		strcpy(str, line.c_str());
-	//}
-	//while(fgets(str,120,fp) != NULL){
+		if(strstr(str, "END") == str) break;
+		if(strstr(str, "TER") == str) break;
+		if(strstr(str, "ATOM ") != str) continue;
+		sscanf(str+13, "%3s", an); an[2] = '\0';
+		if(strcmp(an, repAtom.c_str()) != 0) continue;
+		sscanf(str+17, "%3s", rn); rn[3] = '\0';
+		string line(str);
+		rinfo = line.substr(17, 10);
+		if(rinfo == rinfo0) continue;
+		for(int m=0; m<3; m++) xt[m] = strtod(str+30+8*m, NULL);
+		//std::cout << "xt " << xt[0]<<" "<<xt[1]<<" "<<xt[2] << "\n";
+		x.push_back(Xvec(xt));
+		//std::cout << "rn " << rn<< "\n";
+		int id = aaDefine(rn, DEBUG);
+		resid.push_back(id);
+		sscanf(str+22, "%7s", rn); rn[7] = '\0';
+		resnum.push_back(rn);
+		rinfo0 = rinfo;
+	}
+		}else{
+	FILE *fp = openfile(fn, "r");
+	if(fp == NULL) die("wrong file: %s\n", fn.c_str());
+	while(fgets(str,120,fp) != NULL){
 		if(strstr(str, "END") == str) break;
 		if(strstr(str, "TER") == str) break;
 		if(strstr(str, "ATOM ") != str) continue;
@@ -25,15 +45,14 @@ void Protein2::rdpdb(string fn){
 //		str2dat(str+30, 3, xt);
 		//<<xt coordenadas
 		for(int m=0; m<3; m++) xt[m] = strtod(str+30+8*m, NULL);
-		//std::cout << "xt " << xt[0]<<" "<<xt[1]<<" "<<xt[2] << "\n";
 		x.push_back(Xvec(xt));
-		//std::cout << "rn " << rn<< "\n";
 		int id = aaDefine(rn, DEBUG);
 		resid.push_back(id);
 		sscanf(str+22, "%7s", rn); rn[7] = '\0';
 		resnum.push_back(rn);
 		rinfo0 = rinfo;
 	}
+		}
 	nres = resid.size();
 	//fclose(fp);
 	if(nres < 3) {
