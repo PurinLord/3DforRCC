@@ -36,7 +36,7 @@ public class Refiner implements Runnable{
 		anguloFinal = 0.001;
 		iniFin = 0.0001;
 		finalFin = 0.000001;
-		numBusquedas = 20;
+		numBusquedas = 10;
 		iniPend = (anguloInicial-iniFin)/numBusquedas;
 		finalPend = (anguloFinal-finalFin)/numBusquedas;
 		this.startDir = rootDir+startIndex+"/";
