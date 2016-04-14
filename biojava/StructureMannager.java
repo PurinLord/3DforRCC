@@ -80,7 +80,7 @@ public class StructureMannager {
 		this.energyFunction = energyFunction;
 	}
 
-	public void setConditions(double anguloInicial, double anguloFinal, String[] fileName, String fileDir, long initSeed){
+	public void setConditions(double anguloInicial, double anguloFinal, String fileDir, long initSeed){
 
 		this.initPhi = this.cambioPhi = this.initPsi = this.cambioPsi = anguloInicial;
 		this.minPhi = this.minPsi = anguloFinal;
@@ -96,11 +96,6 @@ public class StructureMannager {
 	public void setSubsitutor(Substitutor sub){
 		this.sub = sub;
 	}
-
-	public int[] calcRCC(String s1){
-		return calcRCC(s1, fileDir);
-	}
-
 
 	public String loadStructures(String[] fileName, int verbos){
 		// Load Protein Sequence
@@ -166,7 +161,6 @@ public class StructureMannager {
 					i++;
 				}
 				struc_target = new Structure[fileName.length - i];
-				for(String struc : fileName){
 				for(;i<fileName.length;i++){
 					struc_target[i] = PDBfromFASTA.readPDB(fileName[i]);
 				}
@@ -185,6 +179,7 @@ public class StructureMannager {
 		}
 
 		if(energyFunction == 2 || multiEnergy > 1){
+			targetRCC = new int[struc_target.length][26];
 			int i = 0;
 			for(Structure struc : struc_target){
 				targetRCC[i] = calcRCC(struc);
@@ -217,6 +212,7 @@ public class StructureMannager {
 		int rcc[] = new int[26];
 		try{
 		String s2 = "A";
+		System.out.println("python create_26dvRCC.py "+s1+" "+s2 +" "+tmpdir);
 		Process p = Runtime.getRuntime().exec("python create_26dvRCC.py "+s1+" "+s2 +" "+tmpdir);
 		BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		String ret = in.readLine();
@@ -237,6 +233,10 @@ public class StructureMannager {
   		e.printStackTrace();
 		}
 		return rcc;
+	}
+
+	public int[] calcRCC(String s1){
+		return calcRCC(s1, fileDir);
 	}
 
 	//TODO
@@ -393,23 +393,23 @@ public class StructureMannager {
 		return Math.sqrt(sum);
 	}
 
-	public double calcEnergy(Structure[] s1, Structure s2){
+	public double calcEnergy(Structure[] target, Structure model){
 		double[] energy = new double[target.length];
 		int i = 0;
 		for(Structure struc : target){
 			switch(energyFunction){
 				case 0:
-					energy[i] = calcRMSD3(struc, fit);
+					energy[i] = calcRMSD3(struc, model);
 					break;
 
 				case 1:
-					energy[i] = calcRMSD_New_fast(struc, fit);
+					energy[i] = calcRMSD_New_fast(struc, model);
 					break;
 
 				case 2:
 					PDBfromFASTA.writePDB(fileDir + "struc_1.pdb", struc);
 					int RCC1[] = calcRCC(fileDir + "struc_1.pdb");
-					PDBfromFASTA.writePDB(fileDir + "struc_2.pdb", fit);
+					PDBfromFASTA.writePDB(fileDir + "struc_2.pdb", model);
 					int RCC2[] = calcRCC(fileDir + "struc_2.pdb");
 					energy[i] = calcRCCSimilarity(RCC1, RCC2);;
 					break;
@@ -419,8 +419,7 @@ public class StructureMannager {
 		if(targetStructureType != 1){
 			return energy[0];
 		}else{
-			//TODO multi target
-			energy = 100000000;
+			return 10000000;
 		}
 	}
 
@@ -429,7 +428,13 @@ public class StructureMannager {
 	}
 
 	public double calcEnergy(){
-		return calcEnergy(struc_target, struc_fit);
+		//initialize fit for initial energy
+		if(struc_fit == null){
+			struc_fit = struc_ini;
+			struc_best = (Structure)struc_fit.clone();
+			return calcEnergy(struc_target, struc_ini);
+		}
+		return calcEnergy(struc_target, struc_model);
 	}
 
 	public void alterConformation(){
@@ -456,7 +461,7 @@ public class StructureMannager {
 		struc_fit = (Structure)struc_model.clone();
 	}
 
-	public void setModelAsBeast(){
+	public void setFitAsBeast(){
 		struc_best = (Structure)struc_model.clone();
 	}
 
@@ -465,11 +470,14 @@ public class StructureMannager {
 		PDBfromFASTA.writePDB(fileDir + "sol_" + best + ".pdb", struc_best);
 	}
 
+	//TODO no se que pedo con esto o.O
 	public void printEnergy(){
 		//if(energyFunction == 2){
 		//	for(int i : modelRCC){System.out.print(i + " ");}
 		//	System.out.print("\n");
 		//}
+		
+		System.out.println(calcEnergy(struc_target, struc_model));
 		if(multiEnergy > 1){
 			double energy = calcEnergy(struc_target, struc_model);
 			System.out.println(energy);

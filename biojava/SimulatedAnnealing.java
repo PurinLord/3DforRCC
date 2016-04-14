@@ -1,6 +1,7 @@
 package rccto3d.optimisation;
 
 import java.util.Vector;
+import java.util.Arrays;
 import java.util.Random;
 import java.lang.Math;
 import java.io.*;
@@ -148,20 +149,15 @@ public class SimulatedAnnealing {
 		double distance_ini[] = {0.0,0.0,0.0};
 		double best;
 
-		// Initialize intial solution
+		// Initialize intial solution and set current as best
 		distance_ini[0] = sm.calcEnergy();
+		best = distance_ini[0];
+		currentEnergy = Arrays.copyOf(distance_ini, distance_ini.length);
 		
 		if (verbos > 0){
 			System.out.println("Initial solution distance: "+distance_ini[0]+" "+distance_ini[1]+" "+distance_ini[2]);
 		}
 		
-		// Set as current best
-		best = sm.calcEnergy();
-		    
-		// Create new neighbour 3d model
-		 
-		currentEnergy = distance_ini;
-
 		// Loop until system has cooled
 		for (;temp > 1;temp = stdCooling(temp)){
 			// Search steps
@@ -178,7 +174,7 @@ public class SimulatedAnnealing {
 				if (acceptanceProbability(currentEnergy[0], neighbourEnergy[0], temp) > rdm.nextDouble()) {
 					sm.acceptModel();
 					//PDBfromFASTA.writePDB(fileDir + "struc_fit.pdb", struc_fit);
-					currentEnergy = neighbourEnergy;
+					currentEnergy = Arrays.copyOf(neighbourEnergy, neighbourEnergy.length);
 					if (verbos > 0){
 						if (verbos > 1){
 							long time = System.nanoTime() - elapsedTime;
@@ -192,7 +188,7 @@ public class SimulatedAnnealing {
 				// Keep track of the best solution found
 				if (neighbourEnergy[0] < best){
 					best = neighbourEnergy[0];
-					sm.setModelAsBeast();
+					sm.setFitAsBeast();
 					//PDBfromFASTA.writePDB(fileDir + "sol_" + best + ".pdb", struc_fit);
 					if(best == 0){
 						temp = 0;
@@ -220,30 +216,22 @@ public class SimulatedAnnealing {
 		double anguloInicial = 0.05;
 		double anguloFinal = 0.001;
 	
-		String dirStartStruc = args[0];
-		String dirTargetStruc = args[1];
+		String[] fileName = new String[2];
+		fileName [0] = args[0];
+		fileName [1] = args[1];
 		String fileDir = "out/";
 		long initSeed = (long)(1000*Math.random());
 		if(args.length>2){
 			fileDir = args[2];
 		}
-		SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal,searchStepsCicle,anguloInicial,
-																									anguloFinal,dirStartStruc,dirTargetStruc,fileDir,initSeed);
-		//SimulatedAnnealing3DProtFromRCC simA = new SimulatedAnnealing3DProtFromRCC(args[0], args[1]);
-		simA.setTemp(2.5);
-		//Substitutor sub = new Substitutor(Trans.readPDB(args[1]));
-		//Vector<Vector<Integer>> divition = new Vector<Vector<Integer>>(5);
-		//Vector<Integer> segment = new Vector<Integer>(2);
-		//segment.add(4); segment.add(16); divition.add(segment); segment = new Vector<Integer>(2);
-		//segment.add(26); segment.add(5); divition.add(segment); segment = new Vector<Integer>(2);
-		//segment.add(33); segment.add(25); divition.add(segment); segment = new Vector<Integer>(2);
-		//segment.add(67); segment.add(35); divition.add(segment); segment = new Vector<Integer>(2);
-		//segment.add(110); segment.add(31); divition.add(segment);
-		//sub.setDivition(divition);
-		//simA.setSubsitutor(sub);
-		//sub.createDivition(4, 20, 20, 4, 2);
-		//simA.setSubsitutor(PDBfromFASTA.readPDB(args[3]));
-		simA.initialize(2);
-		simA.run(2);
+
+		StructureMannager sm = new StructureMannager(0, 0, 1, 2);
+		sm.setConditions(anguloInicial, anguloFinal, fileDir, initSeed);
+		sm.loadStructures(fileName, 2);
+
+		SimulatedAnnealing siA = new SimulatedAnnealing(searchStepsTotal,searchStepsCicle,sm);
+		siA.setTemp(2.5);
+		siA.initialize(2);
+		siA.run(2);
 	}
 }
