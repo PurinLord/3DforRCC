@@ -9,23 +9,28 @@ import java.lang.Thread;
 
 public class MultiSearch implements Runnable{
 
-	private SimulatedAnnealing3DProtFromRCC simA;
+	private SimulatedAnnealing siA;
+	private StructureMannager sm;
 	private String fileDir;
 
 	public MultiSearch(int searchStepsTotal, int searchSteps, double angIni, double angFin,
-			String dirStartStruc,String dirTargetStruc, String fileDir, long initSeed){
-		
-		this.simA = new SimulatedAnnealing3DProtFromRCC(searchStepsTotal, searchSteps, angIni, angFin,
-				dirStartStruc,dirTargetStruc, fileDir, initSeed);
+			String[] fileName, String fileDir, long initSeed){
+
 		this.fileDir = fileDir;
 		File f = new File(fileDir);
 		if (!f.exists()){
 			f.mkdirs();
 		}
+
+		sm = new StructureMannager(0, 0, 0, 3);
+		sm.setConditions(angIni, angFin, fileDir, initSeed);
+		sm.loadStructures(fileName, 2);
+		
+		this.siA = new SimulatedAnnealing(searchStepsTotal, searchSteps, sm);
 	}
 
 	public void run(){
-		System.out.println(fileDir +" "+ simA.run(0));	
+		System.out.println(fileDir +" "+ siA.run(0));	
 	}
 
 	public void write(String filename, String string){
@@ -49,8 +54,9 @@ public class MultiSearch implements Runnable{
 		int searchSteps = 5;
 		double anguloInicial = 9;
 		double anguloFinal = 0.001;
-		String dirStartStruc = args[0];
-		String dirTargetStruc = args[1];
+		String[] fileName = new String[args.length - 1];
+		fileName[0] = args[0];
+		fileName[1] = args[1];
 		String fileDir = "out/";
 		double temp = 0;
 
@@ -66,11 +72,9 @@ public class MultiSearch implements Runnable{
 		int i = 1;
 		for(i = 1; i <= threadSize; i++){
 			rdm =  new Random(System.currentTimeMillis());
-			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,dirStartStruc,
-					dirTargetStruc,fileDir + i + "/",i*rdm.nextLong());
-			mSearch.simA.setTemp(temp);
-			mSearch.simA.setSubsitutor(args[1]);
-			mSearch.write("rep.out", mSearch.simA.initialize(1));
+			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,fileName,fileDir + i + "/",i*rdm.nextLong());
+			mSearch.siA.setTemp(temp);
+			mSearch.write("rep.out", mSearch.siA.initialize(1));
 			(new Thread(mSearch)).start();
 		}
 		liveThreads = Thread.getAllStackTraces().size();
@@ -80,11 +84,9 @@ public class MultiSearch implements Runnable{
 			}
 
 			rdm =  new Random(System.currentTimeMillis());
-			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,dirStartStruc,
-					dirTargetStruc,fileDir + i + "/",i*rdm.nextLong());
-			mSearch.simA.setTemp(temp);
-			mSearch.simA.setSubsitutor(args[1]);
-			mSearch.write("rep.out", mSearch.simA.initialize(1));
+			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,fileName,fileDir + i + "/",i*rdm.nextLong());
+			mSearch.siA.setTemp(temp);
+			mSearch.write("rep.out", mSearch.siA.initialize(1));
 			(new Thread(mSearch)).start();
 
 			liveThreads = Thread.getAllStackTraces().size();

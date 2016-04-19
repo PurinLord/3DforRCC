@@ -216,16 +216,18 @@ public class SimulatedAnnealing {
 		double anguloInicial = 0.05;
 		double anguloFinal = 0.001;
 	
-		String[] fileName = new String[2];
+		String[] fileName = new String[4];
 		fileName [0] = args[0];
 		fileName [1] = args[1];
+		fileName [2] = args[2];
+		fileName [3] = args[3];
 		String fileDir = "out/";
 		long initSeed = (long)(1000*Math.random());
-		if(args.length>2){
-			fileDir = args[2];
-		}
+		//if(args.length>2){
+		//	fileDir = args[2];
+		//}
 
-		StructureMannager sm = new StructureMannager(0, 0, 1, 2);
+		StructureMannager sm = new StructureMannager(0, 1, 1, 2);
 		sm.setConditions(anguloInicial, anguloFinal, fileDir, initSeed);
 		sm.loadStructures(fileName, 2);
 

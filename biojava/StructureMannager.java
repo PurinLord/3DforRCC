@@ -156,13 +156,13 @@ public class StructureMannager {
 				}
 				break;
 			case 1:
-				int i = 0;
+				int offset = 0;
 				if(initialStructureType != 2){
-					i++;
+					offset = 1;
 				}
-				struc_target = new Structure[fileName.length - i];
-				for(;i<fileName.length;i++){
-					struc_target[i] = PDBfromFASTA.readPDB(fileName[i]);
+				struc_target = new Structure[fileName.length -offset];
+				for(int i = 0;i<struc_target.length;i++){
+					struc_target[i] = PDBfromFASTA.readPDB(fileName[i+offset]);
 				}
 				break;
 		}
@@ -173,7 +173,7 @@ public class StructureMannager {
 		if(targetStructureType == 1){
 			int i = 0;
 			for(Structure struc : struc_target){
-				PDBfromFASTA.writePDB(fileDir + "struc_target_"+i+".pdb", struc_target[i]);
+				PDBfromFASTA.writePDB(fileDir + "struc_target_"+i+".pdb", struc);
 				i ++;
 			}
 		}
@@ -212,7 +212,6 @@ public class StructureMannager {
 		int rcc[] = new int[26];
 		try{
 		String s2 = "A";
-		System.out.println("python create_26dvRCC.py "+s1+" "+s2 +" "+tmpdir);
 		Process p = Runtime.getRuntime().exec("python create_26dvRCC.py "+s1+" "+s2 +" "+tmpdir);
 		BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		String ret = in.readLine();
@@ -331,7 +330,7 @@ public class StructureMannager {
 		return currentRMSd;
 	}
 
-	public double calcRMSD3(Structure struc_current, Structure struc_target){
+	public double calcRMSD_SmithWaterman(Structure struc_current, Structure struc_target){
 		double currentRMSd = 0.0;
 		try {
 			Atom[] ca1 = StructureTools.getAtomCAArray(struc_current);
@@ -347,7 +346,7 @@ public class StructureMannager {
 		return currentRMSd*100;
 	}
 
-	public double calcRMSD_New(String dir1, String dir2){
+	public double calcRMSD_SPalignNS(String dir1, String dir2){
 		double rmsd=0;
 		try{
 		String s1 = "-rmsOnly -pair";
@@ -360,28 +359,23 @@ public class StructureMannager {
 		return rmsd;
 	}
 
-	public double calcRMSD_New(Structure struc_current, Structure struc_target){
+	public double calcRMSD_SPalignNS(Structure struc_current, Structure struc_target){
 		PDBfromFASTA.writePDB(fileDir + "struc_1.pdb", struc_current);
 		PDBfromFASTA.writePDB(fileDir + "struc_2.pdb", struc_target);
-		return calcRMSD_New(fileDir + "struc_1.pdb", fileDir + "struc_2.pdb");
+		return calcRMSD_SPalignNS(fileDir + "struc_1.pdb", fileDir + "struc_2.pdb");
 	}
 
- 	static {
-  	System.loadLibrary("SPalig");
-	}
-	public native double calcRMSD_New_fast(String pdb_struc_current, String pdb_struc_target);
-	public double calcRMSD_New_fast(Structure struc_current, Structure struc_target){
-		//if(target_pdb == null){
-		//	target_pdb = struc_target.toPDB();
-		//}
-		String s1 = struc_target.toPDB();
-		String s2 = struc_current.toPDB();
-		return 100*calcRMSD_New_fast(s1, s2);
-	}
-	
-	//public double calcRMSD_New_fast(Structure struc_current, Structure struc_target){
-	//	SPalignNS spalns = new SPalignNS();
-	//	return spalns.calcRMSD(struc_current, struc_target);
+ 	//static {
+  	//System.loadLibrary("SPalig");
+	//}
+	//public native double calcRMSD_SPalignNS_fast(String pdb_struc_current, String pdb_struc_target);
+	//public double calcRMSD_SPalignNS_fast(Structure struc_current, Structure struc_target){
+	//	//if(target_pdb == null){
+	//	//	target_pdb = struc_target.toPDB();
+	//	//}
+	//	String s1 = struc_target.toPDB();
+	//	String s2 = struc_current.toPDB();
+	//	return 100*calcRMSD_SPalignNS_fast(s1, s2);
 	//}
 
 	public double calcRCCSimilarity(int[] rcc1, int[] rcc2){
@@ -399,11 +393,11 @@ public class StructureMannager {
 		for(Structure struc : target){
 			switch(energyFunction){
 				case 0:
-					energy[i] = calcRMSD3(struc, model);
+					energy[i] = calcRMSD_SmithWaterman(struc, model);
 					break;
 
 				case 1:
-					energy[i] = calcRMSD_New_fast(struc, model);
+					energy[i] = calcRMSD_SPalignNS(struc, model);
 					break;
 
 				case 2:
@@ -419,7 +413,9 @@ public class StructureMannager {
 		if(targetStructureType != 1){
 			return energy[0];
 		}else{
-			return 10000000;
+			double mean = 0;
+			mean = mean/energy.length;
+			return mean;
 		}
 	}
 
