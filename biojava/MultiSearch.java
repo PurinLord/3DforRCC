@@ -12,6 +12,7 @@ public class MultiSearch implements Runnable{
 	private SimulatedAnnealing siA;
 	private StructureMannager sm;
 	private String fileDir;
+	String reporte;
 
 	public MultiSearch(int searchStepsTotal, int searchSteps, double angIni, double angFin,
 			String[] fileName, String fileDir, long initSeed){
@@ -24,7 +25,7 @@ public class MultiSearch implements Runnable{
 
 		sm = new StructureMannager(0, 0, 0, 3);
 		sm.setConditions(angIni, angFin, fileDir, initSeed);
-		sm.loadStructures(fileName, 2);
+		this.reporte = sm.loadStructures(fileName, 1);
 		
 		this.siA = new SimulatedAnnealing(searchStepsTotal, searchSteps, sm);
 	}
@@ -74,7 +75,7 @@ public class MultiSearch implements Runnable{
 			rdm =  new Random(System.currentTimeMillis());
 			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,fileName,fileDir + i + "/",i*rdm.nextLong());
 			mSearch.siA.setTemp(temp);
-			mSearch.write("rep.out", mSearch.siA.initialize(1));
+			mSearch.write("rep.out", mSearch.siA.initialize(1)+"\n"+mSearch.reporte);
 			(new Thread(mSearch)).start();
 		}
 		liveThreads = Thread.getAllStackTraces().size();
@@ -86,7 +87,7 @@ public class MultiSearch implements Runnable{
 			rdm =  new Random(System.currentTimeMillis());
 			mSearch = new MultiSearch(searchStepsTotal,searchSteps,anguloInicial,anguloFinal,fileName,fileDir + i + "/",i*rdm.nextLong());
 			mSearch.siA.setTemp(temp);
-			mSearch.write("rep.out", mSearch.siA.initialize(1));
+			mSearch.write("rep.out", mSearch.siA.initialize(1)+"\n"+mSearch.reporte);
 			(new Thread(mSearch)).start();
 
 			liveThreads = Thread.getAllStackTraces().size();

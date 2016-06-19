@@ -4,6 +4,8 @@ import java.util.Vector;
 import java.util.Random;
 import java.io.IOException;
 import java.lang.Integer;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.biojava.bio.structure.io.PDBFileReader;
 import org.biojava.bio.structure.Structure;
@@ -25,7 +27,54 @@ public Substitutor(Structure moldStructure){
 	rdm =  new Random(System.currentTimeMillis());
 }
 
+public void randomInitialize(int divitionFactor){
+	//Random rdm =  new Random(System.currentTimeMillis());
+	int largo = moldStructure.getChain(0).getAtomLength()-1;
+	int numSegment, maxSize, minSize, undefMax, undefMin;
+	numSegment = rdm.nextInt((largo/divitionFactor)-4) + 4;
+	Vector<Vector<Integer>> divition = new Vector<Vector<Integer>>(numSegment);
+	Vector<Integer> segment;
+	int start = 0;
+	int size = 0;
+	ArrayList<Integer> listStart = new ArrayList<Integer>(numSegment); 
+	for(int i = 0; i < numSegment-1; i++){
+		start = rdm.nextInt(largo-1)+1;
+		listStart.add(start);
+	}
+	Collections.sort(listStart);
+	start = 0;
+	boolean par = rdm.nextBoolean();
+	for(int i = 0; i < numSegment-1; i++){
+		size = listStart.get(i) - start;
+		if(par){
+			segment = new Vector<Integer>(2);
+			segment.add(start);
+			segment.add(size);
+			divition.add(segment);
+		}
+		par = !par;
+		start = start + size;
+	}
+	size = largo - start;
+	if(par){
+		segment = new Vector<Integer>(2);
+		segment.add(start);
+		segment.add(size);
+		divition.add(segment);
+	}
+
+	this.divLength = start + size;
+	this.divition = divition;
+}
+
 public void randomInitialize(){
+	int seed = rdm.nextInt(moldStructure.getChain(0).getAtomLength()/10);
+	randomInitialize(seed);
+}
+
+
+@Deprecated
+public void randomInitializeOld(){
 	//Random rdm =  new Random(System.currentTimeMillis());
 	int largo = moldStructure.getChain(0).getAtomLength();
 	int numSegment, maxSize, minSize, undefMax, undefMin;
@@ -76,6 +125,7 @@ public void readDivition(String stringVector){
 	this.divition = divition;
 }
 
+@Deprecated
 public void createDivition(int numSegment, int maxSize, int minSize, int undefMax, int undefMin){
 	//Vector<Integer>[] divition = (Vector<Integer>[]) new Vector<Integer>[numSegment];
 	int largoStruc = this.moldStructure.getChain(0).getAtomLength();
@@ -99,6 +149,10 @@ public void createDivition(int numSegment, int maxSize, int minSize, int undefMa
 	this.divition = divition;
 }
 
+/** Comienza la sutitución desde 0
+ * TODO opciones para proteínas de longitudes distintas
+ *
+ */
 public Structure fakeSubstitute(Structure subStructure){
 	Chain chainFrom = moldStructure.getChain(0);
 	Structure strucTo = (Structure)subStructure.clone();
@@ -113,7 +167,7 @@ public Structure fakeSubstitute(Structure subStructure){
 		for(int j = 0; j <= segment.elementAt(1); j++){
 			try{
 				index = segment.elementAt(0) + j;
-				//System.out.println(index);
+				if(index+1 >= chainTo.getAtomLength()) break;
 				a1 = (AminoAcid)chainFrom.getAtomGroup(index);
 				a2 = (AminoAcid)chainFrom.getAtomGroup(index + 1);
 				angle = Trans.getPhiFix(a1, a2);
@@ -123,7 +177,7 @@ public Structure fakeSubstitute(Structure subStructure){
 				angle = Trans.getOmega(a1, a2);
 				Trans.setOmega(chainTo, index, angle);
 			}catch(Exception e){
-  			e.printStackTrace();
+  				e.printStackTrace();
 			}
 		}
 	}
@@ -148,6 +202,7 @@ public Structure fakeSubstitute(Structure subStructure, int getFrom, int getTo, 
 }
 
 public int generateRandom(int max, int min){
+		//System.out.println("m m "+max+" "+min);
 	if(max == min)return max;
 	int size = rdm.nextInt(max-min);
 	return size+min;

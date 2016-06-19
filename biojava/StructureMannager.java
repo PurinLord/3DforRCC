@@ -132,19 +132,6 @@ public class StructureMannager {
 				break;
 		}
 
-		if(modifyMethod == 3){
-			if(sub != null){
-				if(initialStructureType != 1){
-					struc_ini = sub.fakeSubstitute(struc_ini);
-				}
-			}else{
-				sub = new Substitutor(struc_ini);
-				sub.randomInitialize();
-			}
-		}
-		struc_best = (Structure)struc_ini.clone();
-		PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
-
 		//Load target
 		switch (targetStructureType){
 			case 0:
@@ -166,6 +153,20 @@ public class StructureMannager {
 				}
 				break;
 		}
+
+		//substitutor
+		if(modifyMethod == 3){
+			if(sub == null){
+				sub = new Substitutor(struc_target[0]);
+				// TODO elegir un objetibo al azar
+				sub.randomInitialize();
+			}
+			if(initialStructureType != 1){
+				struc_ini = sub.fakeSubstitute(struc_ini);
+			}
+		}
+		struc_best = (Structure)struc_ini.clone();
+		PDBfromFASTA.writePDB(fileDir + "struc_ini.pdb", struc_ini);
 
 		if(targetStructureType == 0){
 			PDBfromFASTA.writePDB(fileDir + "struc_target.pdb", struc_target[0]);
@@ -201,7 +202,6 @@ public class StructureMannager {
 					}
 				}
 				System.out.println(outString);
-				System.out.print("\n");
 			}
 			return outString;
 		}
@@ -520,13 +520,16 @@ public class StructureMannager {
 		double dPsi;
 		double dPhi;
 		int index = 0;
-		Vector<Integer> segment = sub.getDivition().elementAt(index);
+		Vector<Vector<Integer>> divition = sub.getDivition();
+		Vector<Integer> segment = divition.elementAt(index);
 		for(int i=0; i<largo; i++){
 			if(i == segment.elementAt(0)){
-				i += segment.elementAt(1);
+				i += segment.elementAt(1)+1;
 				index++;
-				if(index < sub.getDivition().size()){
-					segment = sub.getDivition().elementAt(index);
+				if(index < divition.size()){
+					segment = divition.elementAt(index);
+				}else{
+					break;
 				}
 			}
 			dPsi = cambioPsi * 2*(rdm.nextDouble() - 0.5);
